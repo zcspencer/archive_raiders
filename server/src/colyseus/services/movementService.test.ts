@@ -9,12 +9,12 @@ function createPlayerState(): PlayerSchema {
     gridY: 10,
     stamina: 100,
     maxStamina: 100,
-    equippedToolId: "axe",
     selectedHotbarSlot: 0,
-    axeLevel: 0,
-    wateringCanLevel: 0,
-    seedsLevel: 0,
-    lastInteractAtMs: 0
+    lastInteractAtMs: 0,
+    equippedHandItemId: "",
+    equippedHeadItemId: "",
+    equippedHandDefId: "",
+    equippedHeadDefId: ""
   } as PlayerSchema;
 }
 

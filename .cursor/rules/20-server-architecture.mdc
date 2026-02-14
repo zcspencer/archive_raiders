@@ -31,12 +31,34 @@ alwaysApply: false
 - `ClassroomService` — create, list, enroll; membership-based visibility for students.
 - `TaskService` — loads task JSON from `content/`, executes validator from registry.
 
+### Inventory Services (`server/src/inventory/`)
+
+- `InventoryService` — CRUD for `player_inventory` (getInventory, addItems, removeItem, moveItem, extractItem, insertItem).
+- `EquipmentService` — equip/unequip by slot (`hand`, `head`); references inventory instance IDs.
+- `CurrencyService` — getBalances, addCurrency, spendCurrency for `player_currency`.
+- `ContainerService` — stateful open/claim with nonce-based idempotency via `container_claims` table.
+- `ItemDefinitionLoader` — loads + caches `content/items/*.item.json` at startup.
+- `ContainerDefinitionLoader` — loads + caches `content/containers/*.container.json` at startup.
+- `ItemActionResolver` — resolves available actions per item and dispatches to component hooks.
+
+### Component Registry (`server/src/inventory/components/`)
+
+Registry pattern (like task-validators): `Equippable`, `Cosmetic`, `Readable`, `Container`.
+Each component defines a Zod params schema, getActions, and lifecycle hooks (onEquip, onUnequip, onUse).
+
 ## Database (`db/postgres.ts`)
 
-Bootstrap migration creates: `app_users`, `classrooms`, `classroom_memberships`.
+Bootstrap migration creates: `app_users`, `classrooms`, `classroom_memberships`,
+`player_currency`, `player_inventory`, `player_equipment`, `container_claims`.
 No dedicated migration tooling yet — SQL runs in `PostgresDatabase.migrate()`.
+
+Key inventory constraints:
+- `player_inventory.quantity CHECK (quantity >= 1)` — zero-quantity rows must be deleted.
+- `UNIQUE (user_id, slot_index) WHERE slot_index IS NOT NULL` — partial unique for inventory slots.
+- `player_currency` uses column-per-type (coins, museum_points) with `CHECK (>= 0)`.
 
 ## Colyseus Integration
 
 Fastify + Colyseus share the same HTTP server in `index.ts`.
 Room `"shard"` registered via `gameServer.define()`. See `22-colyseus-patterns` for details.
+Services injected into `ShardRoom` via `ShardRoom.configureServices()` in `index.ts`.

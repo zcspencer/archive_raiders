@@ -1,0 +1,28 @@
+{$DOMAIN:localhost} {
+	# API reverse proxy — strip /api prefix before forwarding
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy server:3000
+	}
+
+	# Colyseus WebSocket — proxy with upgrade support
+	handle /colyseus/* {
+		uri strip_prefix /colyseus
+		reverse_proxy server:3000
+	}
+
+	# Admin SPA — files under /admin/
+	handle /admin/* {
+		uri strip_prefix /admin
+		root * /srv/admin
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Client SPA — default catch-all
+	handle {
+		root * /srv/client
+		try_files {path} /index.html
+		file_server
+	}
+}

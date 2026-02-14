@@ -1,7 +1,12 @@
 import Phaser from "phaser";
 import { TILE_SIZE } from "@odyssey/shared";
+import { EQUIPMENT_ANCHORS } from "@odyssey/shared";
+import { facingToDirection } from "../rendering/equippedItemSprite";
 import { animKeyForFacing, idleFrameForFacing } from "../rendering/playerSprite";
 import { diffRemotePlayers, readPlayerSnapshots } from "../interaction/roomState";
+
+const REMOTE_HAND_COLOR = 0x78716c;
+const REMOTE_HEAD_COLOR = 0xfbbf24;
 
 interface RemotePlayerState {
   gridX: number;
@@ -10,13 +15,19 @@ interface RemotePlayerState {
   fy: number;
 }
 
+interface EquipmentSprites {
+  hand?: Phaser.GameObjects.Rectangle;
+  head?: Phaser.GameObjects.Rectangle;
+}
+
 /**
  * Manages remote player sprites and their position/animation reconciliation.
- * Owns the sprite map and per-player facing state so scenes stay lean.
+ * Renders equipped hand/head as placeholder rectangles using EQUIPMENT_ANCHORS.
  */
 export class RemotePlayersController {
   private readonly scene: Phaser.Scene;
   private readonly sprites = new Map<string, Phaser.GameObjects.Sprite>();
+  private readonly equipmentSprites = new Map<string, EquipmentSprites>();
   private readonly state = new Map<string, RemotePlayerState>();
 
   constructor(scene: Phaser.Scene) {
@@ -46,8 +57,13 @@ export class RemotePlayersController {
     }
   }
 
-  /** Destroys all tracked remote-player sprites. */
+  /** Destroys all tracked remote-player sprites and equipment. */
   destroy(): void {
+    for (const eq of this.equipmentSprites.values()) {
+      eq.hand?.destroy();
+      eq.head?.destroy();
+    }
+    this.equipmentSprites.clear();
     for (const sprite of this.sprites.values()) {
       sprite.destroy();
     }
@@ -59,7 +75,13 @@ export class RemotePlayersController {
   /*  Private helpers                                                    */
   /* ------------------------------------------------------------------ */
 
-  private upsertPlayer(snapshot: { sessionId: string; gridX: number; gridY: number }): void {
+  private upsertPlayer(snapshot: {
+    sessionId: string;
+    gridX: number;
+    gridY: number;
+    equippedHandDefId?: string;
+    equippedHeadDefId?: string;
+  }): void {
     const x = snapshot.gridX * TILE_SIZE + TILE_SIZE / 2;
     const y = snapshot.gridY * TILE_SIZE + TILE_SIZE / 2;
     const prev = this.state.get(snapshot.sessionId);
@@ -101,9 +123,44 @@ export class RemotePlayersController {
       sprite.stop();
       sprite.setFrame(idleFrameForFacing(fx, fy));
     }
+
+    const dir = facingToDirection(fx, fy);
+    let eq = this.equipmentSprites.get(snapshot.sessionId);
+    if (!eq) {
+      eq = {};
+      this.equipmentSprites.set(snapshot.sessionId, eq);
+    }
+    if (snapshot.equippedHandDefId) {
+      if (!eq.hand) {
+        eq.hand = this.scene.add.rectangle(0, 0, 10, 8, REMOTE_HAND_COLOR);
+        eq.hand.setOrigin(0.5, 0.5);
+      }
+      const hCfg = EQUIPMENT_ANCHORS.hand[dir];
+      eq.hand.setPosition(x + hCfg.offset.x, y + hCfg.offset.y);
+      eq.hand.setDepth(sprite.depth + hCfg.zOrder * 0.001);
+    } else {
+      eq.hand?.destroy();
+      eq.hand = undefined;
+    }
+    if (snapshot.equippedHeadDefId) {
+      if (!eq.head) {
+        eq.head = this.scene.add.rectangle(0, 0, 12, 10, REMOTE_HEAD_COLOR);
+        eq.head.setOrigin(0.5, 0.5);
+      }
+      const headCfg = EQUIPMENT_ANCHORS.head[dir];
+      eq.head.setPosition(x + headCfg.offset.x, y + headCfg.offset.y);
+      eq.head.setDepth(sprite.depth + headCfg.zOrder * 0.001);
+    } else {
+      eq.head?.destroy();
+      eq.head = undefined;
+    }
   }
 
   private removePlayer(sessionId: string): void {
+    const eq = this.equipmentSprites.get(sessionId);
+    eq?.hand?.destroy();
+    eq?.head?.destroy();
+    this.equipmentSprites.delete(sessionId);
     this.sprites.get(sessionId)?.destroy();
     this.sprites.delete(sessionId);
     this.state.delete(sessionId);

@@ -10,11 +10,15 @@ const envSchema = z.object({
     .default("postgresql://odyssey:dev_password@localhost:5432/odyssey_dev"),
   JWT_SECRET: z.string().min(8).default("odyssey-local-dev-secret"),
   JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
-  CONTENT_DIR: z.string().default("content")
+  CONTENT_DIR: z.string().default("content"),
+  AWS_REGION: z.string().default("us-west-2"),
+  SES_FROM_EMAIL: z.string().email().optional(),
+  INVITE_BASE_URL: z.string().url().optional()
 });
 
 export interface AppConfig extends z.infer<typeof envSchema> {
   ALLOWED_ORIGINS: string[];
+  INVITE_URL_BASE: string;
 }
 
 /**
@@ -24,6 +28,7 @@ export function loadConfig(): AppConfig {
   const parsed = envSchema.parse(process.env);
   return {
     ...parsed,
-    ALLOWED_ORIGINS: [parsed.CLIENT_ORIGIN, parsed.ADMIN_ORIGIN]
+    ALLOWED_ORIGINS: [parsed.CLIENT_ORIGIN, parsed.ADMIN_ORIGIN],
+    INVITE_URL_BASE: parsed.INVITE_BASE_URL ?? parsed.CLIENT_ORIGIN
   };
 }

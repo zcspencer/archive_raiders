@@ -1,0 +1,13 @@
+{
+  "id": "top-hat",
+  "version": 1,
+  "name": "Top Hat",
+  "description": "A fancy top hat.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/top-hat",
+  "equippedSprite": "items/top-hat-equipped",
+  "rarity": "Common",
+  "components": [
+    { "typeId": "Cosmetic", "params": { "slot": "head" } }
+  ]
+}

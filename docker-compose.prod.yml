@@ -6,12 +6,69 @@ services:
       POSTGRES_DB: odyssey
       POSTGRES_USER: odyssey
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odyssey -d odyssey"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      target: server
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://odyssey:${POSTGRES_PASSWORD}@postgres:5432/odyssey
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      CLIENT_ORIGIN: https://${DOMAIN}
+      ADMIN_ORIGIN: https://${DOMAIN}/admin
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      SES_FROM_EMAIL: ${SES_FROM_EMAIL:-}
+      INVITE_BASE_URL: https://${DOMAIN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      target: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - server
 
 volumes:
   pgdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /mnt/pgdata
+  caddy_data:
+  caddy_config:

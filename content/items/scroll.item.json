@@ -1,0 +1,12 @@
+{
+  "id": "scroll",
+  "version": 1,
+  "name": "Scroll",
+  "description": "A dusty scroll.",
+  "maxStackSize": 10,
+  "inventorySprite": "items/scroll",
+  "rarity": "Common",
+  "components": [
+    { "typeId": "Readable", "params": { "contentType": "text", "content": "Welcome to the village." } }
+  ]
+}

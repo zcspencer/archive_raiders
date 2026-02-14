@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
 import { loginTeacher, registerTeacher } from "./api/auth";
-import { addClassroomMembership, createClassroom, listClassrooms } from "./api/classrooms";
+import { createClassroom, listClassrooms } from "./api/classrooms";
+import { sendClassroomInvite } from "./api/invites";
 import { clearSession, loadSession, saveSession } from "./session/authSession";
 import { Dashboard } from "./ui/Dashboard";
 import { LoginScreen } from "./ui/LoginScreen";
@@ -97,12 +98,11 @@ export function App(): ReactElement {
     await refreshClassrooms(accessToken, setClassrooms, setErrorMessage, setIsLoading);
   };
 
-  const handleEnrollStudent = async (classroomId: string, studentEmail: string): Promise<void> => {
+  const handleInviteStudent = async (classroomId: string, studentEmail: string): Promise<void> => {
     if (!accessToken) {
       throw new Error("Authentication required");
     }
-    await addClassroomMembership(accessToken, classroomId, studentEmail);
-    await refreshClassrooms(accessToken, setClassrooms, setErrorMessage, setIsLoading);
+    await sendClassroomInvite(accessToken, classroomId, studentEmail);
   };
 
   const handleLogout = (): void => {
@@ -130,7 +130,7 @@ export function App(): ReactElement {
       errorMessage={errorMessage}
       isLoading={isLoading}
       onCreateClassroom={handleCreateClassroom}
-      onEnrollStudent={handleEnrollStudent}
+      onInviteStudent={handleInviteStudent}
       onLogout={handleLogout}
       onRefresh={handleRefresh}
       user={user}

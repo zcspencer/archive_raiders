@@ -1,7 +1,7 @@
 import type { InteractPayload } from "@odyssey/shared";
 import type { MapSchema } from "@colyseus/schema";
 import type { PlayerSchema, TileSchema } from "../schema/ShardState.js";
-import { getToolRule } from "./toolRules.js";
+import { getToolRule, type HandStats, type ToolRule } from "./toolRules.js";
 
 interface InteractionResult {
   accepted: boolean;
@@ -12,12 +12,14 @@ const INTERACT_COOLDOWN_MS = 90;
 
 /**
  * Applies authoritative interaction checks and mutates player state on success.
+ * handStats: stats from the equipped hand item (Equippable params.stats); undefined if nothing equipped.
  */
 export function applyInteraction(
   player: PlayerSchema,
   tiles: MapSchema<TileSchema>,
   payload: InteractPayload,
-  nowMs: number
+  nowMs: number,
+  handStats: HandStats
 ): InteractionResult {
   const tile = tiles.get(toTileKey(payload.target.gridX, payload.target.gridY));
   if (!tile) {
@@ -28,25 +30,16 @@ export function applyInteraction(
     return { accepted: false, reason: "Interaction cooldown" };
   }
 
-  if (player.equippedToolId !== payload.toolId) {
-    return { accepted: false, reason: "Tool mismatch" };
-  }
-
-  const rule = getToolRule(payload);
+  const rule = getToolRule(payload, handStats);
   if (!rule) {
-    return { accepted: false, reason: "Unsupported tool action" };
+    return { accepted: false, reason: "Unsupported tool or wrong equipment" };
   }
 
   if (!rule.isValidTile(tile)) {
     return { accepted: false, reason: "Invalid target tile" };
   }
 
-  const toolLevel = resolveToolLevel(player, payload.toolId);
-  if (toolLevel < rule.minUpgradeLevel) {
-    return { accepted: false, reason: "Tool level too low" };
-  }
-
-  const chargeCost = payload.toolId === "watering_can" ? Math.floor(payload.chargeMs / 400) : 0;
+  const chargeCost = handStats?.water ? Math.floor(payload.chargeMs / 400) : 0;
   const totalCost = rule.baseStaminaCost + chargeCost;
   if (player.stamina < totalCost) {
     return { accepted: false, reason: "Not enough stamina" };
@@ -54,25 +47,12 @@ export function applyInteraction(
 
   player.stamina -= totalCost;
   player.lastInteractAtMs = nowMs;
-  applyTileMutation(tile, payload);
+  applyTileMutation(tile, rule);
   return { accepted: true, reason: "ok" };
 }
 
-/**
- * Resolves the active upgrade level for the given player tool.
- */
-export function resolveToolLevel(player: PlayerSchema, toolId: InteractPayload["toolId"]): number {
-  if (toolId === "axe") {
-    return player.axeLevel;
-  }
-  if (toolId === "watering_can") {
-    return player.wateringCanLevel;
-  }
-  return player.seedsLevel;
-}
-
-function applyTileMutation(tile: TileSchema, payload: InteractPayload): void {
-  if (payload.toolId === "axe") {
+function applyTileMutation(tile: TileSchema, rule: ToolRule): void {
+  if (rule.requiredStat.chop) {
     const damage = 1;
     tile.objectHealth = Math.max(0, tile.objectHealth - damage);
     if (tile.objectHealth === 0) {
@@ -83,13 +63,11 @@ function applyTileMutation(tile: TileSchema, payload: InteractPayload): void {
     }
     return;
   }
-
-  if (payload.toolId === "watering_can") {
+  if (rule.requiredStat.water) {
     tile.watered = true;
     return;
   }
-
-  if (payload.toolId === "seeds") {
+  if (rule.requiredStat.plant) {
     tile.hasCrop = true;
     tile.watered = false;
   }

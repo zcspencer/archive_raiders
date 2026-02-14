@@ -6,8 +6,42 @@ alwaysApply: false
 
 # Content Schema Rules
 
-- Every task file must include id, type, title, description, config, rewards.
-- Task IDs are stable once released; do not repurpose existing IDs.
+## General
+
 - Validate content through `pnpm content:validate`.
-- Keep task config fields explicit and version-compatible.
 - Prefer additive schema changes over breaking changes.
+- IDs are stable once released; do not repurpose existing IDs.
+
+## Task Definitions (`content/tasks/**/*.task.json`)
+
+- Required fields: id, type, title, description, config, rewards.
+- Keep task config fields explicit and version-compatible.
+
+## Item Definitions (`content/items/*.item.json`)
+
+- Schema: `itemDefinitionSchema` from `@odyssey/shared`.
+- Required fields: `id`, `version`, `name`, `description`, `maxStackSize`, `inventorySprite`, `components[]`.
+- Optional: `equippedSprite` (for in-world rendering). `rarity` (default `"Common"`): `Common` | `Uncommon` | `Rare` | `Epic` | `Legendary` | `Important`. Important = single instance per player, cannot be dropped.
+- Components: `{ typeId, params }` — validated loosely by Zod, deeply by server component registry.
+- Known typeIds: `Equippable` (slot, stats?), `Cosmetic` (slot), `Readable` (contentType, content), `Container` (maxSlots).
+- `version` is incremented when component list or params change (not display-only changes).
+
+## Container Definitions (`content/containers/*.container.json`)
+
+- Schema: `containerDefinitionSchema` from `@odyssey/shared`.
+- Required fields: `id`, `kind`, `loot[]`, `currencyRewards[]`.
+- `id` must match the `objectId` in map files (e.g. `village_chest` in both `village.json` and `village_chest.container.json`).
+- `kind`: `"chest" | "crate" | "bag" | "bookshelf" | "cabinet"`.
+- `loot[]`: `{ definitionId, quantity, weight? }` — references item definition IDs.
+- `currencyRewards[]`: `{ currencyType, amount }`.
+
+## NPC Definitions (`content/npcs/*.json`)
+
+- Schema: NPC Zod schema from `@odyssey/shared`.
+- Required fields: id, displayName, dialogueLines.
+
+## Maps (`content/maps/*.json`)
+
+- Tiled-format JSON.
+- Object `properties` include `objectId`, `kind`, `label`.
+- Container objectIds must match a container definition `id`.

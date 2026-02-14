@@ -10,17 +10,17 @@ function createPlayerState(): PlayerSchema {
     gridY: 10,
     stamina: 100,
     maxStamina: 100,
-    equippedToolId: "axe",
     selectedHotbarSlot: 0,
-    axeLevel: 0,
-    wateringCanLevel: 0,
-    seedsLevel: 0,
-    lastInteractAtMs: 0
+    lastInteractAtMs: 0,
+    equippedHandItemId: "",
+    equippedHeadItemId: "",
+    equippedHandDefId: "",
+    equippedHeadDefId: ""
   } as PlayerSchema;
 }
 
 describe("applyInteraction", () => {
-  it("accepts valid axe interaction, spends stamina, and mutates tile", () => {
+  it("accepts valid axe interaction when hand has chop stat, spends stamina, and mutates tile", () => {
     const player = createPlayerState();
     const tiles = createTiles();
     const result = applyInteraction(
@@ -32,7 +32,8 @@ describe("applyInteraction", () => {
         actionType: "primary",
         chargeMs: 0
       },
-      250
+      250,
+      { chop: 1 }
     );
     expect(result.accepted).toBe(true);
     expect(player.stamina).toBeLessThan(100);
@@ -40,7 +41,7 @@ describe("applyInteraction", () => {
     expect(tile?.objectHealth).toBe(2);
   });
 
-  it("rejects when tool mismatches equipped tool", () => {
+  it("rejects when hand lacks required stat for the action", () => {
     const player = createPlayerState();
     const tiles = createTiles();
     const result = applyInteraction(
@@ -52,15 +53,15 @@ describe("applyInteraction", () => {
         actionType: "primary",
         chargeMs: 0
       },
-      250
+      250,
+      undefined
     );
     expect(result.accepted).toBe(false);
-    expect(result.reason).toBe("Tool mismatch");
+    expect(result.reason).toBe("Unsupported tool or wrong equipment");
   });
 
-  it("plants crop on tilled tile using seeds", () => {
+  it("plants crop on tilled tile when hand has plant stat", () => {
     const player = createPlayerState();
-    player.equippedToolId = "seeds";
     const tiles = createTiles();
     const result = applyInteraction(
       player,
@@ -71,7 +72,8 @@ describe("applyInteraction", () => {
         actionType: "primary",
         chargeMs: 0
       },
-      250
+      250,
+      { plant: 1 }
     );
     expect(result.accepted).toBe(true);
     expect(tiles.get("1,1")?.hasCrop).toBe(true);

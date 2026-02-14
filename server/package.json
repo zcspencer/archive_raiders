@@ -12,6 +12,7 @@
     "test:integration": "vitest run src/auth/AuthService.integration.test.ts src/classroom/ClassroomService.integration.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.990.0",
     "@colyseus/schema": "^3.0.41",
     "@colyseus/ws-transport": "^0.16.5",
     "@fastify/cors": "^10.1.0",

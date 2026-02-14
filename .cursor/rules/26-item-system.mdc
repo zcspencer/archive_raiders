@@ -1,0 +1,62 @@
+---
+description: Item, inventory, equipment, and container system architecture
+globs: server/src/inventory/**,client/src/store/playerInventory.ts,client/src/store/container.ts,client/src/store/currency.ts,client/src/data/itemDefinitions.ts,content/items/**,content/containers/**
+alwaysApply: false
+---
+
+# Item System Architecture
+
+## Design Invariants
+
+- **Server is sole source of truth** for inventory, equipment, currency, and container contents.
+- Every inventory slot holds 0 or 1 `ItemInstance` stack. Quantity >= 1 while row exists; 0 = delete.
+- Loot is **per-player**. Two players opening the same container get independent item instances.
+- Equipment references use **instanceId**, not definitionId. Client derives definition from inventory.
+- **Equipped items stay in inventory** — an "Equipped" badge is shown; item is not removed from grid.
+- No negative quantities or balances (DB CHECK constraints + service validation).
+- `ItemDefinition.version` incremented on component/param changes (not display changes).
+
+## Data Flow: Container Interaction
+
+1. Player presses X near chest → `InteractionHandler.handleChest()` sends `ClientMessage.OpenContainer`
+2. Server `ContainerService.openContainer()` rolls loot, returns nonce + preview → `ServerMessage.ContainerContents`
+3. Client shows read-only preview in `ChestTransferPanel`
+4. Player clicks Claim → `ClientMessage.ClaimContainer` with nonce
+5. Server grants items/currency, sends `InventoryUpdate` + `CurrencyUpdate` (full snapshots)
+6. Client replaces store state; panel closes
+
+## Data Flow: Equipment
+
+1. Client sends `ClientMessage.EquipItem { instanceId }` or `ClientMessage.UnequipItem { slot }`
+2. Server validates item exists, has Equippable/Cosmetic component, calls `EquipmentService`
+3. Server updates `PlayerSchema` fields (`equippedHandItemId`, `equippedHandDefId`, etc.)
+4. Server sends `InventoryUpdate` back
+5. Remote clients read `equippedHandDefId` / `equippedHeadDefId` from schema for sprite rendering
+
+## Tool System (Equipment-Based)
+
+- Old `equippedToolId`, `axeLevel`, etc. fields removed from `PlayerSchema`.
+- Tool interactions now check equipped hand item's component stats (e.g. `{ chop: 1 }` for axe).
+- `toolRules.ts` matches interaction payload against `TOOL_RULES` using `handStats` from equipped item.
+- On first join, server seeds starter items (axe, watering-can, seeds-bag) and auto-equips axe.
+
+## Key Files
+
+| Layer | File | Purpose |
+|-------|------|---------|
+| Shared | `types/itemDefinition.ts` | `ItemDefinition`, `ComponentDescriptor` |
+| Shared | `types/inventory.ts` | `ItemInstance` |
+| Shared | `types/container.ts` | `ContainerDefinition`, payloads |
+| Shared | `constants/equipmentAnchors.ts` | Per-slot per-direction sprite anchors |
+| Server | `inventory/InventoryService.ts` | Inventory CRUD with slot management |
+| Server | `inventory/EquipmentService.ts` | Equip/unequip by slot |
+| Server | `inventory/CurrencyService.ts` | Currency balances |
+| Server | `inventory/ContainerService.ts` | Open/claim with nonce idempotency |
+| Server | `inventory/ItemDefinitionLoader.ts` | Loads item JSON at startup |
+| Server | `inventory/components/` | Component registry (Equippable, Cosmetic, Readable, Container) |
+| Server | `colyseus/services/toolRules.ts` | Stat-based tool interaction rules |
+| Client | `store/playerInventory.ts` | Server-authoritative item list |
+| Client | `store/container.ts` | Container loot preview state |
+| Client | `store/currency.ts` | Currency balances |
+| Client | `data/itemDefinitions.ts` | Build-time item definition cache |
+| Client | `game/rendering/equippedItemSprite.ts` | Equipment sprite rendering |

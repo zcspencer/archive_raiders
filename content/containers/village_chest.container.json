@@ -1,0 +1,11 @@
+{
+  "id": "village_chest",
+  "kind": "chest",
+  "loot": [
+    { "definitionId": "scroll", "quantity": 1 },
+    { "definitionId": "herb", "quantity": 1 }
+  ],
+  "currencyRewards": [
+    { "currencyType": "coins", "amount": 5 }
+  ]
+}

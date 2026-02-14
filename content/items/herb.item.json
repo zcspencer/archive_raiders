@@ -1,0 +1,10 @@
+{
+  "id": "herb",
+  "version": 1,
+  "name": "Herb",
+  "description": "A medicinal herb.",
+  "maxStackSize": 20,
+  "inventorySprite": "items/herb",
+  "rarity": "Common",
+  "components": []
+}

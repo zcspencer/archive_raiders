@@ -17,12 +17,16 @@ export class PlayerSchema extends Schema {
   @type("uint16") declare gridY: number;
   @type("uint16") declare stamina: number;
   @type("uint16") declare maxStamina: number;
-  @type("string") declare equippedToolId: string;
   @type("uint8") declare selectedHotbarSlot: number;
-  @type("uint8") declare axeLevel: number;
-  @type("uint8") declare wateringCanLevel: number;
-  @type("uint8") declare seedsLevel: number;
   @type("uint32") declare lastInteractAtMs: number;
+  /** Inventory instance ID in hand slot; empty string = none. */
+  @type("string") declare equippedHandItemId: string;
+  /** Inventory instance ID in head slot; empty string = none. */
+  @type("string") declare equippedHeadItemId: string;
+  /** Definition ID for hand (for remote clients that don't have inventory). */
+  @type("string") declare equippedHandDefId: string;
+  /** Definition ID for head (for remote clients). */
+  @type("string") declare equippedHeadDefId: string;
 }
 
 export class ShardState extends Schema {

@@ -1,0 +1,11 @@
+{
+  "id": "elders_chest",
+  "kind": "chest",
+  "loot": [
+    { "definitionId": "ancient-map", "quantity": 1 },
+    { "definitionId": "herb", "quantity": 3 }
+  ],
+  "currencyRewards": [
+    { "currencyType": "coins", "amount": 10 }
+  ]
+}

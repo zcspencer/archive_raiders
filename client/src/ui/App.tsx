@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/auth";
 import { useClassroomStore } from "../store/classroom";
 import { usePlayerControlStore } from "../store/playerControl";
 import { destroyGame } from "../game/bootstrap";
+import { InviteAcceptScreen } from "./screens/InviteAcceptScreen";
 import { LoginScreen } from "./screens/LoginScreen";
 import { RegisterScreen } from "./screens/RegisterScreen";
 import { ClassroomPickerScreen } from "./screens/ClassroomPickerScreen";
@@ -35,7 +36,6 @@ export function App(): ReactElement {
     if (user && !accessToken) {
       handleLogout();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, accessToken]);
 
   const handleLogout = (): void => {
@@ -54,6 +54,21 @@ export function App(): ReactElement {
   /* ---------------------------------------------------------------- */
   /*  Screen routing                                                   */
   /* ---------------------------------------------------------------- */
+
+  /* 0. Invite accept -- detect /invite/:token in URL. */
+  const inviteMatch = window.location.pathname.match(/^\/invite\/([a-f0-9]+)$/);
+  if (inviteMatch) {
+    const inviteToken = inviteMatch[1]!;
+    return (
+      <InviteAcceptScreen
+        token={inviteToken}
+        onComplete={() => {
+          /* Force re-render after auth state is set. */
+          hydrate();
+        }}
+      />
+    );
+  }
 
   /* 1. Not authenticated -- show login or register. */
   if (!user || !accessToken) {

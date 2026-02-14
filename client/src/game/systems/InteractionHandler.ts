@@ -4,7 +4,8 @@ import { findInteractionTarget } from "./interactionDetection";
 import { getNpcDialogue, getNpcDefinition } from "../content/npcDialogue";
 import { useDialogueStore } from "../../store/dialogue";
 import { usePlayerControlStore } from "../../store/playerControl";
-import { useChestStore } from "../../store/chest";
+import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
+import { useContainerStore } from "../../store/container";
 
 /** Callback a scene provides so the handler can trigger scene transitions. */
 export type SceneTransitionFn = (targetScene: string, data: Record<string, unknown>) => void;
@@ -88,7 +89,8 @@ export class InteractionHandler {
   }
 
   private handleChest(obj: InteractableObject): void {
-    useChestStore.getState().openChest(obj.objectId);
+    useContainerStore.getState().setOpening(obj.objectId);
+    useGameRoomBridgeStore.getState().sendOpenContainer(obj.objectId);
     usePlayerControlStore.getState().setInputMode("ui");
   }
 }

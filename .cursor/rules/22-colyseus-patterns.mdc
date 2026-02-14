@@ -11,6 +11,7 @@ alwaysApply: false
 - Room name: `"shard"`, one instance per classroom.
 - Defined in `server/src/colyseus/rooms/ShardRoom.ts`.
 - State schema in `server/src/colyseus/schema/ShardState.ts`.
+- **Use `client.send(type, data)` not `this.send(client, type, data)`.** The latter is deprecated in Colyseus 0.16.
 
 ## ShardState Schema
 
@@ -20,29 +21,48 @@ alwaysApply: false
 
 ## PlayerSchema Fields
 
-`id`, `gridX`, `gridY`, `stamina`, `maxStamina`, `equippedToolId`,
-`selectedHotbarSlot`, `axeLevel`, `wateringCanLevel`, `seedsLevel`, `lastInteractAtMs`.
+`id`, `gridX`, `gridY`, `stamina`, `maxStamina`, `selectedHotbarSlot`, `lastInteractAtMs`,
+`equippedHandItemId`, `equippedHeadItemId` (inventory instance IDs),
+`equippedHandDefId`, `equippedHeadDefId` (definition IDs for remote client sprite rendering).
 
 ## Messages (from `@odyssey/shared` enums)
 
 | Client -> Server | Payload |
-|------------------|---------|
-| `ClientMessage.Move` | `{ gridX, gridY }` |
-| `ClientMessage.SelectHotbar` | `{ slot }` |
-| `ClientMessage.Interact` | `{ targetX, targetY, toolId, actionType }` |
+|---|---|
+| `Move` | `{ gridX, gridY }` |
+| `SelectHotbar` | `{ slotIndex }` |
+| `Interact` | `{ target, toolId, actionType, chargeMs }` |
+| `OpenContainer` | `{ objectId }` |
+| `ClaimContainer` | `{ objectId, nonce }` |
+| `EquipItem` | `{ instanceId }` |
+| `UnequipItem` | `{ slot }` |
+| `DropItem` | `{ instanceId }` — destroys item (Important items rejected) |
+| `UseItem` | (planned) |
 
 | Server -> Client | Payload |
-|------------------|---------|
-| `ServerMessage.Notification` | `{ message }` |
-| `ServerMessage.TaskTrigger` | (planned) |
-| `ServerMessage.TaskResult` | (planned) |
+|---|---|
+| `Notification` | `string` (error/info text) |
+| `ContainerContents` | `{ objectId, nonce, items, currencyRewards }` |
+| `InventoryUpdate` | `ItemInstance[]` (full snapshot replace) |
+| `CurrencyUpdate` | `Record<CurrencyType, number>` (full snapshot) |
+| `EquipmentUpdate` | (via schema sync, not message) |
 
 ## Auth Flow
 
 `ShardRoom.onAuth()` validates JWT via `AuthService` and checks classroom membership via `ClassroomService`.
 
+## onJoin Seeding
+
+On first join (empty inventory), server seeds starter items (axe, watering-can, seeds-bag) and auto-equips axe.
+Race condition on reconnect handled by catching duplicate key errors (pg error 23505).
+
 ## Client Connection
 
 1. `useColyseusRoom` hook creates Colyseus client and calls `joinOrCreate("shard", { accessToken, classroomId })`.
 2. Room ref stored in `gameRoomBridge` Zustand store.
-3. `RemotePlayersController` reads room state to reconcile remote player sprites.
+3. `RemotePlayersController` reads room state to reconcile remote player sprites + equipment.
+4. Listeners for `Notification`, `ContainerContents`, `InventoryUpdate`, `CurrencyUpdate` registered in `useColyseusRoom`.
+
+## Buffer Size
+
+`Encoder.BUFFER_SIZE` set to 40 KB in `server/src/index.ts` (equipment fields increase encoded state size).

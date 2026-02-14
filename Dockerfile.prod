@@ -1,0 +1,79 @@
+# ── Stage 1: Install dependencies ─────────────────────────────────────────
+FROM node:22-alpine AS deps
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+
+RUN corepack enable
+
+WORKDIR /workspace
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server/package.json server/package.json
+COPY client/package.json client/package.json
+COPY admin/package.json admin/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/task-validators/package.json packages/task-validators/package.json
+
+RUN pnpm install --frozen-lockfile
+
+# ── Stage 2: Build everything ─────────────────────────────────────────────
+FROM deps AS build
+
+COPY . .
+
+# Build in dependency order: shared -> task-validators -> server, client, admin
+RUN pnpm --filter @odyssey/shared build && \
+    pnpm --filter @odyssey/task-validators build && \
+    pnpm --filter @odyssey/server build && \
+    pnpm --filter @odyssey/client build && \
+    pnpm --filter @odyssey/admin build
+
+# ── Stage 3: Server runtime ──────────────────────────────────────────────
+FROM node:22-alpine AS server
+
+RUN addgroup -S app && adduser -S app -G app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+ENV NODE_ENV=production
+
+RUN corepack enable
+
+WORKDIR /app
+
+# Copy workspace manifests for pnpm to resolve workspace deps at runtime
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server/package.json server/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/task-validators/package.json packages/task-validators/package.json
+
+# Install production deps only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built artifacts
+COPY --from=build /workspace/packages/shared/dist packages/shared/dist
+COPY --from=build /workspace/packages/task-validators/dist packages/task-validators/dist
+COPY --from=build /workspace/server/dist server/dist
+
+# Copy content directory (maps, items, tasks, etc.)
+COPY content/ content/
+
+USER app
+
+EXPOSE 3000
+
+CMD ["node", "server/dist/index.js"]
+
+# ── Stage 4: Caddy with static assets ────────────────────────────────────
+FROM caddy:2-alpine AS caddy
+
+COPY Caddyfile /etc/caddy/Caddyfile
+
+# Client SPA
+COPY --from=build /workspace/client/dist /srv/client
+
+# Admin SPA
+COPY --from=build /workspace/admin/dist /srv/admin
+
+EXPOSE 80 443

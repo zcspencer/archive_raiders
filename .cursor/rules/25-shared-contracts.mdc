@@ -17,20 +17,31 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | `player.ts` | `PlayerProfile` |
 | `task.ts` | `TaskDefinition`, `TaskAnswer`, `TaskResult` |
 | `messages.ts` | `ClientMessage`, `ServerMessage` enums |
-| `interaction.ts` | `MovePayload`, `InteractPayload` |
+| `interaction.ts` | `MovePayload`, `InteractPayload`, `HotbarSelectPayload` |
 | `tool.ts` | `ToolId`, `ToolActionType` |
-| `inventory.ts` | Inventory item types |
+| `inventory.ts` | `ItemInstance` (instanceId, definitionId, definitionVersion, quantity, containedItems?) |
+| `itemDefinition.ts` | `ItemDefinition`, `ItemRarity`, `ITEM_RARITIES`, `ComponentDescriptor` |
+| `equipmentSlot.ts` | `EquipmentSlot` (`"hand" \| "head"`), `EQUIPMENT_SLOTS` |
+| `currency.ts` | `CurrencyType` (`"coins" \| "museum_points"`), `CurrencyReward` |
+| `itemAction.ts` | `ItemAction` (`"drop" \| "equip" \| ...`), `ItemActionRequest` |
+| `container.ts` | `ContainerKind`, `ContainerDefinition`, `LootEntry`, `OpenContainerPayload`, `ClaimContainerPayload` |
 | `resource.ts` | `PlayerResourceState` |
 | `npc.ts` | `NpcDefinition`, `DialogueLine` |
 | `map.ts` | `TiledMapData`, `MapNpcPlacement` |
 
 ## Zod Validators (`src/validators/`)
 
-One `*.schema.ts` per type module. Named `<type>Schema` (e.g. `registerRequestSchema`).
+One `*.schema.ts` per type module. Notable additions:
+- `itemDefinition.schema.ts` — `itemDefinitionSchema`, `itemRaritySchema`, `componentDescriptorSchema`
+- `equipmentSlot.schema.ts` — `equipmentSlotSchema`
+- `currency.schema.ts` — `currencyTypeSchema`, `currencyRewardSchema`
+- `container.schema.ts` — `containerDefinitionSchema`, `openContainerPayloadSchema`, `claimContainerPayloadSchema`
+- `itemAction.schema.ts` — `itemActionSchema`, `equipItemPayloadSchema`, `unequipItemPayloadSchema`, `dropItemPayloadSchema`
 
-## Constants (`src/constants/game.ts`)
+## Constants
 
-`TILE_SIZE`, `PLAYER_MOVE_SPEED`, and other gameplay tuning values.
+- `constants/game.ts` — `TILE_SIZE`, `PLAYER_MOVE_SPEED`, `ROOM_TICK_RATE_MS`
+- `constants/equipmentAnchors.ts` — `EQUIPMENT_ANCHORS`, `FacingDirection`, `AnchorConfig` (per-slot per-direction sprite offsets)
 
 ## Utilities (`src/utils/rng.ts`)
 
@@ -41,5 +52,7 @@ Seeded RNG for deterministic randomness.
 - `TaskDefinition` and `TaskResult` shapes
 - `NpcDefinition` and `DialogueLine` shapes
 - `TiledMapData` and layer schemas
-- `ClientMessage` / `ServerMessage` enums
+- `ClientMessage` / `ServerMessage` enums (additive only)
+- `ItemDefinition` / `ItemInstance` shapes
+- `ContainerDefinition` shape
 - Task validator function signature

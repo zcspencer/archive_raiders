@@ -1,0 +1,8 @@
+domain         = "play.example.com"
+admin_ssh_cidr = "1.2.3.4/32"
+ssh_key_name   = "my-key-pair"
+instance_type  = "t3a.small"
+region         = "us-west-2"
+ebs_size_gb    = 20
+repo_url       = "https://github.com/zspencer/archive_raiders.git"
+repo_branch    = "main"

@@ -37,6 +37,8 @@ pnpm workspaces + Turborepo. Package name prefix: `@odyssey/`.
 - `content/maps/*.json` — Tiled-format map definitions.
 - `content/npcs/*.json` — NPC dialogue definitions.
 - `content/tasks/**/*.task.json` — Task definitions (id, type, config, rewards).
+- `content/items/*.item.json` — Item definitions (Equippable, Cosmetic, Readable, Container components).
+- `content/containers/*.container.json` — Container loot tables (chest, crate, bookshelf, etc.).
 
 ## Documentation
 

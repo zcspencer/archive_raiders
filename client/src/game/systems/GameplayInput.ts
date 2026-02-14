@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { isFormFieldFocused } from "../input/formFocus";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { useDialogueStore } from "../../store/dialogue";
-import { useChestStore } from "../../store/chest";
+import { useContainerStore } from "../../store/container";
 
 /**
  * Standard WASD + interact key bindings used by gameplay scenes.
@@ -42,17 +42,17 @@ export class GameplayInput {
 
   /**
    * Returns true when the player should not move or interact.
-   * Checks input mode, form focus, dialogue, and open chest UI.
+   * Checks input mode, form focus, dialogue, and open container UI.
    */
   isBlocked(): boolean {
     const controlState = usePlayerControlStore.getState();
     const dialogueActive = useDialogueStore.getState().isActive;
-    const chestOpen = useChestStore.getState().currentChestId !== null;
+    const containerOpen = useContainerStore.getState().currentContainerId !== null;
     return (
       controlState.inputMode !== "game" ||
       isFormFieldFocused(document.activeElement) ||
       dialogueActive ||
-      chestOpen
+      containerOpen
     );
   }
 

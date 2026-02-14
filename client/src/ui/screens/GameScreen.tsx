@@ -5,8 +5,10 @@ import { useColyseusRoom } from "../../hooks/useColyseusRoom";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { useDialogueStore } from "../../store/dialogue";
-import { useChestStore } from "../../store/chest";
+import { useContainerStore } from "../../store/container";
+import { useReadableContentStore } from "../../store/readableContent";
 import { DialogueBox } from "../components/DialogueBox";
+import { ReadableContentDialog } from "../components/ReadableContentDialog";
 import { Toolbar } from "../components/Toolbar";
 import { InventoryPanel } from "../components/InventoryPanel";
 import { ChestTransferPanel } from "../components/ChestTransferPanel";
@@ -27,8 +29,10 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   const inventoryOpen = usePlayerControlStore((s) => s.inventoryOpen);
   const setSelectedHotbarSlot = usePlayerControlStore((s) => s.setSelectedHotbarSlot);
   const dialogueActive = useDialogueStore((s) => s.isActive);
-  const chestOpen = useChestStore((s) => s.currentChestId !== null);
-  const closeChest = useChestStore((s) => s.closeChest);
+  const containerOpen = useContainerStore((s) => s.currentContainerId !== null);
+  const closeContainer = useContainerStore((s) => s.closeContainer);
+  const readableOpen = useReadableContentStore((s) => s.isOpen);
+  const closeReadable = useReadableContentStore((s) => s.closeReadable);
 
   const roomConnection = useColyseusRoom({
     accessToken: props.accessToken,
@@ -49,10 +53,10 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   }, [setInputMode]);
 
   useEffect(() => {
-    if (!dialogueActive && !chestOpen) {
+    if (!dialogueActive && !containerOpen) {
       setInputMode("game");
     }
-  }, [dialogueActive, chestOpen, setInputMode]);
+  }, [dialogueActive, containerOpen, setInputMode]);
 
   /* Global keyboard shortcuts for game mode. */
   useEffect(() => {
@@ -69,8 +73,12 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       }
       if (event.key === "Escape") {
         event.preventDefault();
-        if (chestOpen) {
-          closeChest();
+        if (readableOpen) {
+          closeReadable();
+          return;
+        }
+        if (containerOpen) {
+          closeContainer();
           setInputMode("game");
           return;
         }
@@ -89,7 +97,7 @@ export function GameScreen(props: GameScreenProps): ReactElement {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [chestOpen, closeChest, inventoryOpen, setInputMode, setSelectedHotbarSlot, toggleInventory]);
+  }, [containerOpen, closeContainer, inventoryOpen, readableOpen, closeReadable, setInputMode, setSelectedHotbarSlot, toggleInventory]);
 
   return (
     <>
@@ -108,6 +116,7 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       <InventoryPanel />
       <ChestTransferPanel />
       <DialogueBox />
+      <ReadableContentDialog />
 
       {/* Connection error toast */}
       {roomConnection.errorMessage ? (

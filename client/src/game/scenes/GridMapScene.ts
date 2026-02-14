@@ -3,13 +3,19 @@ import { TILE_SIZE } from "@odyssey/shared";
 import type { ParsedMap } from "../map/TileMapManager";
 import { generateTilesetTexture, renderGroundLayer } from "../map/tileRenderer";
 import { generatePlayerTexture, animKeyForFacing, idleFrameForFacing } from "../rendering/playerSprite";
+import {
+  EquippedItemSpriteController,
+  type EquippedState
+} from "../rendering/equippedItemSprite";
 import { GridMovement, keysToDirection } from "../systems/gridMovement";
 import { Npc } from "../entities/Npc";
 import { InteractableObject } from "../entities/InteractableObject";
 import { getNpcDefinition } from "../content/npcDialogue";
+import { getItemDefinition } from "../../data/itemDefinitions";
 import { GameplayInput } from "../systems/GameplayInput";
 import { InteractionHandler } from "../systems/InteractionHandler";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
+import { usePlayerInventoryStore } from "../../store/playerInventory";
 
 /**
  * Scene-init data passed through `scene.start(key, data)`.
@@ -28,6 +34,7 @@ export interface GridMapSceneData {
 export abstract class GridMapScene extends Phaser.Scene {
   protected playerSprite!: Phaser.GameObjects.Sprite;
   protected gridMovement!: GridMovement;
+  protected equippedSpriteController!: EquippedItemSpriteController;
   protected input_!: GameplayInput;
   protected interaction!: InteractionHandler;
   protected npcs: Npc[] = [];
@@ -57,6 +64,12 @@ export abstract class GridMapScene extends Phaser.Scene {
       spawnX,
       spawnY,
       (gx, gy) => useGameRoomBridgeStore.getState().sendMove({ gridX: gx, gridY: gy })
+    );
+
+    this.equippedSpriteController = new EquippedItemSpriteController(
+      this,
+      this.playerSprite,
+      () => this.getEquippedState()
     );
 
     this.npcs = [];
@@ -101,6 +114,25 @@ export abstract class GridMapScene extends Phaser.Scene {
   /* ------------------------------------------------------------------ */
   /*  Overridable hooks                                                  */
   /* ------------------------------------------------------------------ */
+
+  /** Returns current equipment and facing for equipped sprite controller. */
+  protected getEquippedState(): EquippedState {
+    const room = useGameRoomBridgeStore.getState().room;
+    const items = usePlayerInventoryStore.getState().items;
+    const player = room?.state?.players?.get(
+      (room as { sessionId?: string })?.sessionId ?? ""
+    ) as { equippedHandItemId?: string; equippedHeadItemId?: string } | undefined;
+    const handId = player?.equippedHandItemId;
+    const headId = player?.equippedHeadItemId;
+    return {
+      handInstanceId: handId && handId !== "" ? handId : null,
+      headInstanceId: headId && headId !== "" ? headId : null,
+      items,
+      getDefinition: getItemDefinition,
+      facingX: this.gridMovement.getFacingX(),
+      facingY: this.gridMovement.getFacingY()
+    };
+  }
 
   /** Called each frame to update NPC/object proximity prompts. */
   protected updatePrompts(px: number, py: number): void {
@@ -172,5 +204,6 @@ export abstract class GridMapScene extends Phaser.Scene {
       this.playerSprite.stop();
       this.playerSprite.setFrame(idleFrameForFacing(fx, fy));
     }
+    this.equippedSpriteController.sync();
   }
 }

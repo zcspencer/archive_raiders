@@ -1,10 +1,12 @@
 /**
- * Snapshot of a player position from room state.
+ * Snapshot of a player from room state (position and equipment for rendering).
  */
 export interface PlayerSnapshot {
   sessionId: string;
   gridX: number;
   gridY: number;
+  equippedHandDefId?: string;
+  equippedHeadDefId?: string;
 }
 
 interface RoomLike {
@@ -71,13 +73,26 @@ export function diffRemotePlayers(
 }
 
 function toSnapshot(sessionId: string, value: unknown): PlayerSnapshot | null {
-  const maybePlayer = value as { gridX?: number; gridY?: number };
+  const maybePlayer = value as {
+    gridX?: number;
+    gridY?: number;
+    equippedHandDefId?: string;
+    equippedHeadDefId?: string;
+  };
   if (typeof maybePlayer.gridX !== "number" || typeof maybePlayer.gridY !== "number") {
     return null;
   }
   return {
     sessionId,
     gridX: maybePlayer.gridX,
-    gridY: maybePlayer.gridY
+    gridY: maybePlayer.gridY,
+    equippedHandDefId:
+      typeof maybePlayer.equippedHandDefId === "string" && maybePlayer.equippedHandDefId !== ""
+        ? maybePlayer.equippedHandDefId
+        : undefined,
+    equippedHeadDefId:
+      typeof maybePlayer.equippedHeadDefId === "string" && maybePlayer.equippedHeadDefId !== ""
+        ? maybePlayer.equippedHeadDefId
+        : undefined
   };
 }

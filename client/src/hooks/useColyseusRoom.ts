@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Client, type Room } from "colyseus.js";
+import type { CurrencyReward } from "@odyssey/shared";
+import { ServerMessage } from "@odyssey/shared";
+import { useContainerStore } from "../store/container";
+import { useCurrencyStore } from "../store/currency";
 import { useGameRoomBridgeStore } from "../store/gameRoomBridge";
+import { usePlayerControlStore } from "../store/playerControl";
+import { usePlayerInventoryStore } from "../store/playerInventory";
 
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -63,6 +69,40 @@ export function useColyseusRoom(
         setSessionId(activeRoom.sessionId);
         setStatus("connected");
         setRoom(activeRoom);
+
+        activeRoom.onMessage(ServerMessage.Notification, (payload: unknown) => {
+          const msg = typeof payload === "string" ? payload : String(payload);
+          console.warn("[ShardRoom] Server notification:", msg);
+          /* If a container is in "opening" state, close it so the user isn't stuck on "Loading..." */
+          const container = useContainerStore.getState();
+          if (container.currentContainerId && container.nonce === null) {
+            container.closeContainer();
+            usePlayerControlStore.getState().setInputMode("game");
+          }
+        });
+
+        activeRoom.onMessage(ServerMessage.ContainerContents, (payload: unknown) => {
+          if (payload && typeof payload === "object" && "objectId" in payload && "nonce" in payload && "items" in payload && "currencyRewards" in payload) {
+            const p = payload as { objectId: string; nonce: string; items: Array<{ definitionId: string; name: string; quantity: number }>; currencyRewards: CurrencyReward[] };
+            useContainerStore.getState().setContents({
+              objectId: p.objectId,
+              nonce: p.nonce,
+              items: p.items,
+              currencyRewards: p.currencyRewards
+            });
+          }
+        });
+        activeRoom.onMessage(ServerMessage.InventoryUpdate, (payload: unknown) => {
+          if (Array.isArray(payload)) {
+            usePlayerInventoryStore.getState().setItems(payload as import("@odyssey/shared").ItemInstance[]);
+            useContainerStore.getState().closeContainer();
+          }
+        });
+        activeRoom.onMessage(ServerMessage.CurrencyUpdate, (payload: unknown) => {
+          if (payload && typeof payload === "object") {
+            useCurrencyStore.getState().setBalances(payload as Record<string, number>);
+          }
+        });
 
         activeRoom.onLeave((code) => {
           if (cancelled) {

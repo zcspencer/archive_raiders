@@ -15,21 +15,27 @@ All stores use `zustand/create`. React subscribes via hooks; Phaser reads via `g
 | `auth` | user session, token | Login/register, localStorage persistence |
 | `classroom` | list, selected | Classroom selection before game join |
 | `dialogue` | speaker, lines, index | NPC dialogue overlay state |
-| `chest` | contents map, open ID | Per-chest inventory, transfer UI |
-| `playerControl` | inputMode, hotbarSlot | "game"/"ui" mode, inventory toggle, cursor tile |
-| `playerInventory` | item stacks | Player-held items with quantities |
+| `container` | currentContainerId, nonce, previewItems, previewCurrency | Server-provided container loot preview; replaces old `chest` store |
+| `playerControl` | inputMode, hotbarSlot, inventoryOpen | "game"/"ui" mode, inventory toggle, cursor tile |
+| `playerInventory` | items: ItemInstance[] | Server-authoritative inventory; replaced on `InventoryUpdate` |
+| `currency` | balances: Record<CurrencyType, number> | Server-authoritative currency; replaced on `CurrencyUpdate` |
 | `gameRoomBridge` | room ref | Colyseus room handle + message senders |
 
 ## gameRoomBridge (Phaser-React Bridge)
 
 - Holds the Colyseus `Room` reference set by `useColyseusRoom` hook.
-- Exposes: `sendMove(gridX, gridY)`, `sendInteract(payload)`, `sendSelectHotbar(slot)`.
+- Exposes: `sendMove`, `sendInteract`, `sendSelectHotbar`, `sendOpenContainer`, `sendClaimContainer`.
 - Phaser systems call these to send messages to server.
+
+## Server-Authoritative Pattern
+
+`playerInventory` and `currency` stores are **projection-only**. On receiving `InventoryUpdate` or `CurrencyUpdate`, the client **replaces** (not merges) the entire state. Client never mutates these optimistically.
 
 ## Bridge Data Flow
 
-1. **Phaser -> React**: Phaser systems write to stores (e.g. `dialogueStore.openDialogue()`).
+1. **Phaser -> React**: Phaser systems write to stores (e.g. `dialogueStore.openDialogue()`, `containerStore.setOpening()`).
    React components subscribe and render overlays.
 2. **React -> Phaser**: `playerControl.inputMode` blocks Phaser input when UI is active.
    `GameplayInput.isBlocked()` reads store state via `getState()`.
-3. **Both -> Server**: `gameRoomBridge.sendMove()` / `sendInteract()` relay to Colyseus.
+3. **Both -> Server**: `gameRoomBridge.sendMove()` / `sendInteract()` / `sendOpenContainer()` relay to Colyseus.
+4. **Server -> Both**: `useColyseusRoom` registers message listeners that update stores on `ContainerContents`, `InventoryUpdate`, `CurrencyUpdate`, `Notification`.

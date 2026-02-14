@@ -7,7 +7,7 @@ interface DashboardProps {
   isLoading: boolean;
   errorMessage: string | null;
   onCreateClassroom: (name: string) => Promise<void>;
-  onEnrollStudent: (classroomId: string, studentEmail: string) => Promise<void>;
+  onInviteStudent: (classroomId: string, studentEmail: string) => Promise<void>;
   onRefresh: () => Promise<void>;
   onLogout: () => void;
 }
@@ -17,8 +17,8 @@ interface DashboardProps {
  */
 export function Dashboard(props: DashboardProps): ReactElement {
   const [classroomName, setClassroomName] = useState("");
-  const [enrollmentEmails, setEnrollmentEmails] = useState<Record<string, string>>({});
-  const [enrollmentMessage, setEnrollmentMessage] = useState<string | null>(null);
+  const [inviteEmails, setInviteEmails] = useState<Record<string, string>>({});
+  const [inviteMessage, setInviteMessage] = useState<string | null>(null);
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -26,22 +26,22 @@ export function Dashboard(props: DashboardProps): ReactElement {
     setClassroomName("");
   };
 
-  const handleEnroll = async (
+  const handleInvite = async (
     event: FormEvent<HTMLFormElement>,
     classroomId: string
   ): Promise<void> => {
     event.preventDefault();
-    const email = enrollmentEmails[classroomId]?.trim() ?? "";
+    const email = inviteEmails[classroomId]?.trim() ?? "";
     if (!email) {
-      setEnrollmentMessage("Student email is required");
+      setInviteMessage("Student email is required");
       return;
     }
     try {
-      await props.onEnrollStudent(classroomId, email);
-      setEnrollmentEmails((previous) => ({ ...previous, [classroomId]: "" }));
-      setEnrollmentMessage(`Enrolled ${email}`);
+      await props.onInviteStudent(classroomId, email);
+      setInviteEmails((previous) => ({ ...previous, [classroomId]: "" }));
+      setInviteMessage(`Invite sent to ${email}`);
     } catch (error) {
-      setEnrollmentMessage(error instanceof Error ? error.message : "Enrollment failed");
+      setInviteMessage(error instanceof Error ? error.message : "Invite failed");
     }
   };
 
@@ -71,7 +71,7 @@ export function Dashboard(props: DashboardProps): ReactElement {
         </button>
       </form>
       {props.errorMessage ? <p style={{ color: "#dc2626" }}>{props.errorMessage}</p> : null}
-      {enrollmentMessage ? <p style={{ color: "#0369a1" }}>{enrollmentMessage}</p> : null}
+      {inviteMessage ? <p style={{ color: "#0369a1" }}>{inviteMessage}</p> : null}
       <h2>Classrooms</h2>
       <ul>
         {props.classrooms.map((classroom) => (
@@ -81,23 +81,24 @@ export function Dashboard(props: DashboardProps): ReactElement {
             </div>
             <form
               onSubmit={(event) => {
-                void handleEnroll(event, classroom.id);
+                void handleInvite(event, classroom.id);
               }}
               style={{ display: "flex", gap: 8, marginTop: 4 }}
             >
               <input
                 required
+                type="email"
                 placeholder="Student email"
-                value={enrollmentEmails[classroom.id] ?? ""}
+                value={inviteEmails[classroom.id] ?? ""}
                 onChange={(event) =>
-                  setEnrollmentEmails((previous) => ({
+                  setInviteEmails((previous) => ({
                     ...previous,
                     [classroom.id]: event.target.value
                   }))
                 }
               />
               <button disabled={props.isLoading} type="submit">
-                Add student
+                Invite student
               </button>
             </form>
           </li>

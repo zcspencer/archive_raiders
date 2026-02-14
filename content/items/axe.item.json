@@ -1,0 +1,13 @@
+{
+  "id": "axe",
+  "version": 1,
+  "name": "Axe",
+  "description": "Chop trees and clear debris.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/axe",
+  "equippedSprite": "items/axe-held",
+  "rarity": "Common",
+  "components": [
+    { "typeId": "Equippable", "params": { "slot": "hand", "stats": { "chop": 1 } } }
+  ]
+}

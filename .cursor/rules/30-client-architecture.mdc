@@ -13,6 +13,7 @@ alwaysApply: false
 - Bridge via Zustand stores, not direct Phaser-React coupling.
 - Keep task components self-contained and typed by task definition.
 - Never trust client validation for authoritative outcomes.
+- **Server is sole source of truth** for inventory, equipment, and currency. Client stores are projections replaced on server messages.
 
 ## DOM Roots (`client/index.html`)
 
@@ -30,13 +31,17 @@ alwaysApply: false
 - `auth.ts` — login/register calls.
 - `classrooms.ts` — list/select classroom calls.
 
+## Data Layer (`src/data/`)
+
+- `itemDefinitions.ts` — loads `content/items/*.item.json` via Vite `import.meta.glob` at build time. `getItemDefinition(id)` for UI lookups.
+
 ## Overlay Components (`src/ui/components/`)
 
 - `DialogueBox` — bottom-center NPC dialogue, advances on X/Enter/Space.
-- `InventoryPanel` — modal grid toggled by I key.
-- `ChestTransferPanel` — two-column chest/player transfer UI.
-- `Toolbar` — bottom-center hotbar (9 slots, keys 1-9).
+- `InventoryPanel` — modal grid (24 slots) toggled by I key. Shows equipment (hand/head), currency wallet, item context menu (right-click for Drop/Equip/etc.).
+- `ChestTransferPanel` — read-only container loot preview from server. Claim button sends `ClaimContainer`. Loading state while waiting for `ContainerContents`.
+- `Toolbar` — bottom-center hotbar (3 tool slots, keys 1-3).
 
 ## Keyboard Shortcuts
 
-WASD (move), X (interact), I (inventory), 1-9 (hotbar), Escape (close panels).
+WASD (move), X (interact), I (inventory), 1-3 (hotbar), Escape (close panels).

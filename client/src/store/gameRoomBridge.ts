@@ -10,6 +10,9 @@ interface GameRoomBridgeState {
   sendMove: (payload: MovePayload) => void;
   sendInteract: (payload: InteractPayload) => void;
   sendSelectHotbar: (slotIndex: number) => void;
+  sendOpenContainer: (objectId: string) => void;
+  sendClaimContainer: (objectId: string, nonce: string) => void;
+  sendDropItem: (instanceId: string) => void;
 }
 
 /**
@@ -27,5 +30,14 @@ export const useGameRoomBridgeStore = create<GameRoomBridgeState>((set, get) => 
   },
   sendSelectHotbar: (slotIndex): void => {
     get().room?.send(ClientMessage.SelectHotbar, { slotIndex });
+  },
+  sendOpenContainer: (objectId): void => {
+    get().room?.send(ClientMessage.OpenContainer, { objectId });
+  },
+  sendClaimContainer: (objectId, nonce): void => {
+    get().room?.send(ClientMessage.ClaimContainer, { objectId, nonce });
+  },
+  sendDropItem: (instanceId): void => {
+    get().room?.send(ClientMessage.DropItem, { instanceId });
   }
 }));

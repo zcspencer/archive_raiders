@@ -1,10 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { extname, resolve, join } from "node:path";
+import { extname, join } from "node:path";
 import type { AuthUser, TaskAnswer, TaskDefinition, TaskResult } from "@odyssey/shared";
 import { taskDefinitionSchema } from "@odyssey/shared";
 import { getValidator } from "@odyssey/task-validators";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
+import { resolveContentDirectory } from "../contentPath.js";
 
 /**
  * Error raised when task content cannot be found for an id.
@@ -72,24 +72,6 @@ export class TaskService {
 
     throw new TaskNotFoundError(taskId);
   }
-}
-
-function resolveContentDirectory(contentDir: string): string {
-  if (contentDir.startsWith("/")) {
-    return contentDir;
-  }
-
-  const workspaceRelative = resolve(process.cwd(), contentDir);
-  if (existsSync(workspaceRelative)) {
-    return workspaceRelative;
-  }
-
-  const packageRelative = resolve(process.cwd(), "..", contentDir);
-  if (existsSync(packageRelative)) {
-    return packageRelative;
-  }
-
-  return workspaceRelative;
 }
 
 async function collectJsonFiles(directoryPath: string): Promise<string[]> {

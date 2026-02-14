@@ -1,174 +1,93 @@
-import { useState, type CSSProperties, type ReactElement } from "react";
-import type { InventoryStack } from "@odyssey/shared";
-import { useChestStore } from "../../store/chest";
-import { usePlayerInventoryStore } from "../../store/playerInventory";
+import type { CSSProperties, ReactElement } from "react";
+import { useContainerStore } from "../../store/container";
+import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
 
-/** Display labels for known item IDs. */
-const ITEM_LABELS: Record<string, string> = {
-  scroll: "Scroll",
-  coin: "Coin",
-  "ancient-map": "Ancient Map",
-  herb: "Herb",
-  "artifact-stone-tablet": "Stone Tablet"
-};
-
-/** Returns a human-readable label for an item. */
-function labelFor(itemId: string): string {
-  return ITEM_LABELS[itemId] ?? itemId;
-}
-
-/** Stable empty array so selectors do not return a new reference each time. */
-const EMPTY_CONTENTS: InventoryStack[] = [];
-
 /**
- * Modal that appears when a chest is opened.
- * Lets the player choose which items to take and which to leave.
+ * Modal that appears when a container is opened. Shows server-provided loot preview (read-only).
+ * Single "Claim" button sends claim to server; "Close" dismisses without claiming.
  */
 export function ChestTransferPanel(): ReactElement | null {
-  const currentChestId = useChestStore((s) => s.currentChestId);
-  const chestContents = useChestStore((s) =>
-    s.currentChestId ? s.contents[s.currentChestId] ?? EMPTY_CONTENTS : EMPTY_CONTENTS
-  );
-  const setChestContents = useChestStore((s) => s.setChestContents);
-  const closeChest = useChestStore((s) => s.closeChest);
-  const addItems = usePlayerInventoryStore((s) => s.addItems);
+  const currentContainerId = useContainerStore((s) => s.currentContainerId);
+  const nonce = useContainerStore((s) => s.nonce);
+  const previewItems = useContainerStore((s) => s.previewItems);
+  const previewCurrency = useContainerStore((s) => s.previewCurrency);
+  const closeContainer = useContainerStore((s) => s.closeContainer);
   const setInputMode = usePlayerControlStore((s) => s.setInputMode);
+  const sendClaimContainer = useGameRoomBridgeStore((s) => s.sendClaimContainer);
 
-  const [taking, setTaking] = useState<InventoryStack[]>([]);
+  if (!currentContainerId) return null;
 
-  if (!currentChestId) return null;
-
-  const remaining = computeRemaining(chestContents, taking);
-
-  const moveToTaking = (itemId: string): void => {
-    const src = remaining.find((s) => s.itemId === itemId);
-    if (!src || src.quantity <= 0) return;
-    setTaking((prev) => addStack(prev, itemId, 1));
-  };
-
-  const moveToChest = (itemId: string): void => {
-    const src = taking.find((s) => s.itemId === itemId);
-    if (!src || src.quantity <= 0) return;
-    setTaking((prev) => removeStack(prev, itemId, 1));
-  };
-
-  const handleConfirm = (): void => {
-    if (taking.length > 0) {
-      addItems(taking);
+  const handleClaim = (): void => {
+    if (nonce) {
+      sendClaimContainer(currentContainerId, nonce);
     }
-    setChestContents(currentChestId, remaining.filter((s) => s.quantity > 0));
-    setTaking([]);
-    closeChest();
+    closeContainer();
     setInputMode("game");
   };
 
-  const handleCancel = (): void => {
-    setTaking([]);
-    closeChest();
+  const handleClose = (): void => {
+    closeContainer();
     setInputMode("game");
   };
 
   return (
     <div style={backdropStyle} role="presentation">
-      <div style={panelStyle} role="dialog" aria-label="Chest contents">
-        <h2 style={titleStyle}>Chest</h2>
+      <div style={panelStyle} role="dialog" aria-label="Container contents">
+        <h2 style={titleStyle}>Container</h2>
 
-        <div style={columnsStyle}>
-          {/* In chest */}
-          <div style={columnStyle}>
-            <h3 style={columnTitleStyle}>In Chest</h3>
-            {remaining.length === 0 ? (
-              <p style={emptyStyle}>Empty</p>
-            ) : (
-              remaining.map((stack) => (
-                <button
-                  key={stack.itemId}
-                  type="button"
-                  style={itemBtnStyle}
-                  onClick={() => moveToTaking(stack.itemId)}
-                  title={`Take ${labelFor(stack.itemId)}`}
-                >
-                  <span style={itemLabelStyle}>{labelFor(stack.itemId)}</span>
-                  <span style={qtyStyle}>x{stack.quantity}</span>
-                </button>
-              ))
+        {nonce === null ? (
+          <p style={emptyStyle}>Loading...</p>
+        ) : (
+          <>
+            <div style={sectionStyle}>
+              <h3 style={columnTitleStyle}>Items</h3>
+              {previewItems.length === 0 ? (
+                <p style={emptyStyle}>No items</p>
+              ) : (
+                <ul style={listStyle}>
+                  {previewItems.map((item, i) => (
+                    <li key={`${item.definitionId}-${i}`} style={itemRowStyle}>
+                      <span style={itemLabelStyle}>{item.name}</span>
+                      <span style={qtyStyle}>x{item.quantity}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {previewCurrency.length > 0 && (
+              <div style={sectionStyle}>
+                <h3 style={columnTitleStyle}>Currency</h3>
+                <ul style={listStyle}>
+                  {previewCurrency.map((c, i) => (
+                    <li key={`${c.currencyType}-${i}`} style={itemRowStyle}>
+                      <span style={itemLabelStyle}>{c.currencyType}</span>
+                      <span style={qtyStyle}>+{c.amount}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-          </div>
-
-          {/* Taking */}
-          <div style={columnStyle}>
-            <h3 style={columnTitleStyle}>Taking</h3>
-            {taking.length === 0 ? (
-              <p style={emptyStyle}>Nothing selected</p>
-            ) : (
-              taking.map((stack) => (
-                <button
-                  key={stack.itemId}
-                  type="button"
-                  style={itemBtnTakingStyle}
-                  onClick={() => moveToChest(stack.itemId)}
-                  title={`Return ${labelFor(stack.itemId)}`}
-                >
-                  <span style={itemLabelStyle}>{labelFor(stack.itemId)}</span>
-                  <span style={qtyStyle}>x{stack.quantity}</span>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
+          </>
+        )}
 
         <div style={actionsStyle}>
-          <button type="button" style={confirmBtnStyle} onClick={handleConfirm}>
-            Confirm
+          <button
+            type="button"
+            style={confirmBtnStyle}
+            onClick={handleClaim}
+            disabled={nonce === null}
+          >
+            Claim
           </button>
-          <button type="button" style={cancelBtnStyle} onClick={handleCancel}>
-            Cancel
+          <button type="button" style={cancelBtnStyle} onClick={handleClose}>
+            Close
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  Pure helpers                                                       */
-/* ------------------------------------------------------------------ */
-
-function addStack(list: InventoryStack[], itemId: string, qty: number): InventoryStack[] {
-  const copy = list.map((s) => ({ ...s }));
-  const existing = copy.find((s) => s.itemId === itemId);
-  if (existing) {
-    existing.quantity += qty;
-  } else {
-    copy.push({ itemId, quantity: qty });
-  }
-  return copy;
-}
-
-function removeStack(list: InventoryStack[], itemId: string, qty: number): InventoryStack[] {
-  return list
-    .map((s) => (s.itemId === itemId ? { ...s, quantity: s.quantity - qty } : { ...s }))
-    .filter((s) => s.quantity > 0);
-}
-
-function computeRemaining(
-  original: InventoryStack[],
-  taken: InventoryStack[]
-): InventoryStack[] {
-  const result = original.map((s) => ({ ...s }));
-  for (const t of taken) {
-    const entry = result.find((s) => s.itemId === t.itemId);
-    if (entry) {
-      entry.quantity = Math.max(0, entry.quantity - t.quantity);
-    }
-  }
-  return result.filter((s) => s.quantity > 0);
-}
-
-/* ------------------------------------------------------------------ */
-/*  Styles                                                             */
-/* ------------------------------------------------------------------ */
 
 const backdropStyle: CSSProperties = {
   position: "fixed",
@@ -201,19 +120,8 @@ const titleStyle: CSSProperties = {
   textAlign: "center"
 };
 
-const columnsStyle: CSSProperties = {
-  display: "flex",
-  gap: 16,
-  marginBottom: 20
-};
-
-const columnStyle: CSSProperties = {
-  flex: 1,
-  minHeight: 120,
-  padding: 10,
-  background: "rgba(30, 41, 59, 0.6)",
-  borderRadius: 10,
-  border: "1px solid #334155"
+const sectionStyle: CSSProperties = {
+  marginBottom: 16
 };
 
 const columnTitleStyle: CSSProperties = {
@@ -225,41 +133,27 @@ const columnTitleStyle: CSSProperties = {
   letterSpacing: "0.06em"
 };
 
-const emptyStyle: CSSProperties = {
-  fontSize: 13,
-  color: "#64748b",
-  textAlign: "center",
-  marginTop: 20
+const listStyle: CSSProperties = {
+  listStyle: "none",
+  margin: 0,
+  padding: 0
 };
 
-const itemBtnBase: CSSProperties = {
+const itemRowStyle: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  width: "100%",
   padding: "8px 10px",
   marginBottom: 4,
+  background: "rgba(30, 41, 59, 0.7)",
   border: "1px solid #475569",
   borderRadius: 6,
-  cursor: "pointer",
   fontSize: 13
 };
 
-const itemBtnStyle: CSSProperties = {
-  ...itemBtnBase,
-  background: "rgba(30, 41, 59, 0.7)",
-  color: "#e2e8f0"
-};
-
-const itemBtnTakingStyle: CSSProperties = {
-  ...itemBtnBase,
-  background: "rgba(163, 230, 53, 0.12)",
-  border: "1px solid #65a30d",
-  color: "#a3e635"
-};
-
 const itemLabelStyle: CSSProperties = {
-  fontWeight: 600
+  fontWeight: 600,
+  color: "#e2e8f0"
 };
 
 const qtyStyle: CSSProperties = {
@@ -267,10 +161,18 @@ const qtyStyle: CSSProperties = {
   fontWeight: 400
 };
 
+const emptyStyle: CSSProperties = {
+  fontSize: 13,
+  color: "#64748b",
+  textAlign: "center",
+  marginTop: 20
+};
+
 const actionsStyle: CSSProperties = {
   display: "flex",
   gap: 10,
-  justifyContent: "center"
+  justifyContent: "center",
+  marginTop: 20
 };
 
 const confirmBtnStyle: CSSProperties = {

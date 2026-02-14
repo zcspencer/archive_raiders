@@ -12,7 +12,7 @@ alwaysApply: false
 
 ## Scene Hierarchy
 
-- `GridMapScene` (abstract base): map rendering, entity spawning, grid movement, interaction, camera follow.
+- `GridMapScene` (abstract base): map rendering, entity spawning, grid movement, interaction, camera follow, equipped item sprite sync.
 - `VillageScene extends GridMapScene`: adds `RemotePlayersController` for multiplayer.
 - `EldersHouseScene extends GridMapScene`: interior scene, no multiplayer.
 
@@ -20,28 +20,29 @@ alwaysApply: false
 
 | System | Responsibility |
 |--------|---------------|
-| `GameplayInput` | WASD + X key bindings; blocks when form/dialogue/chest active |
+| `GameplayInput` | WASD + X key bindings; blocks when form/dialogue/container active |
 | `gridMovement` | Tile-by-tile movement with tweens and collision checks |
-| `InteractionHandler` | Routes X-press to NPC dialogue, chest open, or door transition |
+| `InteractionHandler` | Routes X-press to NPC dialogue, container open, or door transition |
 | `interactionDetection` | Finds adjacent entity player is facing (NPCs prioritized) |
-| `RemotePlayersController` | Diffs Colyseus room state to create/update/remove remote sprites |
+| `RemotePlayersController` | Diffs Colyseus room state; creates/updates/removes remote sprites + equipment placeholders |
 
 ## Entities (`game/entities/`)
 
 - `Npc`: name label, "X to talk" prompt, `isPlayerAdjacent()`, `isPlayerFacing()`.
 - `InteractableObject`: kind-based (chest, door, artifact, sign), colored by kind, prompt label.
 
+## Rendering (`game/rendering/`)
+
+All textures are procedurally generated (no external art assets yet):
+- `tileRenderer.ts`: colored tile atlas from tile IDs.
+- `playerSprite.ts`: 4-direction spritesheet with walk animations. `animKeyForFacing()`, `idleFrameForFacing()`.
+- `equippedItemSprite.ts`: `EquippedItemSpriteController` — manages child placeholder rectangles for hand/head equipment. Uses `EQUIPMENT_ANCHORS` from `@odyssey/shared` for offset/depth per facing direction. `sync()` called each frame from `updatePlayerAnimation()`.
+
 ## Map Pipeline
 
 Tiled JSON (`content/maps/`) -> `TileMapManager.parseMap()` -> `ParsedMap` -> Phaser registry.
 `ParsedMap` contains: ground tiles, collision grid, NPC placements, object placements, spawn point.
 
-## Rendering
-
-All textures are procedurally generated (no external art assets yet):
-- `tileRenderer.ts`: colored tile atlas from tile IDs.
-- `playerSprite.ts`: 4-direction spritesheet with walk animations.
-
 ## Input Blocking
 
-`GameplayInput.isBlocked()` checks: form focus (`formFocus.ts`), dialogue open, chest open, input mode.
+`GameplayInput.isBlocked()` checks: form focus (`formFocus.ts`), dialogue open, container open, input mode.
