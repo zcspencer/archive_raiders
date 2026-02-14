@@ -1,0 +1,44 @@
+/* Global reset – fill viewport for fullscreen canvas */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111827;
+  color: #f9fafb;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+#game-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#game-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#ui-root {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Allow pointer events on direct children of ui-root */
+#ui-root > * {
+  pointer-events: auto;
+}

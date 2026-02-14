@@ -13,6 +13,8 @@ function stubNpc(npcId: string, gx: number, gy: number) {
       Math.abs(px - gx) + Math.abs(py - gy) === 1,
     body: {} as never,
     label: {} as never,
+    prompt: {} as never,
+    setInteractionPromptVisible: () => {},
     destroy: () => {}
   };
 }
@@ -25,8 +27,12 @@ function stubObject(objectId: string, kind: string, gx: number, gy: number) {
     gridY: gy,
     isPlayerFacing: (px: number, py: number, fx: number, fy: number) =>
       px + fx === gx && py + fy === gy,
+    isPlayerAdjacent: (px: number, py: number) =>
+      Math.abs(px - gx) + Math.abs(py - gy) === 1,
     body: {} as never,
     label: {} as never,
+    prompt: {} as never,
+    setInteractionPromptVisible: () => {},
     destroy: () => {}
   };
 }

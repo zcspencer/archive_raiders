@@ -8,14 +8,30 @@ const KIND_COLORS: Record<string, number> = {
   sign: 0x94a3b8
 };
 
+/** Default prompt text per object kind. */
+const KIND_PROMPTS: Record<string, string> = {
+  chest: "X to open",
+  door: "X to enter",
+  artifact: "X to examine",
+  sign: "X to read"
+};
+
 const LABEL_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontSize: "10px",
   color: "#ffffff",
   align: "center"
 };
 
+const PROMPT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontSize: "11px",
+  color: "#a3e635",
+  align: "center",
+  fontStyle: "bold"
+};
+
 /**
- * An interactable object placed on the village map (chest, door, artifact, sign).
+ * An interactable object placed on a map (chest, door, artifact, sign).
+ * Shows a proximity prompt when the player is adjacent.
  */
 export class InteractableObject {
   readonly objectId: string;
@@ -24,6 +40,7 @@ export class InteractableObject {
   readonly gridY: number;
   readonly body: Phaser.GameObjects.Rectangle;
   readonly label: Phaser.GameObjects.Text;
+  readonly prompt: Phaser.GameObjects.Text;
 
   constructor(
     scene: Phaser.Scene,
@@ -48,6 +65,27 @@ export class InteractableObject {
     this.label = scene.add.text(worldX, worldY - 16, labelText, LABEL_STYLE);
     this.label.setOrigin(0.5, 1);
     this.label.setDepth(2);
+
+    const promptText = KIND_PROMPTS[kind] ?? "X to interact";
+    this.prompt = scene.add.text(worldX, worldY - 30, promptText, PROMPT_STYLE);
+    this.prompt.setOrigin(0.5, 1);
+    this.prompt.setDepth(2);
+    this.prompt.setVisible(false);
+  }
+
+  /** Shows or hides the interaction prompt. */
+  setInteractionPromptVisible(visible: boolean): void {
+    this.prompt.setVisible(visible);
+  }
+
+  /**
+   * Returns true if the player at (px, py) is adjacent to this object
+   * (within one tile in any cardinal direction).
+   */
+  isPlayerAdjacent(px: number, py: number): boolean {
+    const dx = Math.abs(px - this.gridX);
+    const dy = Math.abs(py - this.gridY);
+    return (dx + dy) === 1;
   }
 
   /**
@@ -62,5 +100,6 @@ export class InteractableObject {
   destroy(): void {
     this.body.destroy();
     this.label.destroy();
+    this.prompt.destroy();
   }
 }

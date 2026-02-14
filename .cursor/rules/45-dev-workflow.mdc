@@ -1,0 +1,45 @@
+---
+description: Development commands, ports, Docker, and quality gates
+alwaysApply: true
+---
+
+# Dev Workflow
+
+## Commands
+
+| Task | Command |
+|------|---------|
+| All dev servers | `pnpm dev` |
+| Single package | `pnpm --filter @odyssey/client dev` |
+| Typecheck all | `pnpm typecheck` |
+| Lint all | `pnpm lint` |
+| Test all | `pnpm test` |
+| Build all | `pnpm build` |
+| Validate content | `pnpm content:validate` |
+| Format code | `pnpm format` |
+
+## Ports
+
+| Service | Port |
+|---------|------|
+| Client (Vite) | 5173 |
+| Admin (Vite) | 5174 |
+| Server (Fastify) | 3000 |
+| PostgreSQL | 5432 |
+| Redis | 6379 |
+
+## Docker (dev infrastructure)
+
+`docker compose up -d` starts postgres (odyssey_dev/odyssey/dev_password) and redis.
+
+## Quality Gate (run before committing)
+
+```sh
+pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm content:validate
+```
+
+## Known Sandbox Issues
+
+- `pnpm content:validate` uses `tsx` which fails inside Cursor sandbox with IPC EPERM.
+  Run it outside sandbox or with `required_permissions: ["all"]`.
+- Integration tests require `TEST_DATABASE_URL` env var; they skip when absent.

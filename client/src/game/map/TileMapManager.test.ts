@@ -74,10 +74,11 @@ describe("parseMap", () => {
     expect(result.groundData).toEqual([1, 1, 1, 1, 2, 1, 1, 1, 1]);
   });
 
-  it("builds a collision grid", () => {
+  it("builds a collision grid with NPC and object tiles blocked", () => {
     const result = parseMap(MINIMAL_MAP);
-    expect(result.collisionGrid.isWalkable(1, 1)).toBe(true);
     expect(result.collisionGrid.isWalkable(0, 0)).toBe(false);
+    expect(result.collisionGrid.isWalkable(1, 1)).toBe(false);
+    expect(result.collisionGrid.isWalkable(2, 2)).toBe(false);
   });
 
   it("extracts NPC placements from object layer", () => {

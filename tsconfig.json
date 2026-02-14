@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./client" },
+    { "path": "./admin" },
+    { "path": "./server" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/task-validators" }
+  ]
+}

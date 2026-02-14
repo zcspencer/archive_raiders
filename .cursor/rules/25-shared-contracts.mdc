@@ -1,0 +1,45 @@
+---
+description: Index of shared types, validators, and constants exported from packages/shared
+globs: packages/shared/src/**
+alwaysApply: false
+---
+
+# Shared Contracts Index
+
+All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
+
+## Type Modules (`src/types/`)
+
+| File | Key Exports |
+|------|-------------|
+| `auth.ts` | `AuthUser`, `RegisterRequest`, `LoginRequest` |
+| `classroom.ts` | `Classroom`, `ClassroomMembership` |
+| `player.ts` | `PlayerProfile` |
+| `task.ts` | `TaskDefinition`, `TaskAnswer`, `TaskResult` |
+| `messages.ts` | `ClientMessage`, `ServerMessage` enums |
+| `interaction.ts` | `MovePayload`, `InteractPayload` |
+| `tool.ts` | `ToolId`, `ToolActionType` |
+| `inventory.ts` | Inventory item types |
+| `resource.ts` | `PlayerResourceState` |
+| `npc.ts` | `NpcDefinition`, `DialogueLine` |
+| `map.ts` | `TiledMapData`, `MapNpcPlacement` |
+
+## Zod Validators (`src/validators/`)
+
+One `*.schema.ts` per type module. Named `<type>Schema` (e.g. `registerRequestSchema`).
+
+## Constants (`src/constants/game.ts`)
+
+`TILE_SIZE`, `PLAYER_MOVE_SPEED`, and other gameplay tuning values.
+
+## Utilities (`src/utils/rng.ts`)
+
+Seeded RNG for deterministic randomness.
+
+## Stable Contracts (do not break)
+
+- `TaskDefinition` and `TaskResult` shapes
+- `NpcDefinition` and `DialogueLine` shapes
+- `TiledMapData` and layer schemas
+- `ClientMessage` / `ServerMessage` enums
+- Task validator function signature

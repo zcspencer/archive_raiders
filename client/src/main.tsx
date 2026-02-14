@@ -1,9 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { bootGame } from "./game/bootstrap";
+import "./index.css";
 import { App } from "./ui/App";
-
-bootGame();
 
 const rootElement = document.getElementById("ui-root");
 

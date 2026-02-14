@@ -7,6 +7,12 @@ const NPC_LABEL_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   color: "#ffffff",
   align: "center"
 };
+const PROMPT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontSize: "11px",
+  color: "#a3e635",
+  align: "center",
+  fontStyle: "bold"
+};
 
 /**
  * An NPC placed on the village map.
@@ -18,6 +24,7 @@ export class Npc {
   readonly gridY: number;
   readonly body: Phaser.GameObjects.Ellipse;
   readonly label: Phaser.GameObjects.Text;
+  readonly prompt: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene, npcId: string, gridX: number, gridY: number, displayName: string) {
     this.npcId = npcId;
@@ -33,6 +40,16 @@ export class Npc {
     this.label = scene.add.text(worldX, worldY - 18, displayName, NPC_LABEL_STYLE);
     this.label.setOrigin(0.5, 1);
     this.label.setDepth(2);
+
+    this.prompt = scene.add.text(worldX, worldY - 36, "X to talk", PROMPT_STYLE);
+    this.prompt.setOrigin(0.5, 1);
+    this.prompt.setDepth(2);
+    this.prompt.setVisible(false);
+  }
+
+  /** Shows or hides the interaction prompt based on player adjacency. */
+  setInteractionPromptVisible(visible: boolean): void {
+    this.prompt.setVisible(visible);
   }
 
   /**
@@ -57,5 +74,6 @@ export class Npc {
   destroy(): void {
     this.body.destroy();
     this.label.destroy();
+    this.prompt.destroy();
   }
 }

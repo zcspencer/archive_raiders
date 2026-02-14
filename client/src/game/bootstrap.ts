@@ -12,3 +12,13 @@ export function bootGame(): Phaser.Game {
   }
   return gameInstance;
 }
+
+/**
+ * Destroys the Phaser game instance so it can be re-created later.
+ */
+export function destroyGame(): void {
+  if (gameInstance) {
+    gameInstance.destroy(true);
+    gameInstance = null;
+  }
+}

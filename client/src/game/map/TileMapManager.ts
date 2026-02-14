@@ -32,11 +32,11 @@ export function parseMap(data: TiledMapData): ParsedMap {
   const objectsLayer = findLayer(data.layers, "objects", "objectgroup");
 
   const groundData = groundLayer?.data ?? [];
-  const collisionData = collisionLayer?.data ?? new Array(data.width * data.height).fill(1);
-  const collisionGrid = new CollisionGrid(data.width, data.height, collisionData);
+  const collisionData = [...(collisionLayer?.data ?? new Array(data.width * data.height).fill(1))];
 
   const npcs: MapNpcPlacement[] = [];
   const objects: MapObjectPlacement[] = [];
+  const blockedTiles: Array<{ gx: number; gy: number }> = [];
   let playerSpawn = { gridX: 8, gridY: 9 };
 
   for (const obj of objectsLayer?.objects ?? []) {
@@ -45,6 +45,7 @@ export function parseMap(data: TiledMapData): ParsedMap {
 
     if (obj.type === "npc") {
       npcs.push({ npcId: getProp(obj, "npcId", obj.name), gridX: gx, gridY: gy });
+      blockedTiles.push({ gx, gy });
     } else if (obj.type === "interactable") {
       objects.push({
         objectId: getProp(obj, "objectId", obj.name),
@@ -53,10 +54,19 @@ export function parseMap(data: TiledMapData): ParsedMap {
         gridX: gx,
         gridY: gy
       });
+      blockedTiles.push({ gx, gy });
     } else if (obj.type === "spawn") {
       playerSpawn = { gridX: gx, gridY: gy };
     }
   }
+
+  for (const { gx, gy } of blockedTiles) {
+    if (gx >= 0 && gx < data.width && gy >= 0 && gy < data.height) {
+      collisionData[gy * data.width + gx] = 1;
+    }
+  }
+
+  const collisionGrid = new CollisionGrid(data.width, data.height, collisionData);
 
   return {
     width: data.width,

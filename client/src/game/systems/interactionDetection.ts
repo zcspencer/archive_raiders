@@ -10,8 +10,9 @@ export type InteractionTarget =
   | null;
 
 /**
- * Checks all NPCs and interactable objects to find the one the player
- * is currently facing. Returns the first match or null.
+ * Checks NPCs and interactable objects for interaction. For NPCs: returns
+ * the one the player is facing, or the first adjacent NPC if none are faced.
+ * For objects: requires the player to be facing the object.
  *
  * @param npcs    - Active NPC list.
  * @param objects - Active interactable object list.
@@ -30,6 +31,12 @@ export function findInteractionTarget(
 ): InteractionTarget {
   for (const npc of npcs) {
     if (npc.isPlayerFacing(px, py, fx, fy)) {
+      return { type: "npc", entity: npc };
+    }
+  }
+
+  for (const npc of npcs) {
+    if (npc.isPlayerAdjacent(px, py)) {
       return { type: "npc", entity: npc };
     }
   }

@@ -1,13 +1,42 @@
 ---
-description: Server and API architecture constraints
+description: Server architecture, services, middleware, and DB patterns
 globs: server/src/**/*.ts
 alwaysApply: false
 ---
 
 # Server Architecture
 
+## Principles
+
 - Keep route handlers thin; delegate logic to services.
 - Services should be pure-ish and unit testable.
 - Enforce classroom scoping and role checks in server code.
 - Keep Colyseus room handlers lightweight and non-blocking.
 - Task validation must remain authoritative server-side.
+
+## Route Files (`api/routes/`)
+
+- `auth.ts` — `POST /auth/register`, `POST /auth/login`.
+- `classroom.ts` — CRUD + `POST /classrooms/:id/memberships` (teacher-only enrollment).
+- `task.ts` — `POST /tasks/:taskId/submit` (authenticated, classroom-scoped).
+
+## Middleware (`api/middleware/`)
+
+- `auth.ts` — Bearer JWT validation, attaches `authUser` to request.
+- `role.ts` — `requireRole("teacher")` / `requireRole("student")`.
+
+## Services
+
+- `AuthService` — scrypt password hashing, JWT issue/verify, user lookup.
+- `ClassroomService` — create, list, enroll; membership-based visibility for students.
+- `TaskService` — loads task JSON from `content/`, executes validator from registry.
+
+## Database (`db/postgres.ts`)
+
+Bootstrap migration creates: `app_users`, `classrooms`, `classroom_memberships`.
+No dedicated migration tooling yet — SQL runs in `PostgresDatabase.migrate()`.
+
+## Colyseus Integration
+
+Fastify + Colyseus share the same HTTP server in `index.ts`.
+Room `"shard"` registered via `gameServer.define()`. See `22-colyseus-patterns` for details.

@@ -10,11 +10,12 @@ interface TileCursor {
 
 interface PlayerControlState {
   inputMode: InputMode;
+  inventoryOpen: boolean;
   selectedHotbarSlot: number;
   equippedToolId: ToolId;
   cursorTile: TileCursor;
   setInputMode: (mode: InputMode) => void;
-  toggleInventoryMode: () => void;
+  toggleInventory: () => void;
   setSelectedHotbarSlot: (slotIndex: number) => void;
   setCursorTile: (gridX: number, gridY: number) => void;
 }
@@ -26,12 +27,19 @@ const HOTBAR_TOOL_MAP: readonly ToolId[] = ["axe", "watering_can", "seeds"];
  */
 export const usePlayerControlStore = create<PlayerControlState>((set) => ({
   inputMode: "game",
+  inventoryOpen: false,
   selectedHotbarSlot: 0,
   equippedToolId: "axe",
   cursorTile: { gridX: 0, gridY: 0 },
   setInputMode: (inputMode): void => set({ inputMode }),
-  toggleInventoryMode: (): void =>
-    set((state) => ({ inputMode: state.inputMode === "game" ? "ui" : "game" })),
+  toggleInventory: (): void =>
+    set((state) => {
+      const nextOpen = !state.inventoryOpen;
+      return {
+        inventoryOpen: nextOpen,
+        inputMode: nextOpen ? "ui" : "game"
+      };
+    }),
   setSelectedHotbarSlot: (slotIndex): void =>
     set({
       selectedHotbarSlot: slotIndex,

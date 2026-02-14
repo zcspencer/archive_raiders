@@ -1,13 +1,42 @@
 ---
-description: Phaser and React client separation patterns
+description: Client architecture, screen flow, API layer, and UI components
 globs: client/src/**/*.{ts,tsx}
 alwaysApply: false
 ---
 
 # Client Architecture
 
+## Principles
+
 - Phaser handles world rendering and movement only.
 - React handles HUD, menus, and task overlays.
-- Bridge via typed events and store actions, not direct coupling.
+- Bridge via Zustand stores, not direct Phaser-React coupling.
 - Keep task components self-contained and typed by task definition.
 - Never trust client validation for authoritative outcomes.
+
+## DOM Roots (`client/index.html`)
+
+- `#game-container` — Phaser canvas (managed by `bootstrap.ts`).
+- `#ui-root` — React root (mounted by `main.tsx`).
+
+## Screen Flow (React)
+
+`LoginScreen` -> `RegisterScreen` (toggle) -> `ClassroomPickerScreen` -> `GameScreen`.
+`GameScreen` calls `bootGame()` on mount, `destroyGame()` on unmount.
+
+## API Layer (`src/api/`)
+
+- `client.ts` — base fetch wrapper with auth header injection.
+- `auth.ts` — login/register calls.
+- `classrooms.ts` — list/select classroom calls.
+
+## Overlay Components (`src/ui/components/`)
+
+- `DialogueBox` — bottom-center NPC dialogue, advances on X/Enter/Space.
+- `InventoryPanel` — modal grid toggled by I key.
+- `ChestTransferPanel` — two-column chest/player transfer UI.
+- `Toolbar` — bottom-center hotbar (9 slots, keys 1-9).
+
+## Keyboard Shortcuts
+
+WASD (move), X (interact), I (inventory), 1-9 (hotbar), Escape (close panels).
