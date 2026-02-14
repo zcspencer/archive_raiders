@@ -1,0 +1,9 @@
+{
+  "id": "blacksmith",
+  "displayName": "Forgemaster Dain",
+  "dialogueLines": [
+    { "speaker": "Forgemaster Dain", "text": "Need something repaired? You've come to the right place." },
+    { "speaker": "Forgemaster Dain", "text": "Bring me materials from the archives and I can upgrade your tools." },
+    { "speaker": "Forgemaster Dain", "text": "Good luck out there, raider." }
+  ]
+}

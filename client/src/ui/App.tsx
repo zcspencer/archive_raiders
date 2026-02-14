@@ -6,8 +6,10 @@ import { useGameRoomBridgeStore } from "../store/gameRoomBridge";
 import { useAuthStore } from "../store/auth";
 import { useClassroomStore } from "../store/classroom";
 import { usePlayerControlStore } from "../store/playerControl";
+import { useDialogueStore } from "../store/dialogue";
 import { LoginScreen } from "./screens/LoginScreen";
 import { RegisterScreen } from "./screens/RegisterScreen";
+import { DialogueBox } from "./components/DialogueBox";
 
 export function App(): ReactElement {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -25,6 +27,7 @@ export function App(): ReactElement {
   const toggleInventoryMode = usePlayerControlStore((state) => state.toggleInventoryMode);
   const setInputMode = usePlayerControlStore((state) => state.setInputMode);
   const setSelectedHotbarSlot = usePlayerControlStore((state) => state.setSelectedHotbarSlot);
+  const dialogueActive = useDialogueStore((state) => state.isActive);
   const roomConnection = useColyseusRoom({
     accessToken,
     classroomId: selectedClassroomId
@@ -33,6 +36,13 @@ export function App(): ReactElement {
   useEffect(() => {
     setInputMode(user ? "game" : "ui");
   }, [setInputMode, user]);
+
+  /* Restore game input mode when dialogue closes. */
+  useEffect(() => {
+    if (!dialogueActive && user) {
+      setInputMode("game");
+    }
+  }, [dialogueActive, setInputMode, user]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -123,6 +133,7 @@ export function App(): ReactElement {
   }
 
   return (
+    <>
     <div
       style={{
         position: "absolute",
@@ -179,6 +190,8 @@ export function App(): ReactElement {
         Sign out
       </button>
     </div>
+    <DialogueBox />
+    </>
   );
 }
 

@@ -2,6 +2,14 @@ import { describe, expect, it } from "vitest";
 import { diffRemotePlayers, readPlayerSnapshots } from "./roomState.js";
 
 describe("readPlayerSnapshots", () => {
+  it("returns empty array when room is null", () => {
+    expect(readPlayerSnapshots(null)).toEqual([]);
+  });
+
+  it("returns empty array when room is undefined", () => {
+    expect(readPlayerSnapshots(undefined)).toEqual([]);
+  });
+
   it("reads player snapshots from map-like room state", () => {
     const players = new Map<string, { gridX: number; gridY: number }>([
       ["a", { gridX: 1, gridY: 2 }],

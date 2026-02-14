@@ -287,3 +287,73 @@ Each agent should append:
     2. reduce client bundle size via code-splitting/manual chunks
     3. add task-definition indexing/cache in `TaskService`
     4. replace bootstrap SQL migrations with dedicated migration tooling
+
+## Agent 6 - Batch 3 tile maps + village world
+
+- Scope completed
+  - Added shared NPC, dialogue, and map types with Zod schemas to `packages/shared`.
+  - Created NPC dialogue content files (`village_elder.json`, `blacksmith.json`) in `content/npcs/`.
+  - Created a 24x18 Tiled-format village map (`content/maps/village.json`) with ground, collision, and objects layers.
+  - Implemented `TileMapManager` (pure parser), `CollisionGrid`, and `tileRenderer` (runtime tileset generation) in `client/src/game/map/`.
+  - Implemented `GridMovement` system with tile-by-tile movement, collision checking, and smooth tween interpolation.
+  - Generated a 4-direction player spritesheet at runtime using Phaser Graphics in `client/src/game/rendering/playerSprite.ts`.
+  - Created `Npc` and `InteractableObject` entity classes with facing/adjacency detection.
+  - Created `interactionDetection` system to find entities the player is facing.
+  - Created `dialogueStore` (Zustand) bridging Phaser interaction events with React overlay.
+  - Created `DialogueBox` React component with speaker name, text, next/close controls, and keyboard handling.
+  - Implemented NPC dialogue loader with static JSON imports and Zod validation.
+  - Created `VillageScene` integrating all systems: map rendering, grid movement, NPC/object spawning, interaction, remote player sync.
+  - Refactored `BootScene` to preload-only (loads map data, transitions to VillageScene).
+  - Wired `DialogueBox` into `App.tsx` with input mode switching on dialogue open/close.
+  - Added tests for `CollisionGrid`, `TileMapManager`, `interactionDetection`, and `dialogueStore`.
+- Files changed
+  - `packages/shared/src/types/npc.ts`
+  - `packages/shared/src/types/map.ts`
+  - `packages/shared/src/validators/npc.schema.ts`
+  - `packages/shared/src/index.ts`
+  - `content/npcs/village_elder.json`
+  - `content/npcs/blacksmith.json`
+  - `content/maps/village.json`
+  - `client/src/game/map/TileMapManager.ts`
+  - `client/src/game/map/TileMapManager.test.ts`
+  - `client/src/game/map/collisionGrid.ts`
+  - `client/src/game/map/collisionGrid.test.ts`
+  - `client/src/game/map/tileRenderer.ts`
+  - `client/src/game/systems/gridMovement.ts`
+  - `client/src/game/systems/interactionDetection.ts`
+  - `client/src/game/systems/interactionDetection.test.ts`
+  - `client/src/game/rendering/playerSprite.ts`
+  - `client/src/game/entities/Npc.ts`
+  - `client/src/game/entities/InteractableObject.ts`
+  - `client/src/game/content/npcDialogue.ts`
+  - `client/src/game/scenes/BootScene.ts`
+  - `client/src/game/scenes/VillageScene.ts`
+  - `client/src/game/config.ts`
+  - `client/src/store/dialogue.ts`
+  - `client/src/store/dialogue.test.ts`
+  - `client/src/ui/components/DialogueBox.tsx`
+  - `client/src/ui/App.tsx`
+  - `client/vite.config.ts`
+  - `client/tsconfig.json`
+  - `docs/batches/batch-3.md`
+  - `docs/implementation-roadmap.md`
+  - `docs/handoff.md`
+- Commands run and outcomes
+  - `pnpm install` -> pass.
+  - `pnpm --filter @odyssey/shared build` -> pass.
+  - `pnpm --filter @odyssey/client typecheck` -> failed initially on `@content` path alias resolution; pass after switching to relative imports.
+  - `pnpm --filter @odyssey/client test` -> pass (32 tests including 23 new).
+  - `pnpm --filter @odyssey/client build` -> failed initially on `@content` Rollup resolution; pass after switching to relative imports.
+  - `pnpm typecheck && pnpm lint && pnpm test && pnpm build` -> pass (96 tests passed, 10 integration skipped).
+- Known risks/blockers
+  - Collision is client-side only; server still uses simple bounds clamping. Future batch should add server-side map collision.
+  - Runtime-generated textures are placeholder quality; real art assets should replace them.
+  - Interactable objects log to console only; real behavior (loot, transitions) not yet implemented.
+  - NPC dialogue is static; no branching, conditions, or server-side state.
+  - Client build chunk-size warning remains non-blocking.
+- Next recommended task
+  - Agent 7 should:
+    1. Add server-side collision validation using the village map collision data.
+    2. Implement NPC-triggered tasks (face NPC + interact -> server sends task trigger -> client opens task overlay).
+    3. Add interactable object behavior (chest loot tables, door scene transitions).
+    4. Replace runtime-generated textures with real tileset and character sprite art.

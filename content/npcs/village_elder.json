@@ -1,0 +1,10 @@
+{
+  "id": "village_elder",
+  "displayName": "Elder Mira",
+  "dialogueLines": [
+    { "speaker": "Elder Mira", "text": "Welcome to Archive Village, young explorer!" },
+    { "speaker": "Elder Mira", "text": "This place holds many secrets from the old world." },
+    { "speaker": "Elder Mira", "text": "Search the ruins, talk to the villagers, and piece together what was lost." },
+    { "speaker": "Elder Mira", "text": "Be careful out there. The archives can be tricky!" }
+  ]
+}

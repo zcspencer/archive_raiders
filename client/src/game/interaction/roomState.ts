@@ -23,6 +23,9 @@ interface DiffResult {
  * Reads player snapshots from the current room state shape.
  */
 export function readPlayerSnapshots(room: unknown): PlayerSnapshot[] {
+  if (!room) {
+    return [];
+  }
   const maybeRoom = room as RoomLike;
   const players = maybeRoom.state?.players;
   if (!players) {
