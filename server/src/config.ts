@@ -9,7 +9,8 @@ const envSchema = z.object({
     .url()
     .default("postgresql://odyssey:dev_password@localhost:5432/odyssey_dev"),
   JWT_SECRET: z.string().min(8).default("odyssey-local-dev-secret"),
-  JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600)
+  JWT_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  CONTENT_DIR: z.string().default("content")
 });
 
 export interface AppConfig extends z.infer<typeof envSchema> {

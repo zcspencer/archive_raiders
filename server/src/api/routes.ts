@@ -1,14 +1,17 @@
 import type { FastifyInstance } from "fastify";
 import type { AuthService } from "../auth/AuthService.js";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
+import type { TaskService } from "../task/TaskService.js";
 import { buildAuthenticatePreHandler } from "./middleware/auth.js";
 import { requireRole } from "./middleware/role.js";
 import { registerAuthRoutes } from "./routes/auth.js";
 import { registerClassroomRoutes } from "./routes/classroom.js";
+import { registerTaskRoutes } from "./routes/task.js";
 
 interface RouteServices {
   authService: AuthService;
   classroomService: ClassroomService;
+  taskService: TaskService;
 }
 
 /**
@@ -30,4 +33,5 @@ export async function registerRoutes(
     authenticate,
     requireTeacher
   );
+  await registerTaskRoutes(app, services.taskService, authenticate);
 }

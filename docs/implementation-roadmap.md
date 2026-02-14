@@ -28,8 +28,7 @@ This roadmap is the handoff source of truth for future agents.
 
 ## Immediate next steps (Post Batch 2)
 
-1. Add DB integration tests against a real Postgres service for auth/classroom flows.
-2. Connect client to Colyseus room join flow after authenticated classroom selection.
-3. Implement task submission REST endpoints and wire validator execution server-side.
-4. Add Dockerfiles for client/server/admin development images.
-5. Reduce client production bundle size (code-splitting/manual chunks).
+1. Add Dockerfiles for client/server/admin development images.
+2. Reduce client production bundle size (code-splitting/manual chunks).
+3. Add task-definition indexing/cache to avoid per-submission recursive JSON scans.
+4. Replace bootstrap SQL migrations with dedicated migration tooling.

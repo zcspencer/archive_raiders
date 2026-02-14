@@ -1,8 +1,11 @@
 import {
   classroomListSchema,
+  classroomMembershipSchema,
   classroomSchema,
+  createClassroomMembershipRequestSchema,
   createClassroomRequestSchema,
-  type Classroom
+  type Classroom,
+  type ClassroomMembership
 } from "@odyssey/shared";
 import { requestJson } from "./client";
 
@@ -31,4 +34,24 @@ export async function createClassroom(
     accessToken
   );
   return classroomSchema.parse(response);
+}
+
+/**
+ * Enrolls a student by email into a teacher-owned classroom.
+ */
+export async function addClassroomMembership(
+  accessToken: string,
+  classroomId: string,
+  studentEmail: string
+): Promise<ClassroomMembership> {
+  const payload = createClassroomMembershipRequestSchema.parse({ studentEmail });
+  const response = await requestJson<ClassroomMembership>(
+    `/classrooms/${classroomId}/memberships`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload)
+    },
+    accessToken
+  );
+  return classroomMembershipSchema.parse(response);
 }

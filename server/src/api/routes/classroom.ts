@@ -1,10 +1,17 @@
 import {
   classroomListSchema,
+  classroomMembershipSchema,
   classroomSchema,
+  createClassroomMembershipRequestSchema,
   createClassroomRequestSchema
 } from "@odyssey/shared";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import type { ClassroomService } from "../../classroom/ClassroomService.js";
+import {
+  ClassroomOwnershipError,
+  InvalidMembershipTargetError,
+  StudentNotFoundError,
+  type ClassroomService
+} from "../../classroom/ClassroomService.js";
 
 type AuthPreHandler = (
   request: FastifyRequest,
@@ -73,6 +80,55 @@ export async function registerClassroomRoutes(
         return;
       }
       reply.code(200).send(classroomSchema.parse(classroom));
+    }
+  );
+
+  app.post(
+    "/classrooms/:classroomId/memberships",
+    { preHandler: [authenticate, requireTeacher] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!user) {
+        reply.code(401).send({ error: "Authentication required" });
+        return;
+      }
+
+      const params = request.params as { classroomId?: string };
+      const classroomId = params.classroomId;
+      if (!classroomId) {
+        reply.code(400).send({ error: "Missing classroom id" });
+        return;
+      }
+
+      const parsed = createClassroomMembershipRequestSchema.safeParse(request.body);
+      if (!parsed.success) {
+        reply.code(400).send({ error: "Invalid classroom membership payload" });
+        return;
+      }
+
+      try {
+        const membership = await classroomService.addStudentMembership(
+          user.id,
+          classroomId,
+          parsed.data.studentEmail
+        );
+        reply.code(201).send(classroomMembershipSchema.parse(membership));
+      } catch (error) {
+        if (error instanceof ClassroomOwnershipError) {
+          reply.code(404).send({ error: "Classroom not found" });
+          return;
+        }
+        if (error instanceof StudentNotFoundError) {
+          reply.code(404).send({ error: "Student not found" });
+          return;
+        }
+        if (error instanceof InvalidMembershipTargetError) {
+          reply.code(400).send({ error: "Enrollment target must be a student" });
+          return;
+        }
+
+        throw error;
+      }
     }
   );
 }

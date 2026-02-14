@@ -7,6 +7,7 @@ interface DashboardProps {
   isLoading: boolean;
   errorMessage: string | null;
   onCreateClassroom: (name: string) => Promise<void>;
+  onEnrollStudent: (classroomId: string, studentEmail: string) => Promise<void>;
   onRefresh: () => Promise<void>;
   onLogout: () => void;
 }
@@ -16,11 +17,32 @@ interface DashboardProps {
  */
 export function Dashboard(props: DashboardProps): ReactElement {
   const [classroomName, setClassroomName] = useState("");
+  const [enrollmentEmails, setEnrollmentEmails] = useState<Record<string, string>>({});
+  const [enrollmentMessage, setEnrollmentMessage] = useState<string | null>(null);
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     await props.onCreateClassroom(classroomName);
     setClassroomName("");
+  };
+
+  const handleEnroll = async (
+    event: FormEvent<HTMLFormElement>,
+    classroomId: string
+  ): Promise<void> => {
+    event.preventDefault();
+    const email = enrollmentEmails[classroomId]?.trim() ?? "";
+    if (!email) {
+      setEnrollmentMessage("Student email is required");
+      return;
+    }
+    try {
+      await props.onEnrollStudent(classroomId, email);
+      setEnrollmentEmails((previous) => ({ ...previous, [classroomId]: "" }));
+      setEnrollmentMessage(`Enrolled ${email}`);
+    } catch (error) {
+      setEnrollmentMessage(error instanceof Error ? error.message : "Enrollment failed");
+    }
   };
 
   return (
@@ -49,11 +71,35 @@ export function Dashboard(props: DashboardProps): ReactElement {
         </button>
       </form>
       {props.errorMessage ? <p style={{ color: "#dc2626" }}>{props.errorMessage}</p> : null}
+      {enrollmentMessage ? <p style={{ color: "#0369a1" }}>{enrollmentMessage}</p> : null}
       <h2>Classrooms</h2>
       <ul>
         {props.classrooms.map((classroom) => (
           <li key={classroom.id}>
-            {classroom.name} - {new Date(classroom.createdAt).toLocaleString()}
+            <div>
+              {classroom.name} - {new Date(classroom.createdAt).toLocaleString()}
+            </div>
+            <form
+              onSubmit={(event) => {
+                void handleEnroll(event, classroom.id);
+              }}
+              style={{ display: "flex", gap: 8, marginTop: 4 }}
+            >
+              <input
+                required
+                placeholder="Student email"
+                value={enrollmentEmails[classroom.id] ?? ""}
+                onChange={(event) =>
+                  setEnrollmentEmails((previous) => ({
+                    ...previous,
+                    [classroom.id]: event.target.value
+                  }))
+                }
+              />
+              <button disabled={props.isLoading} type="submit">
+                Add student
+              </button>
+            </form>
           </li>
         ))}
       </ul>

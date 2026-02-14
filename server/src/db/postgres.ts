@@ -33,6 +33,20 @@ export class PostgresDatabase {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS classroom_memberships (
+        classroom_id UUID NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (classroom_id, user_id)
+      );
+    `);
+
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS classroom_memberships_user_id_idx
+      ON classroom_memberships (user_id);
+    `);
   }
 
   /**

@@ -32,7 +32,7 @@ services:
       context: .
       dockerfile: Dockerfile.workspace
     restart: unless-stopped
-    command: sh -c "pnpm --filter @odyssey/shared build && pnpm --filter @odyssey/server dev"
+    command: sh -c "pnpm --filter @odyssey/shared build && pnpm --filter @odyssey/task-validators build && pnpm --filter @odyssey/server dev"
     environment:
       NODE_ENV: development
       PORT: 3000

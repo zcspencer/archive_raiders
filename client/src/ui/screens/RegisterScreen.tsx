@@ -10,6 +10,7 @@ export interface RegisterValues {
 
 interface RegisterScreenProps {
   isLoading: boolean;
+  errorMessage?: string | null;
   onSubmit: (values: RegisterValues) => Promise<void>;
   onSwitchToLogin: () => void;
 }
@@ -83,6 +84,7 @@ export function RegisterScreen(props: RegisterScreenProps): ReactElement {
       <button disabled={props.isLoading} type="button" onClick={props.onSwitchToLogin}>
         Already have an account?
       </button>
+      {props.errorMessage ? <p style={{ color: "#fda4af", margin: 0 }}>{props.errorMessage}</p> : null}
     </form>
   );
 }

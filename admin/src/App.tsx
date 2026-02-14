@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
 import { loginTeacher, registerTeacher } from "./api/auth";
-import { createClassroom, listClassrooms } from "./api/classrooms";
+import { addClassroomMembership, createClassroom, listClassrooms } from "./api/classrooms";
 import { clearSession, loadSession, saveSession } from "./session/authSession";
 import { Dashboard } from "./ui/Dashboard";
 import { LoginScreen } from "./ui/LoginScreen";
@@ -97,6 +97,14 @@ export function App(): ReactElement {
     await refreshClassrooms(accessToken, setClassrooms, setErrorMessage, setIsLoading);
   };
 
+  const handleEnrollStudent = async (classroomId: string, studentEmail: string): Promise<void> => {
+    if (!accessToken) {
+      throw new Error("Authentication required");
+    }
+    await addClassroomMembership(accessToken, classroomId, studentEmail);
+    await refreshClassrooms(accessToken, setClassrooms, setErrorMessage, setIsLoading);
+  };
+
   const handleLogout = (): void => {
     clearSession();
     setAccessToken(null);
@@ -122,6 +130,7 @@ export function App(): ReactElement {
       errorMessage={errorMessage}
       isLoading={isLoading}
       onCreateClassroom={handleCreateClassroom}
+      onEnrollStudent={handleEnrollStudent}
       onLogout={handleLogout}
       onRefresh={handleRefresh}
       user={user}

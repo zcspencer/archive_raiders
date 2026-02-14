@@ -1,5 +1,5 @@
 import type { TaskAnswer, TaskDefinition, TaskResult } from "@odyssey/shared";
-import { validateShortcut } from "./validators/shortcut";
+import { validateShortcut } from "./validators/shortcut.js";
 
 export type ValidatorFn = (
   definition: TaskDefinition,

@@ -198,3 +198,92 @@ Each agent should append:
   - Client build chunk-size warning remains non-blocking.
 - Next recommended task
   - Agent 4 should add DB integration tests and implement task submission REST endpoints with validator execution and classroom scoping.
+
+## Agent 4 - Batch 3 integration tests + room auth + task submission + client join
+
+- Scope completed
+  - Added Postgres integration test suites for `AuthService` and `ClassroomService`, including CI Postgres service wiring and a server integration test script.
+  - Implemented authenticated classroom-scoped Colyseus room joins in `ShardRoom` using server `AuthService` and `ClassroomService`.
+  - Implemented task submission REST flow (`POST /tasks/:taskId/submit`) with `TaskService` loading content definitions and executing validator registry functions.
+  - Implemented client classroom selection and Colyseus `joinOrCreate("shard")` lifecycle hook after authentication.
+  - Fixed NodeNext import/export compatibility gaps in shared/task-validator modules discovered during verification.
+- Files changed
+  - `.github/workflows/ci.yml`
+  - `client/package.json`
+  - `client/src/api/classrooms.ts`
+  - `client/src/hooks/useColyseusRoom.ts`
+  - `client/src/store/classroom.ts`
+  - `client/src/ui/App.tsx`
+  - `docs/handoff.md`
+  - `packages/shared/src/validators/player.schema.ts`
+  - `packages/task-validators/package.json`
+  - `packages/task-validators/src/index.ts`
+  - `packages/task-validators/src/registry.ts`
+  - `server/package.json`
+  - `server/src/api/routes.ts`
+  - `server/src/api/routes/task.test.ts`
+  - `server/src/api/routes/task.ts`
+  - `server/src/auth/AuthService.integration.test.ts`
+  - `server/src/classroom/ClassroomService.integration.test.ts`
+  - `server/src/classroom/ClassroomService.test.ts`
+  - `server/src/classroom/ClassroomService.ts`
+  - `server/src/colyseus/rooms/ShardRoom.ts`
+  - `server/src/config.ts`
+  - `server/src/index.ts`
+  - `server/src/task/TaskService.test.ts`
+  - `server/src/task/TaskService.ts`
+  - `server/src/test/integration.ts`
+  - `pnpm-lock.yaml`
+- Commands run and outcomes
+  - `pnpm install --frozen-lockfile` -> pass.
+  - `pnpm --filter @odyssey/server test` -> pass.
+  - `pnpm --filter @odyssey/server test:integration` -> pass (tests skipped locally because `TEST_DATABASE_URL` not set).
+  - `pnpm install --no-frozen-lockfile` -> failed once due invalid `colyseus.js` version; pass after version correction.
+  - `pnpm typecheck` -> failed initially on task-validator export path issues; pass after NodeNext import/export fixes and package typing updates.
+  - `pnpm lint && pnpm test && pnpm build && pnpm content:validate` -> lint/test/build pass; content validate failed in sandbox due `tsx` IPC `EPERM`.
+  - `pnpm content:validate` (outside sandbox) -> pass.
+- Known risks/blockers
+  - Integration suites currently gate on `TEST_DATABASE_URL`/`DATABASE_URL`; they skip when DB env is absent locally.
+  - Task definition lookup currently scans JSON content recursively per submission; acceptable for baseline but should be indexed/cached at scale.
+  - Client build chunk-size warning remains non-blocking.
+- Next recommended task
+  - Agent 5 should add classroom enrollment/membership modeling (instead of broad student classroom visibility) and enforce it consistently across REST and room auth checks.
+
+## Agent 5 - Classroom membership enforcement + enrollment route
+
+- Scope completed
+  - Added persisted classroom membership schema in PostgreSQL bootstrap migrations.
+  - Enforced membership-based classroom visibility for students in `ClassroomService`.
+  - Added teacher-managed enrollment endpoint `POST /classrooms/:classroomId/memberships`.
+  - Added/updated unit, integration, and route tests for enrolled vs unenrolled behavior.
+  - Updated client overlay with a clear empty enrollment state message.
+  - Updated handoff docs to queue the next infra/perf follow-ups.
+- Files changed
+  - `server/src/db/postgres.ts`
+  - `server/src/test/integration.ts`
+  - `server/src/classroom/ClassroomService.ts`
+  - `server/src/classroom/ClassroomService.test.ts`
+  - `server/src/classroom/ClassroomService.integration.test.ts`
+  - `server/src/api/routes/classroom.ts`
+  - `server/src/api/routes/classroom.test.ts`
+  - `packages/shared/src/types/classroom.ts`
+  - `packages/shared/src/validators/classroom.schema.ts`
+  - `client/src/ui/App.tsx`
+  - `docs/handoff.md`
+  - `docs/implementation-roadmap.md`
+- Commands run and outcomes
+  - `pnpm install` -> pass.
+  - `pnpm --filter @odyssey/shared build` -> pass.
+  - `pnpm --filter @odyssey/server exec vitest run src/api/routes/classroom.test.ts` -> pass.
+  - `pnpm --filter @odyssey/shared build && pnpm typecheck && pnpm lint && pnpm test && pnpm build` -> pass.
+  - `pnpm content:validate` -> fails in sandbox with `tsx` IPC `EPERM`; pass outside sandbox.
+- Known risks/blockers
+  - Integration suites continue to skip locally without `TEST_DATABASE_URL`/`DATABASE_URL`.
+  - Dist artifacts are checked in for some packages; source/schema changes may require package builds before tests in some local workflows.
+  - Client build chunk-size warning remains non-blocking.
+- Next recommended task
+  - Agent 6 should execute queued follow-ups in this order:
+    1. add dev Dockerfiles for `server`, `client`, and `admin`
+    2. reduce client bundle size via code-splitting/manual chunks
+    3. add task-definition indexing/cache in `TaskService`
+    4. replace bootstrap SQL migrations with dedicated migration tooling
