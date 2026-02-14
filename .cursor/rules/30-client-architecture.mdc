@@ -1,0 +1,13 @@
+---
+description: Phaser and React client separation patterns
+globs: client/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Client Architecture
+
+- Phaser handles world rendering and movement only.
+- React handles HUD, menus, and task overlays.
+- Bridge via typed events and store actions, not direct coupling.
+- Keep task components self-contained and typed by task definition.
+- Never trust client validation for authoritative outcomes.

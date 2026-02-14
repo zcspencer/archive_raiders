@@ -1,0 +1,13 @@
+---
+description: Global maintainability and architecture standards
+alwaysApply: true
+---
+
+# Core Standards
+
+- Keep files under 300 lines; split early.
+- Prefer one public export per file; use `index.ts` barrels.
+- Add JSDoc to every public function/class/type alias.
+- Use explicit types on public APIs and function returns.
+- Do not introduce implicit side effects in utility modules.
+- No dead code, commented blocks, or placeholder TODOs without ticket tags.

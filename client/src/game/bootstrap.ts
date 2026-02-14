@@ -1,0 +1,14 @@
+import Phaser from "phaser";
+import { createGameConfig } from "./config";
+
+let gameInstance: Phaser.Game | null = null;
+
+/**
+ * Boots Phaser once and keeps a singleton game reference.
+ */
+export function bootGame(): Phaser.Game {
+  if (!gameInstance) {
+    gameInstance = new Phaser.Game(createGameConfig("game-container"));
+  }
+  return gameInstance;
+}

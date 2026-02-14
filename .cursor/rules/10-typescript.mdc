@@ -1,0 +1,13 @@
+---
+description: TypeScript implementation rules
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript Rules
+
+- `strict` compatibility is required; avoid `any`.
+- Use discriminated unions for message/task polymorphism.
+- Keep domain interfaces in `packages/shared`.
+- Export narrow, explicit types for module boundaries.
+- Validate runtime inputs at route boundaries.

@@ -1,0 +1,24 @@
+{
+  "id": "shortcut-ctrl-f",
+  "type": "shortcut",
+  "title": "The Lost Inscription",
+  "description": "Find the target rune quickly.",
+  "difficulty": 1,
+  "config": {
+    "targetShortcut": "ctrl+f",
+    "scenario": "find-in-text"
+  },
+  "hints": [
+    "Try a search shortcut."
+  ],
+  "rewards": {
+    "currency": 50,
+    "xp": 25,
+    "items": [
+      {
+        "itemId": "artifact-stone-tablet",
+        "quantity": 1
+      }
+    ]
+  }
+}

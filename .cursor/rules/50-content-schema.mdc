@@ -1,0 +1,13 @@
+---
+description: Content JSON schema and compatibility rules
+globs: content/**/*.json
+alwaysApply: false
+---
+
+# Content Schema Rules
+
+- Every task file must include id, type, title, description, config, rewards.
+- Task IDs are stable once released; do not repurpose existing IDs.
+- Validate content through `pnpm content:validate`.
+- Keep task config fields explicit and version-compatible.
+- Prefer additive schema changes over breaking changes.

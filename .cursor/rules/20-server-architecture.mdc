@@ -1,0 +1,13 @@
+---
+description: Server and API architecture constraints
+globs: server/src/**/*.ts
+alwaysApply: false
+---
+
+# Server Architecture
+
+- Keep route handlers thin; delegate logic to services.
+- Services should be pure-ish and unit testable.
+- Enforce classroom scoping and role checks in server code.
+- Keep Colyseus room handlers lightweight and non-blocking.
+- Task validation must remain authoritative server-side.

@@ -1,0 +1,13 @@
+---
+description: Testing expectations for changed behavior
+globs: **/*.{test,spec}.{ts,tsx}
+alwaysApply: false
+---
+
+# Testing Rules
+
+- Add tests for new domain logic and bug fixes.
+- Prefer pure-function tests for validators and utilities.
+- Include negative-path tests for auth and validation flows.
+- Keep tests deterministic; avoid hidden time/network dependencies.
+- Test names should describe behavior and expected outcomes.

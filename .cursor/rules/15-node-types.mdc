@@ -1,0 +1,12 @@
+---
+description: Require explicit Node type setup in Node TS packages
+globs: **/{tsconfig.json,package.json}
+alwaysApply: false
+---
+
+# Node Type Definitions
+
+- For Node-targeted TypeScript packages, always set `compilerOptions.types` explicitly.
+- If a package uses Node runtime/module settings (for example `moduleResolution: "NodeNext"` or `types: ["node"]`), include `@types/node` in that package's `devDependencies`.
+- Do not rely on transitive or root-only `@types/node` for workspace packages.
+- Keep `tsconfig.json` and local `package.json` synchronized when changing Node type usage.
