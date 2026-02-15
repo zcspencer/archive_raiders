@@ -36,9 +36,16 @@ export function useColyseusRoom(
     if (explicitWs) {
       return new Client(explicitWs);
     }
-    const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ??
-      "http://localhost:3000";
-    return new Client(apiBase.replace(/^http/i, "ws"));
+    const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+    if (apiUrl) {
+      return new Client(apiUrl.replace(/^http/i, "ws"));
+    }
+    // Production: derive WebSocket URL from current origin via Caddy /colyseus proxy
+    if (import.meta.env.PROD) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return new Client(`${protocol}//${window.location.host}/colyseus`);
+    }
+    return new Client("ws://localhost:3000");
   }, []);
 
   useEffect(() => {

@@ -7,7 +7,21 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+/**
+ * Resolves the API base URL.
+ *
+ * - Explicit `VITE_API_URL` env var wins.
+ * - Production builds (served behind Caddy) use the `/api` reverse-proxy path.
+ * - Local dev defaults to the Fastify server on port 3000.
+ */
+function resolveApiBaseUrl(): string {
+  const explicit = import.meta.env.VITE_API_URL as string | undefined;
+  if (explicit) return explicit;
+  if (import.meta.env.PROD) return "/api";
+  return "http://localhost:3000";
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 /**
  * Executes a typed JSON API request.
