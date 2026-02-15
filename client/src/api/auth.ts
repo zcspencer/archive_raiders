@@ -8,6 +8,18 @@ import {
 } from "@odyssey/shared";
 import { requestJson } from "./client";
 
+/** Server response shape for GET /auth/registration-status. */
+interface RegistrationStatus {
+  publicRegistrationEnabled: boolean;
+}
+
+/**
+ * Fetches whether public (self-serve) registration is enabled.
+ */
+export async function fetchRegistrationStatus(): Promise<RegistrationStatus> {
+  return requestJson<RegistrationStatus>("/auth/registration-status");
+}
+
 /**
  * Calls register endpoint and validates response.
  */

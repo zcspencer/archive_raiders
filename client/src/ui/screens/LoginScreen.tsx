@@ -9,7 +9,8 @@ interface LoginScreenProps {
   isLoading: boolean;
   errorMessage?: string | null;
   onSubmit: (values: LoginValues) => Promise<void>;
-  onSwitchToRegister: () => void;
+  /** When undefined, the "register" link is hidden (public registration disabled). */
+  onSwitchToRegister?: (() => void) | undefined;
 }
 
 /**
@@ -56,14 +57,16 @@ export function LoginScreen(props: LoginScreenProps): ReactElement {
           {props.isLoading ? "Signing in\u2026" : "Sign in"}
         </button>
 
-        <button
-          disabled={props.isLoading}
-          type="button"
-          style={linkButtonStyle}
-          onClick={props.onSwitchToRegister}
-        >
-          Need an account? Register
-        </button>
+        {props.onSwitchToRegister ? (
+          <button
+            disabled={props.isLoading}
+            type="button"
+            style={linkButtonStyle}
+            onClick={props.onSwitchToRegister}
+          >
+            Need an account? Register
+          </button>
+        ) : null}
 
         {props.errorMessage ? (
           <p style={errorStyle}>{props.errorMessage}</p>

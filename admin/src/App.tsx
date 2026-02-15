@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
-import { loginTeacher, registerTeacher } from "./api/auth";
+import { fetchRegistrationStatus, loginTeacher, registerTeacher } from "./api/auth";
 import { createClassroom, listClassrooms } from "./api/classrooms";
 import { sendClassroomInvite } from "./api/invites";
 import { clearSession, loadSession, saveSession } from "./session/authSession";
@@ -13,6 +13,7 @@ export function App(): ReactElement {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [publicRegistrationEnabled, setPublicRegistrationEnabled] = useState(false);
 
   useEffect(() => {
     const session = loadSession();
@@ -25,6 +26,13 @@ export function App(): ReactElement {
     }
     setAccessToken(session.accessToken);
     setUser(session.user);
+  }, []);
+
+  /* Check whether public registration is enabled. */
+  useEffect(() => {
+    fetchRegistrationStatus()
+      .then((status) => setPublicRegistrationEnabled(status.publicRegistrationEnabled))
+      .catch(() => setPublicRegistrationEnabled(false));
   }, []);
 
   useEffect(() => {
@@ -119,7 +127,7 @@ export function App(): ReactElement {
         errorMessage={errorMessage}
         isLoading={isLoading}
         onLogin={handleLogin}
-        onRegister={handleRegister}
+        onRegister={publicRegistrationEnabled ? handleRegister : undefined}
       />
     );
   }

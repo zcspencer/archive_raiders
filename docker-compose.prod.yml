@@ -40,6 +40,7 @@ services:
       AWS_REGION: ${AWS_REGION:-us-west-2}
       SES_FROM_EMAIL: ${SES_FROM_EMAIL:-}
       INVITE_BASE_URL: https://${DOMAIN}
+      ALLOW_PUBLIC_REGISTRATION: ${ALLOW_PUBLIC_REGISTRATION:-false}
     depends_on:
       postgres:
         condition: service_healthy

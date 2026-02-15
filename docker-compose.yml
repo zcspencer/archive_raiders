@@ -41,6 +41,7 @@ services:
       JWT_SECRET: replace-this-in-production
       CLIENT_ORIGIN: http://localhost:5173
       ADMIN_ORIGIN: http://localhost:5174
+      ALLOW_PUBLIC_REGISTRATION: "true"
     ports:
       - "3000:3000"
     depends_on:

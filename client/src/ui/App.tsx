@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactElement } from "react";
 import type { Classroom } from "@odyssey/shared";
+import { fetchRegistrationStatus } from "../api/auth";
 import { useAuthStore } from "../store/auth";
 import { useClassroomStore } from "../store/classroom";
 import { usePlayerControlStore } from "../store/playerControl";
@@ -21,6 +22,7 @@ import { GameScreen } from "./screens/GameScreen";
 export function App(): ReactElement {
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
+  const [publicRegistrationEnabled, setPublicRegistrationEnabled] = useState(false);
 
   const { user, accessToken, isLoading, errorMessage, hydrate, login, register, logout } =
     useAuthStore();
@@ -30,6 +32,13 @@ export function App(): ReactElement {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  /* Check whether public registration is enabled. */
+  useEffect(() => {
+    fetchRegistrationStatus()
+      .then((status) => setPublicRegistrationEnabled(status.publicRegistrationEnabled))
+      .catch(() => setPublicRegistrationEnabled(false));
+  }, []);
 
   /* Handle session expiry: if user exists but token is gone, force logout. */
   useEffect(() => {
@@ -72,7 +81,7 @@ export function App(): ReactElement {
 
   /* 1. Not authenticated -- show login or register. */
   if (!user || !accessToken) {
-    if (authMode === "register") {
+    if (authMode === "register" && publicRegistrationEnabled) {
       return (
         <RegisterScreen
           errorMessage={errorMessage}
@@ -86,7 +95,7 @@ export function App(): ReactElement {
       <LoginScreen
         errorMessage={errorMessage}
         isLoading={isLoading}
-        onSwitchToRegister={() => setAuthMode("register")}
+        onSwitchToRegister={publicRegistrationEnabled ? () => setAuthMode("register") : undefined}
         onSubmit={login}
       />
     );
