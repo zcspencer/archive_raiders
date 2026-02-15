@@ -59,8 +59,9 @@ if ! grep -q '/mnt/pgdata' /etc/fstab; then
   echo "$DEVICE /mnt/pgdata ext4 defaults,nofail 0 2" >> /etc/fstab
 fi
 
-# Ensure postgres container can write to the volume
-chown 70:70 /mnt/pgdata
+# Create a subdirectory for pgdata (avoids ext4 lost+found conflict)
+mkdir -p /mnt/pgdata/data
+chown 70:70 /mnt/pgdata/data
 
 # ─── Clone repository ────────────────────────────────────────────────────
 

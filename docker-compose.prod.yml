@@ -69,6 +69,6 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /mnt/pgdata
+      device: /mnt/pgdata/data
   caddy_data:
   caddy_config:
