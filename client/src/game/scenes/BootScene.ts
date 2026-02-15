@@ -3,6 +3,8 @@ import type { TiledMapData } from "@odyssey/shared";
 import { parseMap } from "../map/TileMapManager";
 import villageMapJson from "../../../../content/maps/village.json";
 import eldersHouseMapJson from "../../../../content/maps/elders_house.json";
+import mosslightCottageMapJson from "../../../../content/maps/mosslight_cottage.json";
+import timberNookMapJson from "../../../../content/maps/timber_nook.json";
 
 /**
  * Boot scene responsible for loading assets and transitioning to VillageScene.
@@ -26,6 +28,11 @@ export class BootScene extends Phaser.Scene {
 
     this.registry.set("parsedMap_village", parseMap(villageMapJson as TiledMapData));
     this.registry.set("parsedMap_elders_house", parseMap(eldersHouseMapJson as TiledMapData));
+    this.registry.set(
+      "parsedMap_mosslight_cottage",
+      parseMap(mosslightCottageMapJson as TiledMapData)
+    );
+    this.registry.set("parsedMap_timber_nook", parseMap(timberNookMapJson as TiledMapData));
 
     this.scene.start("VillageScene");
   }

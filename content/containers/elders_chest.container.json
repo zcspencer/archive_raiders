@@ -3,7 +3,8 @@
   "kind": "chest",
   "loot": [
     { "definitionId": "ancient-map", "quantity": 1 },
-    { "definitionId": "herb", "quantity": 3 }
+    { "definitionId": "herb", "quantity": 3 },
+    { "definitionId": "fez", "quantity": 1 }
   ],
   "currencyRewards": [
     { "currencyType": "coins", "amount": 10 }

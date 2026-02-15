@@ -16,7 +16,8 @@ export function ChestTransferPanel(): ReactElement | null {
   const setInputMode = usePlayerControlStore((s) => s.setInputMode);
   const sendClaimContainer = useGameRoomBridgeStore((s) => s.sendClaimContainer);
 
-  if (!currentContainerId) return null;
+  /* Don't render until we have contents; avoids flash when server returns "already looted". */
+  if (!currentContainerId || nonce === null) return null;
 
   const handleClaim = (): void => {
     if (nonce) {

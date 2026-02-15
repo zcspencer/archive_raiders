@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
 import { VillageScene } from "./scenes/VillageScene";
 import { EldersHouseScene } from "./scenes/EldersHouseScene";
+import { MosslightCottageScene } from "./scenes/MosslightCottageScene";
+import { TimberNookScene } from "./scenes/TimberNookScene";
 
 /**
  * Creates the Phaser game configuration with all registered scenes.
@@ -18,6 +20,6 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
       height: "100%"
     },
     backgroundColor: "#111827",
-    scene: [BootScene, VillageScene, EldersHouseScene]
+    scene: [BootScene, VillageScene, EldersHouseScene, MosslightCottageScene, TimberNookScene]
   };
 }

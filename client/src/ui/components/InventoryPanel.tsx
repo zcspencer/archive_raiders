@@ -1,33 +1,24 @@
 import { useState, type CSSProperties, type ReactElement } from "react";
-import type { ToolId } from "@odyssey/shared";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
+import { usePlayerHotbarStore } from "../../store/playerHotbar";
 import { useCurrencyStore } from "../../store/currency";
 import { useReadableContentStore } from "../../store/readableContent";
-import { getItemDefinition, getReadableParams } from "../../data/itemDefinitions";
-
-/** Visual metadata for each tool type (legacy; Phase 6 replaces with equipment). */
-const TOOL_META: Record<ToolId, { label: string; color: string; description: string }> = {
-  axe: { label: "Axe", color: "#b45309", description: "Chop trees and clear debris." },
-  watering_can: { label: "Watering Can", color: "#0ea5e9", description: "Water crops and seedlings." },
-  seeds: { label: "Seeds", color: "#65a30d", description: "Plant new crops in tilled soil." }
-};
-
-const ALL_TOOLS: ToolId[] = ["axe", "watering_can", "seeds"];
+import { getItemDefinition, getReadableParams, hasEquippableComponent } from "../../data/itemDefinitions";
 
 const SLOT_COUNT = 24;
 
 /**
  * Inventory overlay panel toggled by pressing I.
- * Shows currency wallet, tools (legacy), equipment slots, and item grid from server state.
+ * Shows currency wallet, equipment slots, and item grid from server state.
  */
 export function InventoryPanel(): ReactElement | null {
   const inventoryOpen = usePlayerControlStore((s) => s.inventoryOpen);
-  const equippedToolId = usePlayerControlStore((s) => s.equippedToolId);
   const toggleInventory = usePlayerControlStore((s) => s.toggleInventory);
   const items = usePlayerInventoryStore((s) => s.items);
   const balances = useCurrencyStore((s) => s.balances);
+  const addToToolbar = usePlayerHotbarStore((s) => s.addToToolbar);
 
   const [contextItemId, setContextItemId] = useState<string | null>(null);
   const openReadable = useReadableContentStore((s) => s.openReadable);
@@ -71,24 +62,6 @@ export function InventoryPanel(): ReactElement | null {
           </div>
         </div>
 
-        {/* Tools section (legacy; Phase 6 removes) */}
-        <div style={sectionStyle}>
-          <h3 style={sectionTitleStyle}>Tools</h3>
-          <div style={toolGridStyle}>
-            {ALL_TOOLS.map((toolId) => {
-              const meta = TOOL_META[toolId];
-              const isEquipped = toolId === equippedToolId;
-              return (
-                <div key={toolId} style={toolCardStyle(isEquipped, meta.color)}>
-                  <div style={toolLabelStyle(meta.color)}>{meta.label}</div>
-                  <div style={toolDescStyle}>{meta.description}</div>
-                  {isEquipped ? <div style={equippedBadgeStyle}>Equipped</div> : null}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Items section */}
         <div style={sectionStyle}>
           <h3 style={sectionTitleStyle}>Items</h3>
@@ -102,6 +75,7 @@ export function InventoryPanel(): ReactElement | null {
               const name = def?.name ?? item.definitionId;
               const readableParams = def ? getReadableParams(def) : undefined;
               const canDrop = def?.rarity !== "Important";
+              const isEquippable = def ? hasEquippableComponent(def) : false;
               const isContext = contextItemId === item.instanceId;
               return (
                 <div
@@ -116,6 +90,18 @@ export function InventoryPanel(): ReactElement | null {
                   {item.quantity > 1 ? <span style={qtyBadgeStyle}>x{item.quantity}</span> : null}
                   {isContext ? (
                     <div style={contextStyle}>
+                      {isEquippable ? (
+                        <button
+                          type="button"
+                          style={contextBtnStyle}
+                          onClick={() => {
+                            addToToolbar(item.instanceId);
+                            setContextItemId(null);
+                          }}
+                        >
+                          Add to toolbar
+                        </button>
+                      ) : null}
                       {readableParams ? (
                         <button
                           type="button"
@@ -251,48 +237,6 @@ const equipLabelStyle: CSSProperties = {
 const equipPlaceholderStyle: CSSProperties = {
   fontSize: 13,
   color: "#64748b"
-};
-
-const toolGridStyle: CSSProperties = {
-  display: "flex",
-  gap: 10,
-  flexWrap: "wrap"
-};
-
-function toolCardStyle(equipped: boolean, accentColor: string): CSSProperties {
-  return {
-    position: "relative",
-    flex: "1 1 140px",
-    padding: "12px 14px",
-    background: equipped ? "rgba(255,255,255,0.06)" : "rgba(30, 41, 59, 0.7)",
-    border: equipped ? `2px solid ${accentColor}` : "1px solid #334155",
-    borderRadius: 10
-  };
-}
-
-function toolLabelStyle(color: string): CSSProperties {
-  return {
-    fontSize: 14,
-    fontWeight: 700,
-    color,
-    marginBottom: 4
-  };
-}
-
-const toolDescStyle: CSSProperties = {
-  fontSize: 12,
-  color: "#94a3b8",
-  lineHeight: 1.4
-};
-
-const equippedBadgeStyle: CSSProperties = {
-  position: "absolute",
-  top: 6,
-  right: 8,
-  fontSize: 10,
-  fontWeight: 700,
-  color: "#a3e635",
-  textTransform: "uppercase"
 };
 
 const itemGridStyle: CSSProperties = {

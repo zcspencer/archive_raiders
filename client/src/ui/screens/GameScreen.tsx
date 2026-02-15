@@ -4,8 +4,10 @@ import { bootGame, destroyGame } from "../../game/bootstrap";
 import { useColyseusRoom } from "../../hooks/useColyseusRoom";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
+import { usePlayerHotbarStore } from "../../store/playerHotbar";
 import { useDialogueStore } from "../../store/dialogue";
 import { useContainerStore } from "../../store/container";
+import { useNotificationStore } from "../../store/notification";
 import { useReadableContentStore } from "../../store/readableContent";
 import { DialogueBox } from "../components/DialogueBox";
 import { ReadableContentDialog } from "../components/ReadableContentDialog";
@@ -33,6 +35,8 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   const closeContainer = useContainerStore((s) => s.closeContainer);
   const readableOpen = useReadableContentStore((s) => s.isOpen);
   const closeReadable = useReadableContentStore((s) => s.closeReadable);
+  const notificationMessage = useNotificationStore((s) => s.message);
+  const setNotificationMessage = useNotificationStore((s) => s.setMessage);
 
   const roomConnection = useColyseusRoom({
     accessToken: props.accessToken,
@@ -57,6 +61,13 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       setInputMode("game");
     }
   }, [dialogueActive, containerOpen, setInputMode]);
+
+  /* Auto-dismiss server notification after 4 seconds. */
+  useEffect(() => {
+    if (!notificationMessage) return;
+    const id = setTimeout(() => setNotificationMessage(null), 4000);
+    return () => clearTimeout(id);
+  }, [notificationMessage, setNotificationMessage]);
 
   /* Global keyboard shortcuts for game mode. */
   useEffect(() => {
@@ -91,7 +102,14 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       const slot = hotbarSlotFromKey(event.key);
       if (slot !== null) {
         setSelectedHotbarSlot(slot);
-        useGameRoomBridgeStore.getState().sendSelectHotbar(slot);
+        const bridge = useGameRoomBridgeStore.getState();
+        bridge.sendSelectHotbar(slot);
+        const instanceId = usePlayerHotbarStore.getState().slots[slot] ?? null;
+        if (instanceId) {
+          bridge.sendEquipItem(instanceId);
+        } else {
+          bridge.sendUnequipItem("hand");
+        }
       }
     };
 
@@ -122,6 +140,11 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       {roomConnection.errorMessage ? (
         <div style={errorToastStyle}>{roomConnection.errorMessage}</div>
       ) : null}
+
+      {/* Server notification toast (e.g. "The container is empty") */}
+      {notificationMessage ? (
+        <div style={notificationToastStyle}>{notificationMessage}</div>
+      ) : null}
     </>
   );
 }
@@ -131,7 +154,6 @@ export function GameScreen(props: GameScreenProps): ReactElement {
 /* ------------------------------------------------------------------ */
 
 function hotbarSlotFromKey(key: string): number | null {
-  if (key === "0") return 9;
   if (key >= "1" && key <= "9") return Number(key) - 1;
   return null;
 }
@@ -197,6 +219,22 @@ const errorToastStyle: CSSProperties = {
   color: "#fda4af",
   background: "rgba(127, 29, 29, 0.88)",
   border: "1px solid #991b1b",
+  borderRadius: 8,
+  zIndex: 50,
+  pointerEvents: "auto"
+};
+
+const notificationToastStyle: CSSProperties = {
+  position: "fixed",
+  bottom: 100,
+  left: "50%",
+  transform: "translateX(-50%)",
+  maxWidth: 320,
+  padding: "10px 18px",
+  fontSize: 14,
+  color: "#e2e8f0",
+  background: "rgba(30, 41, 59, 0.95)",
+  border: "1px solid #475569",
   borderRadius: 8,
   zIndex: 50,
   pointerEvents: "auto"

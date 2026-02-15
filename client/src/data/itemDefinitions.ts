@@ -31,6 +31,15 @@ export interface ReadableParams {
 }
 
 /**
+ * Returns true if the item definition has the Equippable component (hand/head slot).
+ */
+export function hasEquippableComponent(def: ItemDefinition): boolean {
+  const comp = def.components?.find((c) => c.typeId === "Equippable" || c.typeId === "Cosmetic");
+  const slot = (comp?.params as { slot?: string } | undefined)?.slot;
+  return slot === "hand" || slot === "head";
+}
+
+/**
  * Returns Readable component params if the definition has a Readable component; otherwise undefined.
  */
 export function getReadableParams(def: ItemDefinition): ReadableParams | undefined {

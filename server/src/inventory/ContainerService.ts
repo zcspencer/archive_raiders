@@ -50,7 +50,7 @@ export class ContainerService {
 
     if (existing.length > 0) {
       const row = existing[0]!;
-      if (row.state === "claimed") throw new Error("Already looted");
+      if (row.state === "claimed") throw new Error("The container is empty");
       const items = this.rollLoot(definition);
       const names = this.resolveNames(items);
       return {

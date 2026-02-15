@@ -25,9 +25,6 @@ import { PlayerSchema, ShardState } from "../schema/ShardState.js";
 import { applyInteraction } from "../services/interactionService.js";
 import { applyMove } from "../services/movementService.js";
 
-/** Definition IDs for hotbar slots 0–2 (axe, watering can, seeds). */
-const HOTBAR_DEF_IDS = ["axe", "watering-can", "seeds-bag"] as const;
-
 interface JoinOptions {
   accessToken?: string;
   classroomId?: string;
@@ -70,7 +67,7 @@ export class ShardRoom extends Room<ShardState> {
       applyMove(player, payloadResult.data);
     });
 
-    this.onMessage(ClientMessage.SelectHotbar, async (client, rawPayload: unknown) => {
+    this.onMessage(ClientMessage.SelectHotbar, (client, rawPayload: unknown) => {
       const payloadResult = hotbarSelectPayloadSchema.safeParse(rawPayload);
       if (!payloadResult.success) {
         client.send(ServerMessage.Notification, "Invalid hotbar payload");
@@ -78,16 +75,8 @@ export class ShardRoom extends Room<ShardState> {
       }
       const player = this.state.players.get(client.sessionId);
       if (!player) return;
-      const authContext = client.auth as JoinAuthContext | undefined;
-      if (!authContext) return;
-      player.selectedHotbarSlot = payloadResult.data.slotIndex;
-      const defId = HOTBAR_DEF_IDS[payloadResult.data.slotIndex % HOTBAR_DEF_IDS.length] ?? "axe";
-      const inventory = await this.getServices().inventoryService.getInventory(authContext.user.id);
-      const item = findFirstInstanceByDefinitionId(inventory, defId);
-      if (item) {
-        await this.getServices().equipmentService.equip(authContext.user.id, item.instanceId, "hand");
-        await syncPlayerEquipment(this.getServices(), this.state, client.sessionId, authContext.user.id);
-      }
+      player.selectedHotbarSlot = payloadResult.data.slotIndex % 9;
+      // Equipping is done by the client via EquipItem when a hotbar slot has an item
     });
 
     this.onMessage(ClientMessage.Interact, async (client, rawPayload: unknown) => {
@@ -191,7 +180,7 @@ export class ShardRoom extends Room<ShardState> {
       }
       const authContext = client.auth as JoinAuthContext | undefined;
       if (!authContext) return;
-      const { itemActionResolver, inventoryService, equipmentService } = this.getServices();
+      const { itemActionResolver, inventoryService } = this.getServices();
       const result = await itemActionResolver.executeAction(
         authContext.user.id,
         payloadResult.data.instanceId,

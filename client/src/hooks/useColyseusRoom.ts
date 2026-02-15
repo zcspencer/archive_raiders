@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Client, type Room } from "colyseus.js";
 import type { CurrencyReward } from "@odyssey/shared";
 import { ServerMessage } from "@odyssey/shared";
+import type { ItemInstance } from "@odyssey/shared";
 import { useContainerStore } from "../store/container";
 import { useCurrencyStore } from "../store/currency";
+import { useNotificationStore } from "../store/notification";
 import { useGameRoomBridgeStore } from "../store/gameRoomBridge";
 import { usePlayerControlStore } from "../store/playerControl";
 import { usePlayerInventoryStore } from "../store/playerInventory";
+import { usePlayerHotbarStore } from "../store/playerHotbar";
 
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -79,7 +82,7 @@ export function useColyseusRoom(
 
         activeRoom.onMessage(ServerMessage.Notification, (payload: unknown) => {
           const msg = typeof payload === "string" ? payload : String(payload);
-          console.warn("[ShardRoom] Server notification:", msg);
+          useNotificationStore.getState().setMessage(msg);
           /* If a container is in "opening" state, close it so the user isn't stuck on "Loading..." */
           const container = useContainerStore.getState();
           if (container.currentContainerId && container.nonce === null) {
@@ -101,7 +104,10 @@ export function useColyseusRoom(
         });
         activeRoom.onMessage(ServerMessage.InventoryUpdate, (payload: unknown) => {
           if (Array.isArray(payload)) {
-            usePlayerInventoryStore.getState().setItems(payload as import("@odyssey/shared").ItemInstance[]);
+            const items = payload as ItemInstance[];
+            usePlayerInventoryStore.getState().setItems(items);
+            const instanceIds = collectInstanceIds(items);
+            usePlayerHotbarStore.getState().pruneOrphans(instanceIds);
             useContainerStore.getState().closeContainer();
           }
         });
@@ -150,4 +156,16 @@ export function useColyseusRoom(
     errorMessage,
     sessionId
   };
+}
+
+function collectInstanceIds(items: ItemInstance[]): string[] {
+  const ids: string[] = [];
+  function walk(list: ItemInstance[]): void {
+    for (const item of list) {
+      ids.push(item.instanceId);
+      if (item.containedItems?.length) walk(item.containedItems);
+    }
+  }
+  walk(items);
+  return ids;
 }

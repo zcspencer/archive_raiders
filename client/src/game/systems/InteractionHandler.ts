@@ -110,8 +110,24 @@ const doorTransitions: Record<string, DoorTransition> = {
     targetScene: "EldersHouseScene",
     data: { mapKey: "parsedMap_elders_house" }
   },
+  mosslight_cottage_door: {
+    targetScene: "MosslightCottageScene",
+    data: { mapKey: "parsedMap_mosslight_cottage" }
+  },
+  timber_nook_door: {
+    targetScene: "TimberNookScene",
+    data: { mapKey: "parsedMap_timber_nook" }
+  },
   elders_house_exit: {
     targetScene: "VillageScene",
     data: { mapKey: "parsedMap_village", spawnGridX: 4, spawnGridY: 7 }
+  },
+  mosslight_cottage_exit: {
+    targetScene: "VillageScene",
+    data: { mapKey: "parsedMap_village", spawnGridX: 13, spawnGridY: 7 }
+  },
+  timber_nook_exit: {
+    targetScene: "VillageScene",
+    data: { mapKey: "parsedMap_village", spawnGridX: 13, spawnGridY: 15 }
   }
 };
