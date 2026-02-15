@@ -3,6 +3,7 @@
  */
 export interface PlayerSnapshot {
   sessionId: string;
+  currentMapKey: string;
   gridX: number;
   gridY: number;
   equippedHandDefId?: string;
@@ -64,9 +65,12 @@ export function readPlayerSnapshots(room: unknown): PlayerSnapshot[] {
 export function diffRemotePlayers(
   snapshots: PlayerSnapshot[],
   localSessionId: string | null,
+  localMapKey: string,
   existingSessionIds: string[]
 ): DiffResult {
-  const upserts = snapshots.filter((snapshot) => snapshot.sessionId !== localSessionId);
+  const upserts = snapshots.filter(
+    (snapshot) => snapshot.sessionId !== localSessionId && snapshot.currentMapKey === localMapKey
+  );
   const activeIds = new Set(upserts.map((snapshot) => snapshot.sessionId));
   const removals = existingSessionIds.filter((sessionId) => !activeIds.has(sessionId));
   return { upserts, removals };
@@ -74,16 +78,22 @@ export function diffRemotePlayers(
 
 function toSnapshot(sessionId: string, value: unknown): PlayerSnapshot | null {
   const maybePlayer = value as {
+    currentMapKey?: string;
     gridX?: number;
     gridY?: number;
     equippedHandDefId?: string;
     equippedHeadDefId?: string;
   };
-  if (typeof maybePlayer.gridX !== "number" || typeof maybePlayer.gridY !== "number") {
+  if (
+    typeof maybePlayer.currentMapKey !== "string" ||
+    typeof maybePlayer.gridX !== "number" ||
+    typeof maybePlayer.gridY !== "number"
+  ) {
     return null;
   }
   return {
     sessionId,
+    currentMapKey: maybePlayer.currentMapKey,
     gridX: maybePlayer.gridX,
     gridY: maybePlayer.gridY,
     equippedHandDefId:

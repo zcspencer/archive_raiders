@@ -8,6 +8,7 @@ import {
   hotbarSelectPayloadSchema,
   interactPayloadSchema,
   movePayloadSchema,
+  setMapPayloadSchema,
   openContainerPayloadSchema,
   unequipItemPayloadSchema
 } from "@odyssey/shared";
@@ -65,6 +66,19 @@ export class ShardRoom extends Room<ShardState> {
         return;
       }
       applyMove(player, payloadResult.data);
+    });
+
+    this.onMessage(ClientMessage.SetMap, (client, rawPayload: unknown) => {
+      const payloadResult = setMapPayloadSchema.safeParse(rawPayload);
+      if (!payloadResult.success) {
+        client.send(ServerMessage.Notification, "Invalid set-map payload");
+        return;
+      }
+      const player = this.state.players.get(client.sessionId);
+      if (!player) {
+        return;
+      }
+      player.currentMapKey = payloadResult.data.mapKey;
     });
 
     this.onMessage(ClientMessage.SelectHotbar, (client, rawPayload: unknown) => {
@@ -269,6 +283,7 @@ export class ShardRoom extends Room<ShardState> {
     player.equippedHeadItemId = "";
     player.equippedHandDefId = "";
     player.equippedHeadDefId = "";
+    player.currentMapKey = "parsedMap_village";
     this.state.players.set(client.sessionId, player);
 
     const { inventoryService, equipmentService } = this.getServices();

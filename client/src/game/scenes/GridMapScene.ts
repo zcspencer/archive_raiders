@@ -14,6 +14,7 @@ import { getNpcDefinition } from "../content/npcDialogue";
 import { getItemDefinition } from "../../data/itemDefinitions";
 import { GameplayInput } from "../systems/GameplayInput";
 import { InteractionHandler } from "../systems/InteractionHandler";
+import { RemotePlayersController } from "../systems/RemotePlayersController";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
 
@@ -35,13 +36,16 @@ export abstract class GridMapScene extends Phaser.Scene {
   protected playerSprite!: Phaser.GameObjects.Sprite;
   protected gridMovement!: GridMovement;
   protected equippedSpriteController!: EquippedItemSpriteController;
+  protected remotePlayers!: RemotePlayersController;
   protected input_!: GameplayInput;
   protected interaction!: InteractionHandler;
   protected npcs: Npc[] = [];
   protected objects: InteractableObject[] = [];
+  private currentMapKey = "parsedMap";
 
   create(data?: GridMapSceneData): void {
     const mapKey = data?.mapKey ?? "parsedMap";
+    this.currentMapKey = mapKey;
     const mapData = this.registry.get(mapKey) as ParsedMap | undefined;
     if (!mapData) {
       throw new Error(`${this.scene.key} requires ${mapKey} in registry`);
@@ -81,11 +85,15 @@ export abstract class GridMapScene extends Phaser.Scene {
     this.interaction = new InteractionHandler((targetScene, sceneData) => {
       this.scene.start(targetScene, sceneData);
     });
+    this.remotePlayers = new RemotePlayersController(this);
+    useGameRoomBridgeStore.getState().sendSetMap({ mapKey: this.currentMapKey });
 
     this.setupCamera(mapData);
   }
 
   update(): void {
+    const room = useGameRoomBridgeStore.getState().room;
+    this.remotePlayers.reconcile(room, this.currentMapKey);
     const px = this.gridMovement.getGridX();
     const py = this.gridMovement.getGridY();
 

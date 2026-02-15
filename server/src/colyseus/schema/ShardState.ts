@@ -13,6 +13,7 @@ export class TileSchema extends Schema {
 
 export class PlayerSchema extends Schema {
   @type("string") declare id: string;
+  @type("string") declare currentMapKey: string;
   @type("uint16") declare gridX: number;
   @type("uint16") declare gridY: number;
   @type("uint16") declare stamina: number;

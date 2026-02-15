@@ -38,7 +38,9 @@ export function ZoomDiscoverChallenge({ task, onResult }: ChallengeProps): React
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isRevealed = zoom >= config.revealAtZoom;
-
+  console.log("config", config);
+  console.log("zoom", zoom);
+  console.log("isRevealed", isRevealed);
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isModifierPressed(e)) return;

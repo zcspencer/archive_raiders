@@ -9,6 +9,18 @@ export interface InviteInfo {
 }
 
 /**
+ * Classroom invite record visible in teacher administration screens.
+ */
+export interface ClassroomInviteSummary {
+  id: string;
+  email: string;
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt: string | null;
+}
+
+/**
  * Request payload for creating a classroom invite.
  */
 export interface CreateInviteRequest {

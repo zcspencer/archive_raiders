@@ -38,13 +38,14 @@ export class RemotePlayersController {
    * Reconciles remote player sprites with the current room state.
    * Creates, updates, and removes sprites as needed.
    */
-  reconcile(room: unknown): void {
+  reconcile(room: unknown, localMapKey: string): void {
     const snapshots = readPlayerSnapshots(room);
     const maybeRoom = room as { sessionId?: string } | null;
     const localSessionId = maybeRoom?.sessionId ?? null;
     const diff = diffRemotePlayers(
       snapshots,
       localSessionId,
+      localMapKey,
       Array.from(this.sprites.keys())
     );
 

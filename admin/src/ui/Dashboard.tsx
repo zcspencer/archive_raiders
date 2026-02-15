@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
+import { Link } from "react-router-dom";
 
 interface DashboardProps {
   user: AuthUser;
@@ -78,6 +79,8 @@ export function Dashboard(props: DashboardProps): ReactElement {
           <li key={classroom.id}>
             <div>
               {classroom.name} - {new Date(classroom.createdAt).toLocaleString()}
+              {" - "}
+              <Link to={`/classrooms/${classroom.id}`}>Open classroom</Link>
             </div>
             <form
               onSubmit={(event) => {

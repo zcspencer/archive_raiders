@@ -3,6 +3,8 @@ import type { AuthService } from "../auth/AuthService.js";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
 import type { AppConfig } from "../config.js";
 import type { InviteService } from "../invite/index.js";
+import type { CurrencyService } from "../inventory/CurrencyService.js";
+import type { InventoryService } from "../inventory/InventoryService.js";
 import type { TaskService } from "../task/TaskService.js";
 import { buildAuthenticatePreHandler } from "./middleware/auth.js";
 import { requireRole } from "./middleware/role.js";
@@ -14,6 +16,8 @@ import { registerTaskRoutes } from "./routes/task.js";
 interface RouteServices {
   authService: AuthService;
   classroomService: ClassroomService;
+  inventoryService: InventoryService;
+  currencyService: CurrencyService;
   inviteService: InviteService;
   taskService: TaskService;
 }
@@ -37,6 +41,8 @@ export async function registerRoutes(
   await registerClassroomRoutes(
     app,
     services.classroomService,
+    services.inventoryService,
+    services.currencyService,
     authenticate,
     requireTeacher
   );

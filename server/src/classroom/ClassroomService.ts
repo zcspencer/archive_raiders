@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { AuthUser, Classroom, ClassroomMembership } from "@odyssey/shared";
+import type {
+  AuthUser,
+  Classroom,
+  ClassroomMembership,
+  ClassroomStudentSummary
+} from "@odyssey/shared";
 import type { PostgresDatabase } from "../db/postgres.js";
 
 /**
@@ -175,6 +180,48 @@ export class ClassroomService {
     }
     return mapClassroomMembership(created);
   }
+
+  /**
+   * Lists students enrolled in a teacher-owned classroom.
+   */
+  async listStudentsForTeacher(
+    teacherId: string,
+    classroomId: string
+  ): Promise<ClassroomStudentSummary[]> {
+    const rows = await this.db.query<ClassroomStudentRow>(
+      `
+      SELECT u.id AS user_id, u.email, u.display_name, m.created_at AS membership_created_at
+      FROM classroom_memberships m
+      INNER JOIN app_users u ON u.id = m.user_id
+      INNER JOIN classrooms c ON c.id = m.classroom_id
+      WHERE c.id = $1 AND c.teacher_id = $2 AND u.role = 'student'
+      ORDER BY m.created_at DESC
+      `,
+      [classroomId, teacherId]
+    );
+    return rows.map(mapClassroomStudentSummary);
+  }
+
+  /**
+   * Checks whether a student is enrolled in a teacher-owned classroom.
+   */
+  async isStudentInTeacherClassroom(
+    teacherId: string,
+    classroomId: string,
+    studentId: string
+  ): Promise<boolean> {
+    const rows = await this.db.query<MembershipCheckRow>(
+      `
+      SELECT 1 AS allowed
+      FROM classroom_memberships m
+      INNER JOIN classrooms c ON c.id = m.classroom_id
+      INNER JOIN app_users u ON u.id = m.user_id
+      WHERE c.id = $1 AND c.teacher_id = $2 AND m.user_id = $3 AND u.role = 'student'
+      `,
+      [classroomId, teacherId, studentId]
+    );
+    return Boolean(rows[0]);
+  }
 }
 
 interface ClassroomRow {
@@ -203,6 +250,13 @@ interface ClassroomMembershipRow {
   created_at: Date;
 }
 
+interface ClassroomStudentRow {
+  user_id: string;
+  email: string;
+  display_name: string;
+  membership_created_at: Date;
+}
+
 function mapClassroom(row: ClassroomRow): Classroom {
   return {
     id: row.id,
@@ -217,6 +271,15 @@ function mapClassroomMembership(row: ClassroomMembershipRow): ClassroomMembershi
     classroomId: row.classroom_id,
     userId: row.user_id,
     createdAt: row.created_at.toISOString()
+  };
+}
+
+function mapClassroomStudentSummary(row: ClassroomStudentRow): ClassroomStudentSummary {
+  return {
+    userId: row.user_id,
+    email: row.email,
+    displayName: row.display_name,
+    membershipCreatedAt: row.membership_created_at.toISOString()
   };
 }
 

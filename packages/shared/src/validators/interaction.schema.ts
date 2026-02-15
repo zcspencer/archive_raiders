@@ -15,6 +15,13 @@ export const tileCoordinateSchema = z.object({
 export const movePayloadSchema = tileCoordinateSchema;
 
 /**
+ * Runtime validator for map context payload.
+ */
+export const setMapPayloadSchema = z.object({
+  mapKey: z.string().min(1).max(128)
+});
+
+/**
  * Runtime validator for interaction payload.
  */
 export const interactPayloadSchema = z.object({

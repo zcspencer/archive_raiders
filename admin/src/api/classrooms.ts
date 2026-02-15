@@ -18,6 +18,17 @@ export async function listClassrooms(accessToken: string): Promise<Classroom[]> 
 }
 
 /**
+ * Gets a classroom by id for the signed-in teacher.
+ */
+export async function getClassroom(
+  accessToken: string,
+  classroomId: string
+): Promise<Classroom> {
+  const response = await requestJson<Classroom>(`/classrooms/${classroomId}`, {}, accessToken);
+  return classroomSchema.parse(response);
+}
+
+/**
  * Creates a classroom for the signed-in teacher.
  */
 export async function createClassroom(

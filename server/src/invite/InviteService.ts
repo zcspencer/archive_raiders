@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import type { AuthResponse, InviteInfo } from "@odyssey/shared";
+import type { AuthResponse, ClassroomInviteSummary, InviteInfo } from "@odyssey/shared";
 import type { PostgresDatabase } from "../db/postgres.js";
 import type { AuthService } from "../auth/AuthService.js";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
@@ -191,6 +191,33 @@ export class InviteService {
 
     return authResponse;
   }
+
+  /**
+   * Lists invites for a teacher-owned classroom.
+   */
+  async listInvitesForTeacher(
+    teacherId: string,
+    classroomId: string
+  ): Promise<ClassroomInviteSummary[]> {
+    const classroom = await this.classroomService.getByIdForUser(
+      { id: teacherId, email: "", displayName: "", role: "teacher" },
+      classroomId
+    );
+    if (!classroom) {
+      throw new Error("Classroom not found or not owned by teacher");
+    }
+
+    const rows = await this.db.query<ClassroomInviteRow>(
+      `
+      SELECT id, email, token, created_at, expires_at, accepted_at
+      FROM classroom_invites
+      WHERE classroom_id = $1
+      ORDER BY created_at DESC
+      `,
+      [classroomId]
+    );
+    return rows.map(mapClassroomInviteSummary);
+  }
 }
 
 interface InviteRow {
@@ -208,4 +235,24 @@ interface InviteAcceptRow {
   expires_at: Date;
   accepted_at: Date | null;
   teacher_id: string;
+}
+
+interface ClassroomInviteRow {
+  id: string;
+  email: string;
+  token: string;
+  created_at: Date;
+  expires_at: Date;
+  accepted_at: Date | null;
+}
+
+function mapClassroomInviteSummary(row: ClassroomInviteRow): ClassroomInviteSummary {
+  return {
+    id: row.id,
+    email: row.email,
+    token: row.token,
+    createdAt: row.created_at.toISOString(),
+    expiresAt: row.expires_at.toISOString(),
+    acceptedAt: row.accepted_at ? row.accepted_at.toISOString() : null
+  };
 }

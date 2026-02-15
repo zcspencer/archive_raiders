@@ -1,6 +1,8 @@
 import {
+  classroomInviteSummaryListSchema,
   createInviteRequestSchema,
   inviteInfoSchema,
+  type ClassroomInviteSummary,
   type InviteInfo
 } from "@odyssey/shared";
 import { requestJson } from "./client";
@@ -23,4 +25,19 @@ export async function sendClassroomInvite(
     accessToken
   );
   return inviteInfoSchema.parse(response);
+}
+
+/**
+ * Lists invites previously sent for a classroom.
+ */
+export async function listClassroomInvites(
+  accessToken: string,
+  classroomId: string
+): Promise<ClassroomInviteSummary[]> {
+  const response = await requestJson<ClassroomInviteSummary[]>(
+    `/classrooms/${classroomId}/invites`,
+    {},
+    accessToken
+  );
+  return classroomInviteSummaryListSchema.parse(response);
 }

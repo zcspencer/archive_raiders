@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { addClassroomMembership } from "./classrooms";
+import { addClassroomMembership, getClassroom } from "./classrooms";
 import { requestJson } from "./client";
 
 vi.mock("./client", () => ({
@@ -28,5 +28,24 @@ describe("addClassroomMembership", () => {
       },
       "token-1"
     );
+  });
+});
+
+describe("getClassroom", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("gets a classroom by id endpoint", async () => {
+    vi.mocked(requestJson).mockResolvedValue({
+      id: "class-1",
+      name: "Class One",
+      teacherId: "teacher-1",
+      createdAt: "2026-01-01T00:00:00.000Z"
+    });
+
+    await getClassroom("token-1", "class-1");
+
+    expect(requestJson).toHaveBeenCalledWith("/classrooms/class-1", {}, "token-1");
   });
 });

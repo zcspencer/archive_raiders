@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { fetchRegistrationStatus, loginTeacher, registerTeacher } from "./api/auth";
 import { createClassroom, listClassrooms } from "./api/classrooms";
 import { sendClassroomInvite } from "./api/invites";
 import { clearSession, loadSession, saveSession } from "./session/authSession";
+import { ClassroomScreen } from "./ui/ClassroomScreen";
 import { Dashboard } from "./ui/Dashboard";
 import { LoginScreen } from "./ui/LoginScreen";
 
@@ -133,16 +135,28 @@ export function App(): ReactElement {
   }
 
   return (
-    <Dashboard
-      classrooms={classrooms}
-      errorMessage={errorMessage}
-      isLoading={isLoading}
-      onCreateClassroom={handleCreateClassroom}
-      onInviteStudent={handleInviteStudent}
-      onLogout={handleLogout}
-      onRefresh={handleRefresh}
-      user={user}
-    />
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Dashboard
+            classrooms={classrooms}
+            errorMessage={errorMessage}
+            isLoading={isLoading}
+            onCreateClassroom={handleCreateClassroom}
+            onInviteStudent={handleInviteStudent}
+            onLogout={handleLogout}
+            onRefresh={handleRefresh}
+            user={user}
+          />
+        }
+      />
+      <Route
+        path="/classrooms/:classroomId"
+        element={<ClassroomScreen accessToken={accessToken ?? ""} />}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

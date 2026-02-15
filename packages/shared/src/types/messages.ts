@@ -1,5 +1,6 @@
 export enum ClientMessage {
   Move = "move",
+  SetMap = "set-map",
   Interact = "interact",
   SelectHotbar = "select-hotbar",
   Chat = "chat",
@@ -27,4 +28,11 @@ export enum ServerMessage {
 export interface MovePayload {
   gridX: number;
   gridY: number;
+}
+
+/**
+ * Map context payload sent by the client when entering a scene/map.
+ */
+export interface SetMapPayload {
+  mapKey: string;
 }

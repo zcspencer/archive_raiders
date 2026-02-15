@@ -72,7 +72,14 @@ async function startServer(): Promise<void> {
 
   await registerRoutes(
     app,
-    { authService, classroomService, inviteService, taskService },
+    {
+      authService,
+      classroomService,
+      inventoryService,
+      currencyService,
+      inviteService,
+      taskService
+    },
     config
   );
 

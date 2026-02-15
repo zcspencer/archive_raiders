@@ -1,3 +1,6 @@
+import type { CurrencyType } from "./currency.js";
+import type { ItemInstance } from "./inventory.js";
+
 /**
  * Classroom record visible through API responses.
  */
@@ -29,4 +32,22 @@ export interface ClassroomMembership {
   classroomId: string;
   userId: string;
   createdAt: string;
+}
+
+/**
+ * Student summary visible in classroom administration screens.
+ */
+export interface ClassroomStudentSummary {
+  userId: string;
+  email: string;
+  displayName: string;
+  membershipCreatedAt: string;
+}
+
+/**
+ * Student economy payload for classroom administration screens.
+ */
+export interface ClassroomStudentEconomy {
+  inventory: ItemInstance[];
+  currency: Record<CurrencyType, number>;
 }

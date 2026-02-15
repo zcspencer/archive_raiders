@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { currencyBalancesSchema } from "./currency.schema.js";
+import { itemInstanceSchema } from "./inventory.schema.js";
 
 export const createClassroomRequestSchema = z.object({
   name: z.string().min(1).max(120)
@@ -22,3 +24,17 @@ export const classroomMembershipSchema = z.object({
 });
 
 export const classroomListSchema = z.array(classroomSchema);
+
+export const classroomStudentSummarySchema = z.object({
+  userId: z.string().min(1),
+  email: z.string().email().max(320),
+  displayName: z.string().min(1).max(100),
+  membershipCreatedAt: z.string().datetime()
+});
+
+export const classroomStudentSummaryListSchema = z.array(classroomStudentSummarySchema);
+
+export const classroomStudentEconomySchema = z.object({
+  inventory: z.array(itemInstanceSchema),
+  currency: currencyBalancesSchema
+});

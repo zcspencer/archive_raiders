@@ -1,5 +1,6 @@
 import {
   acceptInviteRequestSchema,
+  classroomInviteSummaryListSchema,
   createInviteRequestSchema,
   inviteInfoSchema
 } from "@odyssey/shared";
@@ -57,6 +58,36 @@ export async function registerInviteRoutes(
           parsed.data.email
         );
         reply.code(201).send(inviteInfoSchema.parse(invite));
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("not found")) {
+          reply.code(404).send({ error: "Classroom not found" });
+          return;
+        }
+        throw error;
+      }
+    }
+  );
+
+  app.get(
+    "/classrooms/:classroomId/invites",
+    { preHandler: [authenticate, requireTeacher] },
+    async (request, reply) => {
+      const user = request.authUser;
+      if (!user) {
+        reply.code(401).send({ error: "Authentication required" });
+        return;
+      }
+
+      const params = request.params as { classroomId?: string };
+      const classroomId = params.classroomId;
+      if (!classroomId) {
+        reply.code(400).send({ error: "Missing classroom id" });
+        return;
+      }
+
+      try {
+        const invites = await inviteService.listInvitesForTeacher(user.id, classroomId);
+        reply.code(200).send(classroomInviteSummaryListSchema.parse(invites));
       } catch (error) {
         if (error instanceof Error && error.message.includes("not found")) {
           reply.code(404).send({ error: "Classroom not found" });
