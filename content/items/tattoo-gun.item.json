@@ -1,0 +1,18 @@
+{
+    "id": "tattoo-gun",
+    "version": 1,
+    "name": "Tattoo Gun",
+    "description": "A professional tattoo machine.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/tattoo-gun",
+    "equippedSprite": "items/tattoo-gun-held",
+    "rarity": "Legendary",
+    "components": [
+        {
+            "typeId": "Equippable",
+            "params": {
+                "slot": "hand"
+            }
+        }
+    ]
+}

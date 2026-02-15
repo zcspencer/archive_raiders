@@ -1,10 +1,11 @@
-import type { CurrencyReward } from "@odyssey/shared";
+import type { CurrencyReward, ItemRarity } from "@odyssey/shared";
 import { create } from "zustand";
 
 export interface ContainerItemPreview {
   definitionId: string;
   name: string;
   quantity: number;
+  rarity?: ItemRarity;
 }
 
 interface ContainerState {

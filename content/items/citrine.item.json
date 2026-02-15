@@ -1,0 +1,11 @@
+{
+    "id": "citrine",
+    "version": 1,
+    "name": "Citrine",
+    "description": "A golden yellow gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/citrine",
+    "rarity": "Common",
+    "tags": ["gem"],
+    "components": []
+}

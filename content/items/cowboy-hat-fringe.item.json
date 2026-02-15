@@ -1,0 +1,18 @@
+{
+    "id": "cowboy-hat-fringe",
+    "version": 1,
+    "name": "Cowboy Hat with Fringe",
+    "description": "A legendary hat with leather fringe.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/cowboy-hat-fringe",
+    "equippedSprite": "items/cowboy-hat-fringe-equipped",
+    "rarity": "Legendary",
+    "components": [
+        {
+            "typeId": "Cosmetic",
+            "params": {
+                "slot": "head"
+            }
+        }
+    ]
+}

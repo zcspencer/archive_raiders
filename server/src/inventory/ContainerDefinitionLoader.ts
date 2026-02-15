@@ -33,7 +33,12 @@ export class ContainerDefinitionLoader {
       const raw = await readFile(path, "utf-8");
       const parsed = JSON.parse(raw) as unknown;
       const result = containerDefinitionSchema.safeParse(parsed);
-      if (!result.success) continue;
+      if (!result.success) {
+        console.warn(
+          `[ContainerDefinitionLoader] Skipped ${entry.name}: ${result.error.message}`
+        );
+        continue;
+      }
       this.cache.set(result.data.id, result.data);
     }
   }

@@ -1,0 +1,10 @@
+{
+    "id": "old-circuit-board",
+    "version": 1,
+    "name": "Old Circuit Board",
+    "description": "Salvaged electronics.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/old-circuit-board",
+    "rarity": "Common",
+    "components": []
+}

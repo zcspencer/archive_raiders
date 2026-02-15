@@ -1,9 +1,10 @@
 {
   "id": "village_chest",
   "kind": "chest",
-  "loot": [
-    { "definitionId": "scroll", "quantity": 1 },
-    { "definitionId": "herb", "quantity": 1 }
+  "drops": [
+    { "method": "fixed", "source": { "type": "item", "itemId": "scroll", "quantity": 1 } },
+    { "method": "fixed", "source": { "type": "item", "itemId": "herb", "quantity": 1 } },
+    { "method": "fixed", "source": { "type": "table", "tableId": "gem_loot" } }
   ],
   "currencyRewards": [
     { "currencyType": "coins", "amount": 5 }

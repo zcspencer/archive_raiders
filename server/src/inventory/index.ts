@@ -5,4 +5,6 @@ export { EquipmentService } from "./EquipmentService.js";
 export { InventoryService } from "./InventoryService.js";
 export { ItemActionResolver } from "./ItemActionResolver.js";
 export { ItemDefinitionLoader } from "./ItemDefinitionLoader.js";
+export { LootTableLoader } from "./LootTableLoader.js";
+export { LootResolver } from "./LootResolver.js";
 export { getComponentType, parseComponentParams } from "./components/index.js";

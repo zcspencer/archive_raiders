@@ -1,0 +1,10 @@
+{
+    "id": "loaf-of-meat",
+    "version": 1,
+    "name": "Loaf of Meat",
+    "description": "A hearty chunk of meat.",
+    "maxStackSize": 5,
+    "inventorySprite": "items/loaf-of-meat",
+    "rarity": "Uncommon",
+    "components": []
+}

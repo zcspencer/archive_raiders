@@ -1,0 +1,11 @@
+{
+    "id": "tourmaline",
+    "version": 1,
+    "name": "Tourmaline",
+    "description": "A multi-hued gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/tourmaline",
+    "rarity": "Epic",
+    "tags": ["gem"],
+    "components": []
+}

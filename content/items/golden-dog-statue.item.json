@@ -1,0 +1,10 @@
+{
+    "id": "golden-dog-statue",
+    "version": 1,
+    "name": "Golden Dog Statue",
+    "description": "A small golden figurine of a dog.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/golden-dog-statue",
+    "rarity": "Legendary",
+    "components": []
+}

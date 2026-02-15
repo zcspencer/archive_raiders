@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { currencyRewardSchema } from "./currency.schema.js";
+import { lootDropSchema } from "./lootTable.schema.js";
 
 /**
  * Runtime validator for container kind.
@@ -23,13 +24,20 @@ export const lootEntrySchema = z.object({
 
 /**
  * Runtime validator for container definition from content JSON.
+ * Exactly one of `loot` or `drops` must be present.
  */
-export const containerDefinitionSchema = z.object({
-  id: z.string().min(1),
-  kind: containerKindSchema,
-  loot: z.array(lootEntrySchema),
-  currencyRewards: z.array(currencyRewardSchema)
-});
+export const containerDefinitionSchema = z
+  .object({
+    id: z.string().min(1),
+    kind: containerKindSchema,
+    loot: z.array(lootEntrySchema).optional(),
+    drops: z.array(lootDropSchema).min(1).optional(),
+    currencyRewards: z.array(currencyRewardSchema)
+  })
+  .refine(
+    (d) => (d.loot !== undefined) !== (d.drops !== undefined),
+    { message: "Exactly one of 'loot' or 'drops' must be provided" }
+  );
 
 /**
  * Runtime validator for open-container payload.

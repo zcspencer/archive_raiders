@@ -1,0 +1,11 @@
+{
+    "id": "peridot",
+    "version": 1,
+    "name": "Peridot",
+    "description": "A green olivine gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/peridot",
+    "rarity": "Uncommon",
+    "tags": ["gem"],
+    "components": []
+}

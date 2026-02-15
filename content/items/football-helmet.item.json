@@ -1,0 +1,18 @@
+{
+    "id": "football-helmet",
+    "version": 1,
+    "name": "Football Helmet",
+    "description": "Protective headgear for the field.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/football-helmet",
+    "equippedSprite": "items/football-helmet-equipped",
+    "rarity": "Rare",
+    "components": [
+        {
+            "typeId": "Cosmetic",
+            "params": {
+                "slot": "head"
+            }
+        }
+    ]
+}

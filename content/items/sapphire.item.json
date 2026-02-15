@@ -1,0 +1,11 @@
+{
+    "id": "sapphire",
+    "version": 1,
+    "name": "Sapphire",
+    "description": "A blue corundum.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/sapphire",
+    "rarity": "Epic",
+    "tags": ["gem"],
+    "components": []
+}

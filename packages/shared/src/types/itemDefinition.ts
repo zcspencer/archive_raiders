@@ -28,5 +28,7 @@ export interface ItemDefinition {
   equippedSprite?: string;
   /** Defaults to Common. Important = single instance per player, cannot be dropped. */
   rarity?: ItemRarity;
+  /** Freeform tags for grouping items (e.g. "gem", "food"). Used by tag-based loot sources. */
+  tags?: string[];
   components: ComponentDescriptor[];
 }

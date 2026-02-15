@@ -1,0 +1,11 @@
+{
+    "id": "tanzanite",
+    "version": 1,
+    "name": "Tanzanite",
+    "description": "A blue-violet zoisite.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/tanzanite",
+    "rarity": "Rare",
+    "tags": ["gem"],
+    "components": []
+}

@@ -1,0 +1,45 @@
+{
+  "id": "gem_loot",
+  "drops": [
+    {
+      "method": "tiered",
+      "tiers": [
+        {
+          "name": "Common",
+          "weight": 40,
+          "pool": [
+            { "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Common", "quantity": 1 } }
+          ]
+        },
+        {
+          "name": "Uncommon",
+          "weight": 30,
+          "pool": [
+            { "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Uncommon", "quantity": 1 } }
+          ]
+        },
+        {
+          "name": "Rare",
+          "weight": 15,
+          "pool": [
+            { "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Rare", "quantity": 1 } }
+          ]
+        },
+        {
+          "name": "Epic",
+          "weight": 10,
+          "pool": [
+            { "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Epic", "quantity": 1 } }
+          ]
+        },
+        {
+          "name": "Legendary",
+          "weight": 5,
+          "pool": [
+            { "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Legendary", "quantity": 1 } }
+          ]
+        }
+      ]
+    }
+  ]
+}

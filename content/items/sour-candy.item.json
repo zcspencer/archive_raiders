@@ -1,0 +1,10 @@
+{
+    "id": "sour-candy",
+    "version": 1,
+    "name": "Sour Candy",
+    "description": "Tart and tangy.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/sour-candy",
+    "rarity": "Common",
+    "components": []
+}

@@ -1,4 +1,6 @@
 import type { CurrencyType } from "./currency.js";
+import type { ItemRarity } from "./itemDefinition.js";
+import type { LootDrop } from "./lootTable.js";
 
 /**
  * Container kind for world interactables. Extensible by adding values.
@@ -32,11 +34,16 @@ export interface CurrencyReward {
 
 /**
  * Container definition loaded from content JSON.
+ * Uses either legacy `loot` (flat list, all granted) or new `drops` (RPG loot table system).
+ * Exactly one of `loot` or `drops` must be present.
  */
 export interface ContainerDefinition {
   id: string;
   kind: ContainerKind;
-  loot: LootEntry[];
+  /** Legacy flat loot list. Every entry is granted deterministically. */
+  loot?: LootEntry[];
+  /** RPG-style loot drops with configurable selection methods. */
+  drops?: LootDrop[];
   currencyRewards: CurrencyReward[];
 }
 
@@ -62,6 +69,8 @@ export interface ContainerItemPreview {
   definitionId: string;
   name: string;
   quantity: number;
+  /** Display rarity; defaults to Common when omitted. */
+  rarity?: ItemRarity;
 }
 
 /**

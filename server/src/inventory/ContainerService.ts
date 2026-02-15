@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { createSeededRng } from "@odyssey/shared";
 import type { ContainerDefinition, CurrencyReward } from "@odyssey/shared";
-import type { ItemInstance } from "@odyssey/shared";
+import type { ItemInstance, ItemRarity } from "@odyssey/shared";
 import type { InventoryService } from "./InventoryService.js";
 import type { CurrencyService } from "./CurrencyService.js";
 import type { ContainerDefinitionLoader } from "./ContainerDefinitionLoader.js";
 import type { ItemDefinitionLoader } from "./ItemDefinitionLoader.js";
+import type { LootResolver } from "./LootResolver.js";
 import type { PostgresDatabase } from "../db/postgres.js";
 
 interface ContainerClaimRow {
@@ -19,6 +21,7 @@ interface RolledLoot {
   definitionId: string;
   quantity: number;
   name: string;
+  rarity?: ItemRarity;
 }
 
 /**
@@ -30,7 +33,8 @@ export class ContainerService {
     private readonly containerLoader: ContainerDefinitionLoader,
     private readonly itemLoader: ItemDefinitionLoader,
     private readonly inventoryService: InventoryService,
-    private readonly currencyService: CurrencyService
+    private readonly currencyService: CurrencyService,
+    private readonly lootResolver: LootResolver
   ) {}
 
   /**
@@ -51,11 +55,16 @@ export class ContainerService {
     if (existing.length > 0) {
       const row = existing[0]!;
       if (row.state === "claimed") throw new Error("The container is empty");
-      const items = this.rollLoot(definition);
+      const items = this.rollLoot(definition, hashSeed(userId, objectId));
       const names = this.resolveNames(items);
+      const rarities = this.resolveRarities(items);
       return {
         nonce: row.nonce,
-        items: items.map((item, i) => ({ ...item, name: names[i] ?? item.definitionId })),
+        items: items.map((item, i) => ({
+          ...item,
+          name: names[i] ?? item.definitionId,
+          rarity: rarities[i] ?? "Common"
+        })),
         currencyRewards: definition.currencyRewards
       };
     }
@@ -67,11 +76,16 @@ export class ContainerService {
        VALUES ($1, $2, $3, $4, 'open', $5, $5)`,
       [randomUUID(), userId, objectId, nonce, now]
     );
-    const items = this.rollLoot(definition);
+    const items = this.rollLoot(definition, hashSeed(userId, objectId));
     const names = this.resolveNames(items);
+    const rarities = this.resolveRarities(items);
     return {
       nonce,
-      items: items.map((item, i) => ({ ...item, name: names[i] ?? item.definitionId })),
+      items: items.map((item, i) => ({
+        ...item,
+        name: names[i] ?? item.definitionId,
+        rarity: rarities[i] ?? "Common"
+      })),
       currencyRewards: definition.currencyRewards
     };
   }
@@ -99,7 +113,7 @@ export class ContainerService {
       return { grantedItems: [], grantedCurrency: [] };
     }
 
-    const items = this.rollLoot(definition);
+    const items = this.rollLoot(definition, hashSeed(userId, objectId));
     const inventory = await this.inventoryService.getInventory(userId);
     const toGrant = filterImportantSingleInstance(items, inventory, this.itemLoader);
 
@@ -136,8 +150,18 @@ export class ContainerService {
     return rows.length > 0 && rows[0]!.state === "claimed";
   }
 
-  private rollLoot(definition: ContainerDefinition): RolledLoot[] {
-    return definition.loot.map((entry) => ({
+  private rollLoot(definition: ContainerDefinition, seed: number): RolledLoot[] {
+    if (definition.drops) {
+      const rng = createSeededRng(seed);
+      const resolved = this.lootResolver.resolve(definition.drops, rng);
+      return resolved.map((r) => ({
+        definitionId: r.definitionId,
+        quantity: r.quantity,
+        name: this.itemLoader.getDefinition(r.definitionId)?.name ?? r.definitionId
+      }));
+    }
+    // Legacy path: grant all loot entries deterministically
+    return (definition.loot ?? []).map((entry) => ({
       definitionId: entry.definitionId,
       quantity: entry.quantity,
       name: this.itemLoader.getDefinition(entry.definitionId)?.name ?? entry.definitionId
@@ -146,6 +170,10 @@ export class ContainerService {
 
   private resolveNames(items: Array<{ definitionId: string }>): string[] {
     return items.map((item) => this.itemLoader.getDefinition(item.definitionId)?.name ?? item.definitionId);
+  }
+
+  private resolveRarities(items: Array<{ definitionId: string }>): (ItemRarity | undefined)[] {
+    return items.map((item) => this.itemLoader.getDefinition(item.definitionId)?.rarity);
   }
 }
 
@@ -174,4 +202,14 @@ function filterImportantSingleInstance(
     }
   }
   return out;
+}
+
+/** Simple string hash for deterministic seeding. */
+function hashSeed(a: string, b: string): number {
+  const str = a + ":" + b;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) | 0;
+  }
+  return hash >>> 0;
 }

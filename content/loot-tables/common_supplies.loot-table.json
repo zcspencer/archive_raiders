@@ -1,0 +1,13 @@
+{
+  "id": "common_supplies",
+  "drops": [
+    {
+      "method": "weighted",
+      "pool": [
+        { "weight": 50, "source": { "type": "item", "itemId": "herb", "quantity": { "min": 1, "max": 3 } } },
+        { "weight": 30, "source": { "type": "item", "itemId": "fez", "quantity": 1 } },
+        { "weight": 20, "source": { "type": "item", "itemId": "stick", "quantity": 1 } }
+      ]
+    }
+  ]
+}

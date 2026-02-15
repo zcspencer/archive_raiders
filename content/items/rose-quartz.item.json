@@ -1,0 +1,11 @@
+{
+    "id": "rose-quartz",
+    "version": 1,
+    "name": "Rose Quartz",
+    "description": "A pale pink quartz.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/rose-quartz",
+    "rarity": "Common",
+    "tags": ["gem"],
+    "components": []
+}

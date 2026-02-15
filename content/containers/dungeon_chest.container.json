@@ -1,0 +1,37 @@
+{
+  "id": "dungeon_chest",
+  "kind": "chest",
+  "drops": [
+    { "method": "fixed", "source": { "type": "item", "itemId": "scroll", "quantity": 1 } },
+    {
+      "method": "tiered",
+      "count": 2,
+      "tiers": [
+        {
+          "name": "Common",
+          "weight": 60,
+          "pool": [
+            { "weight": 100, "source": { "type": "table", "tableId": "common_supplies" } }
+          ]
+        },
+        {
+          "name": "Rare",
+          "weight": 30,
+          "pool": [
+            { "weight": 100, "source": { "type": "table", "tableId": "rare_gear" } }
+          ]
+        },
+        {
+          "name": "Epic",
+          "weight": 10,
+          "pool": [
+            { "weight": 100, "source": { "type": "item", "itemId": "ancient-map", "quantity": 1 } }
+          ]
+        }
+      ]
+    }
+  ],
+  "currencyRewards": [
+    { "currencyType": "coins", "amount": 15 }
+  ]
+}

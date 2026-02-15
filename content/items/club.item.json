@@ -1,0 +1,18 @@
+{
+    "id": "club",
+    "version": 1,
+    "name": "Club",
+    "description": "A heavy wooden club.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/club",
+    "equippedSprite": "items/club-held",
+    "rarity": "Uncommon",
+    "components": [
+        {
+            "typeId": "Equippable",
+            "params": {
+                "slot": "hand"
+            }
+        }
+    ]
+}

@@ -32,5 +32,6 @@ export const itemDefinitionSchema = z.object({
   inventorySprite: z.string().min(1),
   equippedSprite: z.string().min(1).optional(),
   rarity: itemRaritySchema.default("Common"),
+  tags: z.array(z.string().min(1)).optional(),
   components: z.array(componentDescriptorSchema)
 });

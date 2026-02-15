@@ -1,0 +1,18 @@
+{
+    "id": "square-cap",
+    "version": 1,
+    "name": "Square Cap",
+    "description": "A flat-topped cap.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/square-cap",
+    "equippedSprite": "items/square-cap-equipped",
+    "rarity": "Common",
+    "components": [
+        {
+            "typeId": "Cosmetic",
+            "params": {
+                "slot": "head"
+            }
+        }
+    ]
+}

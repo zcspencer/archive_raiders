@@ -1,0 +1,11 @@
+{
+    "id": "chrysoberyl-cats-eye",
+    "version": 1,
+    "name": "Chrysoberyl Cat's-Eye",
+    "description": "A chatoyant gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/chrysoberyl-cats-eye",
+    "rarity": "Rare",
+    "tags": ["gem"],
+    "components": []
+}

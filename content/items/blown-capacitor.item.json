@@ -1,0 +1,10 @@
+{
+    "id": "blown-capacitor",
+    "version": 1,
+    "name": "Blown Capacitor",
+    "description": "A failed capacitor from old gear.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/blown-capacitor",
+    "rarity": "Common",
+    "components": []
+}

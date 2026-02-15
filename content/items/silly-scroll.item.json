@@ -1,0 +1,18 @@
+{
+    "id": "silly-scroll",
+    "version": 1,
+    "name": "Silly Scroll",
+    "description": "A scroll with a silly message.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/silly-scroll",
+    "rarity": "Rare",
+    "components": [
+        {
+            "typeId": "Readable",
+            "params": {
+                "contentType": "text",
+                "content": "You are a silly goose."
+            }
+        }
+    ]
+}

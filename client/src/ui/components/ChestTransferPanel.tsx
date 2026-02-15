@@ -1,7 +1,17 @@
 import type { CSSProperties, ReactElement } from "react";
+import type { ItemRarity } from "@odyssey/shared";
 import { useContainerStore } from "../../store/container";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
+
+const RARITY_COLORS: Record<ItemRarity, string> = {
+  Common: "#ffffff",
+  Uncommon: "#22c55e",
+  Rare: "#3b82f6",
+  Epic: "#a855f7",
+  Legendary: "#f97316",
+  Important: "#eab308"
+};
 
 /**
  * Modal that appears when a container is opened. Shows server-provided loot preview (read-only).
@@ -49,7 +59,17 @@ export function ChestTransferPanel(): ReactElement | null {
                 <ul style={listStyle}>
                   {previewItems.map((item, i) => (
                     <li key={`${item.definitionId}-${i}`} style={itemRowStyle}>
-                      <span style={itemLabelStyle}>{item.name}</span>
+                      <span style={itemNameRarityWrap}>
+                        <span style={itemLabelStyle}>{item.name}</span>
+                        <span
+                          style={{
+                            ...itemRarityStyle,
+                            color: RARITY_COLORS[item.rarity ?? "Common"]
+                          }}
+                        >
+                          {item.rarity ?? "Common"}
+                        </span>
+                      </span>
                       <span style={qtyStyle}>x{item.quantity}</span>
                     </li>
                   ))}
@@ -144,6 +164,7 @@ const itemRowStyle: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+  gap: 8,
   padding: "8px 10px",
   marginBottom: 4,
   background: "rgba(30, 41, 59, 0.7)",
@@ -152,9 +173,25 @@ const itemRowStyle: CSSProperties = {
   fontSize: 13
 };
 
+const itemNameRarityWrap: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  flex: "1 1 auto",
+  minWidth: 0
+};
+
 const itemLabelStyle: CSSProperties = {
   fontWeight: 600,
   color: "#e2e8f0"
+};
+
+const itemRarityStyle: CSSProperties = {
+  fontWeight: 600,
+  fontSize: 12,
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  flexShrink: 0
 };
 
 const qtyStyle: CSSProperties = {

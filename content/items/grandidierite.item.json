@@ -1,0 +1,11 @@
+{
+    "id": "grandidierite",
+    "version": 1,
+    "name": "Grandidierite",
+    "description": "A rare blue-green mineral.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/grandidierite",
+    "rarity": "Legendary",
+    "tags": ["gem"],
+    "components": []
+}

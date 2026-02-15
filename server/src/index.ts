@@ -19,7 +19,9 @@ import {
   EquipmentService,
   InventoryService,
   ItemActionResolver,
-  ItemDefinitionLoader
+  ItemDefinitionLoader,
+  LootTableLoader,
+  LootResolver
 } from "./inventory/index.js";
 import { EmailService, InviteService } from "./invite/index.js";
 import { TaskService } from "./task/TaskService.js";
@@ -57,12 +59,16 @@ async function startServer(): Promise<void> {
   const containerDefinitionLoader = new ContainerDefinitionLoader(config.CONTENT_DIR);
   await itemDefinitionLoader.loadAll();
   await containerDefinitionLoader.loadAll();
+  const lootTableLoader = new LootTableLoader(config.CONTENT_DIR);
+  await lootTableLoader.loadAll();
+  const lootResolver = new LootResolver(lootTableLoader, itemDefinitionLoader);
   const containerService = new ContainerService(
     db,
     containerDefinitionLoader,
     itemDefinitionLoader,
     inventoryService,
-    currencyService
+    currencyService,
+    lootResolver
   );
   const itemActionResolver = new ItemActionResolver(
     itemDefinitionLoader,

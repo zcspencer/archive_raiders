@@ -1,0 +1,18 @@
+{
+    "id": "alpine-glasses",
+    "version": 1,
+    "name": "Alpine Glasses",
+    "description": "Sunglasses for the slopes.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/alpine-glasses",
+    "equippedSprite": "items/alpine-glasses-equipped",
+    "rarity": "Rare",
+    "components": [
+        {
+            "typeId": "Cosmetic",
+            "params": {
+                "slot": "head"
+            }
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "id": "garnet",
+    "version": 1,
+    "name": "Garnet",
+    "description": "A deep red gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/garnet",
+    "rarity": "Uncommon",
+    "tags": ["gem"],
+    "components": []
+}

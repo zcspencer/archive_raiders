@@ -1,0 +1,11 @@
+{
+    "id": "aquamarine",
+    "version": 1,
+    "name": "Aquamarine",
+    "description": "A pale blue beryl.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/aquamarine",
+    "rarity": "Uncommon",
+    "tags": ["gem"],
+    "components": []
+}

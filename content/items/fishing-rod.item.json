@@ -1,0 +1,21 @@
+{
+    "id": "fishing-rod",
+    "version": 1,
+    "name": "Fishing Rod",
+    "description": "Cast a line and catch fish.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/fishing-rod",
+    "equippedSprite": "items/fishing-rod-held",
+    "rarity": "Uncommon",
+    "components": [
+        {
+            "typeId": "Equippable",
+            "params": {
+                "slot": "hand",
+                "stats": {
+                    "fish": 1
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "id": "bent-metal-sheet",
+    "version": 1,
+    "name": "Bent Metal Sheet",
+    "description": "A warped sheet of metal.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/bent-metal-sheet",
+    "rarity": "Common",
+    "components": []
+}

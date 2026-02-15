@@ -1,0 +1,11 @@
+{
+    "id": "opal",
+    "version": 1,
+    "name": "Opal",
+    "description": "A gem with play-of-color.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/opal",
+    "rarity": "Rare",
+    "tags": ["gem"],
+    "components": []
+}

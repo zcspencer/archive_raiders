@@ -1,0 +1,11 @@
+{
+    "id": "alexandrite",
+    "version": 1,
+    "name": "Alexandrite",
+    "description": "A color-change chrysoberyl.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/alexandrite",
+    "rarity": "Epic",
+    "tags": ["gem"],
+    "components": []
+}

@@ -1,0 +1,10 @@
+{
+    "id": "steam-boy",
+    "version": 1,
+    "name": "Steam Boy",
+    "description": "A museum artifact: a silly take on handheld gaming.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/steam-boy",
+    "rarity": "Rare",
+    "components": []
+}

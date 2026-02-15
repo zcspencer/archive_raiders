@@ -1,0 +1,10 @@
+{
+    "id": "broken-cell-phone",
+    "version": 1,
+    "name": "Broken Cell Phone",
+    "description": "A cracked phone, no longer working.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/broken-cell-phone",
+    "rarity": "Common",
+    "components": []
+}

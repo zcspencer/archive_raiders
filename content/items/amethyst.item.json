@@ -1,0 +1,11 @@
+{
+    "id": "amethyst",
+    "version": 1,
+    "name": "Amethyst",
+    "description": "A purple gemstone.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/amethyst",
+    "rarity": "Common",
+    "tags": ["gem"],
+    "components": []
+}

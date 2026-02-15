@@ -1,0 +1,10 @@
+{
+    "id": "pocket-watch",
+    "version": 1,
+    "name": "Pocket Watch",
+    "description": "A fine timepiece.",
+    "maxStackSize": 1,
+    "inventorySprite": "items/pocket-watch",
+    "rarity": "Uncommon",
+    "components": []
+}

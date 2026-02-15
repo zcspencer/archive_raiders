@@ -1,0 +1,11 @@
+{
+    "id": "painite",
+    "version": 1,
+    "name": "Painite",
+    "description": "One of the rarest minerals.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/painite",
+    "rarity": "Legendary",
+    "tags": ["gem"],
+    "components": []
+}

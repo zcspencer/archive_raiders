@@ -1,0 +1,11 @@
+{
+    "id": "musgravite",
+    "version": 1,
+    "name": "Musgravite",
+    "description": "An extremely rare gem.",
+    "maxStackSize": 20,
+    "inventorySprite": "items/musgravite",
+    "rarity": "Legendary",
+    "tags": ["gem"],
+    "components": []
+}

@@ -1,0 +1,12 @@
+{
+  "id": "rare_gear",
+  "drops": [
+    {
+      "method": "weighted",
+      "pool": [
+        { "weight": 60, "source": { "type": "item", "itemId": "fez", "quantity": 1 } },
+        { "weight": 40, "source": { "type": "item", "itemId": "top-hat", "quantity": 1 } }
+      ]
+    }
+  ]
+}
