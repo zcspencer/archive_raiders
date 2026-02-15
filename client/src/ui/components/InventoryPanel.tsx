@@ -6,6 +6,8 @@ import { usePlayerHotbarStore } from "../../store/playerHotbar";
 import { useCurrencyStore } from "../../store/currency";
 import { useReadableContentStore } from "../../store/readableContent";
 import { getItemDefinition, getReadableParams, hasEquippableComponent } from "../../data/itemDefinitions";
+import { getTaskDefinition } from "../../data/taskDefinitions";
+import { useChallengeStore } from "../../store/challenge";
 
 const SLOT_COUNT = 24;
 
@@ -107,9 +109,19 @@ export function InventoryPanel(): ReactElement | null {
                           type="button"
                           style={contextBtnStyle}
                           onClick={() => {
+                            setContextItemId(null);
+                            if (readableParams.taskId) {
+                              const task = getTaskDefinition(readableParams.taskId);
+                              if (task) {
+                                useChallengeStore.getState().startChallenge(task, () => {
+                                  const ct = readableParams.contentType === "render" ? "text" : readableParams.contentType;
+                                  openReadable(name, ct, readableParams.content);
+                                });
+                                return;
+                              }
+                            }
                             const ct = readableParams.contentType === "render" ? "text" : readableParams.contentType;
                             openReadable(name, ct, readableParams.content);
-                            setContextItemId(null);
                           }}
                         >
                           Read

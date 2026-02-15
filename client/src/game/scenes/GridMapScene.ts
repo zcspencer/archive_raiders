@@ -165,7 +165,8 @@ export abstract class GridMapScene extends Phaser.Scene {
           placement.kind,
           placement.label,
           placement.gridX,
-          placement.gridY
+          placement.gridY,
+          placement.taskId
         )
       );
     }

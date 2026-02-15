@@ -5,7 +5,8 @@ const KIND_COLORS: Record<string, number> = {
   chest: 0xfbbf24,
   door: 0x8b5cf6,
   artifact: 0x06b6d4,
-  sign: 0x94a3b8
+  sign: 0x94a3b8,
+  computer: 0x22c55e
 };
 
 /** Default prompt text per object kind. */
@@ -13,7 +14,8 @@ const KIND_PROMPTS: Record<string, string> = {
   chest: "X to open",
   door: "X to enter",
   artifact: "X to examine",
-  sign: "X to read"
+  sign: "X to read",
+  computer: "X to use"
 };
 
 const LABEL_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -38,6 +40,8 @@ export class InteractableObject {
   readonly kind: string;
   readonly gridX: number;
   readonly gridY: number;
+  /** Optional task definition ID that gates this interaction behind a challenge. */
+  readonly taskId: string | undefined;
   readonly body: Phaser.GameObjects.Rectangle;
   readonly label: Phaser.GameObjects.Text;
   readonly prompt: Phaser.GameObjects.Text;
@@ -48,12 +52,14 @@ export class InteractableObject {
     kind: string,
     labelText: string,
     gridX: number,
-    gridY: number
+    gridY: number,
+    taskId?: string
   ) {
     this.objectId = objectId;
     this.kind = kind;
     this.gridX = gridX;
     this.gridY = gridY;
+    this.taskId = taskId;
 
     const worldX = gridX * TILE_SIZE + TILE_SIZE / 2;
     const worldY = gridY * TILE_SIZE + TILE_SIZE / 2;

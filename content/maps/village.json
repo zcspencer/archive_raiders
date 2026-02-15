@@ -150,7 +150,8 @@
           "properties": [
             { "name": "objectId", "type": "string", "value": "timber_nook_door" },
             { "name": "kind", "type": "string", "value": "door" },
-            { "name": "label", "type": "string", "value": "Timber Nook" }
+            { "name": "label", "type": "string", "value": "Timber Nook" },
+            { "name": "taskId", "type": "string", "value": "timber-nook-key" }
           ]
         }
       ]

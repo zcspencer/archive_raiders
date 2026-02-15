@@ -1,0 +1,20 @@
+{
+  "id": "timber-nook-key",
+  "type": "copy-paste",
+  "title": "The Key to Timber Nook",
+  "description": "The door to Timber Nook is sealed with an ancient rune lock. Copy the magic key rune and paste it into the lock.",
+  "difficulty": 1,
+  "config": {
+    "sourceContent": "\ud83d\udddd\ufe0f",
+    "expectedValue": "\ud83d\udddd\ufe0f"
+  },
+  "hints": [
+    "Select the key symbol above, then copy it.",
+    "Paste the copied symbol into the text field below."
+  ],
+  "rewards": {
+    "currency": 15,
+    "xp": 10,
+    "items": []
+  }
+}

@@ -28,6 +28,8 @@ export function getItemDefinition(id: string): ItemDefinition | undefined {
 export interface ReadableParams {
   contentType: "text" | "image" | "render";
   content: string;
+  /** Optional task ID that gates reading behind a challenge. */
+  taskId?: string;
 }
 
 /**
@@ -49,5 +51,6 @@ export function getReadableParams(def: ItemDefinition): ReadableParams | undefin
   if (contentType !== "text" && contentType !== "image" && contentType !== "render") {
     return undefined;
   }
-  return { contentType, content: comp.params.content };
+  const taskId = typeof comp.params.taskId === "string" ? comp.params.taskId : undefined;
+  return { contentType, content: comp.params.content, taskId };
 }

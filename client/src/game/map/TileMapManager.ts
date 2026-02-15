@@ -47,12 +47,14 @@ export function parseMap(data: TiledMapData): ParsedMap {
       npcs.push({ npcId: getProp(obj, "npcId", obj.name), gridX: gx, gridY: gy });
       blockedTiles.push({ gx, gy });
     } else if (obj.type === "interactable") {
+      const taskIdRaw = getOptionalProp(obj, "taskId");
       objects.push({
         objectId: getProp(obj, "objectId", obj.name),
         kind: getProp(obj, "kind", "artifact"),
         label: getProp(obj, "label", obj.name),
         gridX: gx,
-        gridY: gy
+        gridY: gy,
+        ...(taskIdRaw ? { taskId: taskIdRaw } : {})
       });
       blockedTiles.push({ gx, gy });
     } else if (obj.type === "spawn") {
@@ -93,4 +95,10 @@ function findLayer(
 function getProp(obj: TiledObject, name: string, fallback: string): string {
   const prop: TiledProperty | undefined = obj.properties?.find((p) => p.name === name);
   return prop ? String(prop.value) : fallback;
+}
+
+/** Reads an optional custom property string from a Tiled object. */
+function getOptionalProp(obj: TiledObject, name: string): string | undefined {
+  const prop: TiledProperty | undefined = obj.properties?.find((p) => p.name === name);
+  return prop ? String(prop.value) : undefined;
 }

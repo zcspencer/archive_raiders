@@ -68,4 +68,6 @@ export interface MapObjectPlacement {
   label: string;
   gridX: number;
   gridY: number;
+  /** Optional task definition ID that gates this interaction behind a challenge. */
+  taskId?: string;
 }

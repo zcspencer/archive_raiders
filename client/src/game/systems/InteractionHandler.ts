@@ -6,6 +6,8 @@ import { useDialogueStore } from "../../store/dialogue";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { useContainerStore } from "../../store/container";
+import { useChallengeStore } from "../../store/challenge";
+import { getTaskDefinition } from "../../data/taskDefinitions";
 
 /** Callback a scene provides so the handler can trigger scene transitions. */
 export type SceneTransitionFn = (targetScene: string, data: Record<string, unknown>) => void;
@@ -67,6 +69,21 @@ export class InteractionHandler {
   }
 
   private handleObject(obj: InteractableObject): void {
+    if (obj.taskId) {
+      const task = getTaskDefinition(obj.taskId);
+      if (task) {
+        useChallengeStore.getState().startChallenge(task, () => {
+          this.proceedWithObject(obj);
+        });
+        usePlayerControlStore.getState().setInputMode("ui");
+        return;
+      }
+    }
+    this.proceedWithObject(obj);
+  }
+
+  /** Executes the actual interaction after any challenge gate has passed. */
+  private proceedWithObject(obj: InteractableObject): void {
     if (obj.kind === "door") {
       this.handleDoor(obj);
       return;
@@ -76,6 +93,10 @@ export class InteractionHandler {
       this.handleChest(obj);
       return;
     }
+
+    /* Standalone challenge objects (computer, artifact with taskId) are
+       fully handled by the challenge panel — nothing else to do here. */
+    if (obj.taskId) return;
 
     /* Fallback for unknown kinds — log for debugging. */
     console.log(`Interacted with ${obj.kind}: ${obj.objectId}`);

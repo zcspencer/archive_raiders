@@ -1,0 +1,21 @@
+{
+  "id": "zoom-ancient-map",
+  "type": "zoom-discover",
+  "title": "The Ancient Map",
+  "description": "This map holds a secret, but the writing is impossibly small. Zoom in to uncover it.",
+  "difficulty": 1,
+  "config": {
+    "content": "~~~ ANCIENT CARTOGRAPHIC SURVEY ~~~\n\nRegion: The Verdant Expanse\nSurveyed by: Archivist Lira, Third Age\n\nNorth: Mountains of Echoing Stone\nSouth: The Sunken Marshlands\nEast: Whispering Forest\nWest: The Shattered Coast\n\n[Faded markings and compass rose]\n[Illegible footnote near the southern edge]",
+    "hiddenDetail": "Vault beneath the old well",
+    "revealAtZoom": 2.5
+  },
+  "hints": [
+    "Try using the zoom shortcut to make the map larger.",
+    "Look near the bottom of the map for tiny hidden text."
+  ],
+  "rewards": {
+    "currency": 30,
+    "xp": 20,
+    "items": []
+  }
+}

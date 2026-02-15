@@ -9,8 +9,10 @@ import { useDialogueStore } from "../../store/dialogue";
 import { useContainerStore } from "../../store/container";
 import { useNotificationStore } from "../../store/notification";
 import { useReadableContentStore } from "../../store/readableContent";
+import { useChallengeStore } from "../../store/challenge";
 import { DialogueBox } from "../components/DialogueBox";
 import { ReadableContentDialog } from "../components/ReadableContentDialog";
+import { ChallengePanel } from "../components/ChallengePanel";
 import { Toolbar } from "../components/Toolbar";
 import { InventoryPanel } from "../components/InventoryPanel";
 import { ChestTransferPanel } from "../components/ChestTransferPanel";
@@ -35,6 +37,8 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   const closeContainer = useContainerStore((s) => s.closeContainer);
   const readableOpen = useReadableContentStore((s) => s.isOpen);
   const closeReadable = useReadableContentStore((s) => s.closeReadable);
+  const challengeActive = useChallengeStore((s) => s.activeTask !== null);
+  const dismissChallenge = useChallengeStore((s) => s.dismiss);
   const notificationMessage = useNotificationStore((s) => s.message);
   const setNotificationMessage = useNotificationStore((s) => s.setMessage);
 
@@ -57,10 +61,10 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   }, [setInputMode]);
 
   useEffect(() => {
-    if (!dialogueActive && !containerOpen) {
+    if (!dialogueActive && !containerOpen && !challengeActive) {
       setInputMode("game");
     }
-  }, [dialogueActive, containerOpen, setInputMode]);
+  }, [dialogueActive, containerOpen, challengeActive, setInputMode]);
 
   /* Auto-dismiss server notification after 4 seconds. */
   useEffect(() => {
@@ -84,6 +88,11 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       }
       if (event.key === "Escape") {
         event.preventDefault();
+        if (challengeActive) {
+          dismissChallenge();
+          setInputMode("game");
+          return;
+        }
         if (readableOpen) {
           closeReadable();
           return;
@@ -115,7 +124,7 @@ export function GameScreen(props: GameScreenProps): ReactElement {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [containerOpen, closeContainer, inventoryOpen, readableOpen, closeReadable, setInputMode, setSelectedHotbarSlot, toggleInventory]);
+  }, [challengeActive, dismissChallenge, containerOpen, closeContainer, inventoryOpen, readableOpen, closeReadable, setInputMode, setSelectedHotbarSlot, toggleInventory]);
 
   return (
     <>
@@ -133,6 +142,7 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       <Toolbar />
       <InventoryPanel />
       <ChestTransferPanel />
+      <ChallengePanel />
       <DialogueBox />
       <ReadableContentDialog />
 

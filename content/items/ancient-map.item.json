@@ -1,12 +1,12 @@
 {
   "id": "ancient-map",
-  "version": 1,
+  "version": 2,
   "name": "Ancient Map",
   "description": "An old map.",
   "maxStackSize": 1,
   "inventorySprite": "items/ancient-map",
   "rarity": "Important",
   "components": [
-    { "typeId": "Readable", "params": { "contentType": "image", "content": "maps/ancient.png" } }
+    { "typeId": "Readable", "params": { "contentType": "image", "content": "maps/ancient.png", "taskId": "zoom-ancient-map" } }
   ]
 }

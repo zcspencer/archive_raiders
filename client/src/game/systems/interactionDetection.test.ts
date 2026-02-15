@@ -25,6 +25,7 @@ function stubObject(objectId: string, kind: string, gx: number, gy: number) {
     kind,
     gridX: gx,
     gridY: gy,
+    taskId: undefined,
     isPlayerFacing: (px: number, py: number, fx: number, fy: number) =>
       px + fx === gx && py + fy === gy,
     isPlayerAdjacent: (px: number, py: number) =>
