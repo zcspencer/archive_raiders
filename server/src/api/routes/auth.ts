@@ -6,14 +6,33 @@ import {
 import type { FastifyInstance } from "fastify";
 import type { AuthService } from "../../auth/AuthService.js";
 
+interface AuthRouteOptions {
+  /** When false, POST /auth/register returns 403. Invite-based registration is unaffected. */
+  allowPublicRegistration: boolean;
+}
+
 /**
  * Registers authentication API routes.
  */
 export async function registerAuthRoutes(
   app: FastifyInstance,
-  authService: AuthService
+  authService: AuthService,
+  options: AuthRouteOptions
 ): Promise<void> {
+  /** Public endpoint so clients can hide the register form when self-signup is disabled. */
+  app.get("/auth/registration-status", async () => ({
+    publicRegistrationEnabled: options.allowPublicRegistration
+  }));
+
   app.post("/auth/register", async (request, reply) => {
+    if (!options.allowPublicRegistration) {
+      reply.code(403).send({
+        error:
+          "Public registration is disabled. Please ask your teacher for an invite."
+      });
+      return;
+    }
+
     const parsed = registerRequestSchema.safeParse(request.body);
     if (!parsed.success) {
       reply.code(400).send({ error: "Invalid register payload" });

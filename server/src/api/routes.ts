@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { AuthService } from "../auth/AuthService.js";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
+import type { AppConfig } from "../config.js";
 import type { InviteService } from "../invite/index.js";
 import type { TaskService } from "../task/TaskService.js";
 import { buildAuthenticatePreHandler } from "./middleware/auth.js";
@@ -22,14 +23,17 @@ interface RouteServices {
  */
 export async function registerRoutes(
   app: FastifyInstance,
-  services: RouteServices
+  services: RouteServices,
+  config: AppConfig
 ): Promise<void> {
   app.get("/health", async () => ({ status: "ok" }));
 
   const authenticate = buildAuthenticatePreHandler(services.authService);
   const requireTeacher = requireRole("teacher");
 
-  await registerAuthRoutes(app, services.authService);
+  await registerAuthRoutes(app, services.authService, {
+    allowPublicRegistration: config.ALLOW_PUBLIC_REGISTRATION
+  });
   await registerClassroomRoutes(
     app,
     services.classroomService,

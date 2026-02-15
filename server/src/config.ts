@@ -13,7 +13,11 @@ const envSchema = z.object({
   CONTENT_DIR: z.string().default("content"),
   AWS_REGION: z.string().default("us-west-2"),
   SES_FROM_EMAIL: z.string().email().optional(),
-  INVITE_BASE_URL: z.string().url().optional()
+  INVITE_BASE_URL: z.string().url().optional(),
+  ALLOW_PUBLIC_REGISTRATION: z
+    .enum(["true", "false", "1", "0"])
+    .default("false")
+    .transform((v) => v === "true" || v === "1")
 });
 
 export interface AppConfig extends z.infer<typeof envSchema> {

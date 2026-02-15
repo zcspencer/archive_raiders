@@ -70,7 +70,11 @@ async function startServer(): Promise<void> {
     equipmentService
   );
 
-  await registerRoutes(app, { authService, classroomService, inviteService, taskService });
+  await registerRoutes(
+    app,
+    { authService, classroomService, inviteService, taskService },
+    config
+  );
 
   const gameServer = new Server({
     transport: new WebSocketTransport({ server: app.server })

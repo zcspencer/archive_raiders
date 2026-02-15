@@ -11,9 +11,11 @@
 		reverse_proxy server:3000
 	}
 
-	# Admin SPA — files under /admin/
-	handle /admin/* {
-		uri strip_prefix /admin
+	# Redirect /admin to /admin/
+	redir /admin /admin/ 308
+
+	# Admin SPA — strip prefix and serve from /srv/admin
+	handle_path /admin/* {
 		root * /srv/admin
 		try_files {path} /index.html
 		file_server
