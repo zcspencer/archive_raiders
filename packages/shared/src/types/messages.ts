@@ -1,3 +1,7 @@
+/**
+ * Message types sent from the client to the server over the Colyseus room connection.
+ * This enum is additive-only; existing values must not be renamed or removed.
+ */
 export enum ClientMessage {
   Move = "move",
   SetMap = "set-map",
@@ -12,6 +16,10 @@ export enum ClientMessage {
   UseItem = "use-item"
 }
 
+/**
+ * Message types sent from the server to the client over the Colyseus room connection.
+ * This enum is additive-only; existing values must not be renamed or removed.
+ */
 export enum ServerMessage {
   TaskTrigger = "task-trigger",
   TaskResult = "task-result",

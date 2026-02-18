@@ -11,11 +11,13 @@ alwaysApply: false
 - Validate content through `pnpm content:validate`.
 - Prefer additive schema changes over breaking changes.
 - IDs are stable once released; do not repurpose existing IDs.
+- New content types (maps, items, NPCs, containers, tasks, loot tables) follow the same patterns described below. When adding a new content kind, add a Zod schema in `packages/shared`, a loader in the server, and a validation entry in the content script.
 
 ## Task Definitions (`content/tasks/**/*.task.json`)
 
 - Required fields: id, type, title, description, config, rewards.
 - Keep task config fields explicit and version-compatible.
+- New task types are added by registering a validator in `packages/task-validators`.
 
 ## Item Definitions (`content/items/*.item.json`)
 
@@ -23,25 +25,34 @@ alwaysApply: false
 - Required fields: `id`, `version`, `name`, `description`, `maxStackSize`, `inventorySprite`, `components[]`.
 - Optional: `equippedSprite` (for in-world rendering). `rarity` (default `"Common"`): `Common` | `Uncommon` | `Rare` | `Epic` | `Legendary` | `Important`. Important = single instance per player, cannot be dropped.
 - Components: `{ typeId, params }` — validated loosely by Zod, deeply by server component registry.
-- Known typeIds: `Equippable` (slot, stats?), `Cosmetic` (slot), `Readable` (contentType, content), `Container` (maxSlots).
+- Current typeIds include `Equippable` (slot, stats?), `Cosmetic` (slot), `Readable` (contentType, content), `Container` (maxSlots). New component types are added by extending the component registry in `server/src/inventory/components/`.
 - `version` is incremented when component list or params change (not display-only changes).
 
 ## Container Definitions (`content/containers/*.container.json`)
 
 - Schema: `containerDefinitionSchema` from `@odyssey/shared`.
-- Required fields: `id`, `kind`, `loot[]`, `currencyRewards[]`.
+- Required fields: `id`, `kind`, `currencyRewards[]`, and exactly one of `loot[]` or `drops[]`.
 - `id` must match the `objectId` in map files (e.g. `village_chest` in both `village.json` and `village_chest.container.json`).
-- `kind`: `"chest" | "crate" | "bag" | "bookshelf" | "cabinet"`.
-- `loot[]`: `{ definitionId, quantity, weight? }` — references item definition IDs.
+- `kind`: `"chest" | "crate" | "bag" | "bookshelf" | "cabinet"` — extensible by adding values to `containerKindSchema`.
+- `loot[]`: `{ definitionId, quantity, weight? }` — references item definition IDs directly.
+- `drops[]`: loot table entries using `lootDropSchema` (supports `fixed`, `uniform`, `weighted`, `tiered` methods and table references). See `lootTable.schema.ts` for the full schema.
 - `currencyRewards[]`: `{ currencyType, amount }`.
+
+## Loot Table Definitions (`content/loot-tables/*.loot-table.json`)
+
+- Schema: `lootTableDefinitionSchema` from `@odyssey/shared`.
+- Standalone tables referenced by `tableId` from container `drops` or other tables.
+- Supports nested resolution, tag-based item selection, and rarity filtering.
 
 ## NPC Definitions (`content/npcs/*.json`)
 
 - Schema: NPC Zod schema from `@odyssey/shared`.
 - Required fields: id, displayName, dialogueLines.
+- New NPCs are added as JSON files; the client loads them via `npcDialogue.ts` mappings.
 
 ## Maps (`content/maps/*.json`)
 
-- Tiled-format JSON.
+- Tiled-format JSON exported from the Tiled editor.
 - Object `properties` include `objectId`, `kind`, `label`.
 - Container objectIds must match a container definition `id`.
+- New maps require a corresponding `GridMapScene` subclass in the client and optionally a door entry in `InteractionHandler`.

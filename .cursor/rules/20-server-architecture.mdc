@@ -16,9 +16,11 @@ alwaysApply: false
 
 ## Route Files (`api/routes/`)
 
-- `auth.ts` — `POST /auth/register`, `POST /auth/login`.
-- `classroom.ts` — CRUD + `POST /classrooms/:id/memberships` (teacher-only enrollment).
+- `auth.ts` — `POST /auth/register`, `POST /auth/login`, `GET /auth/registration-status`.
+- `classroom.ts` — CRUD + student summaries + economy views (teacher-only).
+- `invite.ts` — `POST /invites` (create), `GET /invites/:token` (validate), `POST /invites/:token/accept`.
 - `task.ts` — `POST /tasks/:taskId/submit` (authenticated, classroom-scoped).
+- New route files follow the same pattern: thin handlers, Zod validation at boundaries, service delegation. Registered via `registerRoutes()` in `api/routes.ts`.
 
 ## Middleware (`api/middleware/`)
 
@@ -30,21 +32,31 @@ alwaysApply: false
 - `AuthService` — scrypt password hashing, JWT issue/verify, user lookup.
 - `ClassroomService` — create, list, enroll; membership-based visibility for students.
 - `TaskService` — loads task JSON from `content/`, executes validator from registry.
+- `InviteService` — classroom invites with email delivery (SES) and student auto-enrollment.
+- `EmailService` — AWS SES integration for invite emails.
 
 ### Inventory Services (`server/src/inventory/`)
 
 - `InventoryService` — CRUD for `player_inventory` (getInventory, addItems, removeItem, moveItem, extractItem, insertItem).
 - `EquipmentService` — equip/unequip by slot (`hand`, `head`); references inventory instance IDs.
 - `CurrencyService` — getBalances, addCurrency, spendCurrency for `player_currency`.
-- `ContainerService` — stateful open/claim with nonce-based idempotency via `container_claims` table.
+- `ContainerService` — stateful open/claim with nonce-based idempotency via `container_claims` table. Supports legacy `loot[]` and new `drops[]` (loot table) resolution paths.
 - `ItemDefinitionLoader` — loads + caches `content/items/*.item.json` at startup.
 - `ContainerDefinitionLoader` — loads + caches `content/containers/*.container.json` at startup.
+- `LootTableLoader` — loads + caches `content/loot-tables/*.loot-table.json` at startup.
+- `LootResolver` — resolves loot drops from tiered/weighted/fixed/uniform methods with tag and table references.
 - `ItemActionResolver` — resolves available actions per item and dispatches to component hooks.
 
 ### Component Registry (`server/src/inventory/components/`)
 
-Registry pattern (like task-validators): `Equippable`, `Cosmetic`, `Readable`, `Container`.
+Registry pattern (like task-validators). Current components: `Equippable`, `Cosmetic`, `Readable`, `Container`.
 Each component defines a Zod params schema, getActions, and lifecycle hooks (onEquip, onUnequip, onUse).
+New component types are added by creating a module in this directory and registering it in `ComponentRegistry`.
+
+### Room Utilities (`server/src/colyseus/rooms/`)
+
+- `inventoryTreeUtils.ts` — pure functions for searching nested `ItemInstance` trees.
+- `roomServices.ts` — `RoomServices` interface, `JoinAuthContext`, and helper functions for syncing equipment state between DB and Colyseus schema.
 
 ## Database (`db/postgres.ts`)
 

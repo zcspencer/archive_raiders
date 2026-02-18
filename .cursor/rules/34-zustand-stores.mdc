@@ -7,6 +7,7 @@ alwaysApply: false
 # Zustand Stores
 
 All stores use `zustand/create`. React subscribes via hooks; Phaser reads via `getState()`.
+Barrel re-exports are available from `client/src/store/index.ts`.
 
 ## Store Index (`client/src/store/`)
 
@@ -15,17 +16,24 @@ All stores use `zustand/create`. React subscribes via hooks; Phaser reads via `g
 | `auth` | user session, token | Login/register, localStorage persistence |
 | `classroom` | list, selected | Classroom selection before game join |
 | `dialogue` | speaker, lines, index | NPC dialogue overlay state |
-| `container` | currentContainerId, nonce, previewItems, previewCurrency | Server-provided container loot preview; replaces old `chest` store |
+| `container` | currentContainerId, nonce, previewItems, previewCurrency | Server-provided container loot preview |
 | `playerControl` | inputMode, hotbarSlot, inventoryOpen | "game"/"ui" mode, inventory toggle, cursor tile |
 | `playerInventory` | items: ItemInstance[] | Server-authoritative inventory; replaced on `InventoryUpdate` |
+| `playerHotbar` | slots, addToToolbar | Hotbar slot assignments for quick equip |
 | `currency` | balances: Record<CurrencyType, number> | Server-authoritative currency; replaced on `CurrencyUpdate` |
 | `gameRoomBridge` | room ref | Colyseus room handle + message senders |
+| `notification` | message, type | Transient server notification display |
+| `challenge` | currentTask, onComplete | Challenge overlay state (gated readable content) |
+| `readableContent` | title, contentType, content | Readable item content display |
+
+New stores follow the same pattern. Add the store file and re-export from `store/index.ts`.
 
 ## gameRoomBridge (Phaser-React Bridge)
 
 - Holds the Colyseus `Room` reference set by `useColyseusRoom` hook.
-- Exposes: `sendMove`, `sendInteract`, `sendSelectHotbar`, `sendOpenContainer`, `sendClaimContainer`.
+- Exposes message senders: `sendMove`, `sendSetMap`, `sendInteract`, `sendSelectHotbar`, `sendOpenContainer`, `sendClaimContainer`, `sendEquipItem`, `sendUnequipItem`, `sendDropItem`.
 - Phaser systems call these to send messages to server.
+- New senders are added as new `ClientMessage` types are implemented.
 
 ## Server-Authoritative Pattern
 

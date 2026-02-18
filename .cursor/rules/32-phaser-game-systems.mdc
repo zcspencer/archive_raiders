@@ -8,13 +8,21 @@ alwaysApply: false
 
 ## Scene Lifecycle
 
-`BootScene` (loads assets, parses maps, stores in registry) -> `VillageScene` / `EldersHouseScene`.
+`BootScene` (loads assets, parses all maps, stores in registry) -> initial scene (currently `VillageScene`).
 
 ## Scene Hierarchy
 
 - `GridMapScene` (abstract base): map rendering, entity spawning, grid movement, interaction, camera follow, equipped item sprite sync.
-- `VillageScene extends GridMapScene`: adds `RemotePlayersController` for multiplayer.
-- `EldersHouseScene extends GridMapScene`: interior scene, no multiplayer.
+- Concrete scenes extend `GridMapScene`. Current scenes include `VillageScene`, `EldersHouseScene`, `MosslightCottageScene`, `TimberNookScene`. Additional `GridMapScene` subclasses are added as new maps are built.
+- Multiplayer scenes (e.g. `VillageScene`) add `RemotePlayersController` for Colyseus state sync.
+- Interior/single-player scenes (e.g. `EldersHouseScene`) omit remote players.
+
+### Adding a New Scene
+
+1. Create a Tiled JSON map in `content/maps/`.
+2. Add a `GridMapScene` subclass in `client/src/game/scenes/`.
+3. Register the scene in `client/src/game/config.ts`.
+4. Add door/transition entries in `InteractionHandler` if reachable via doors.
 
 ## Systems (`game/systems/`)
 
@@ -22,14 +30,14 @@ alwaysApply: false
 |--------|---------------|
 | `GameplayInput` | WASD + X key bindings; blocks when form/dialogue/container active |
 | `gridMovement` | Tile-by-tile movement with tweens and collision checks |
-| `InteractionHandler` | Routes X-press to NPC dialogue, container open, or door transition |
+| `InteractionHandler` | Routes X-press to NPC dialogue, container open, door transition, or challenge |
 | `interactionDetection` | Finds adjacent entity player is facing (NPCs prioritized) |
 | `RemotePlayersController` | Diffs Colyseus room state; creates/updates/removes remote sprites + equipment placeholders |
 
 ## Entities (`game/entities/`)
 
 - `Npc`: name label, "X to talk" prompt, `isPlayerAdjacent()`, `isPlayerFacing()`.
-- `InteractableObject`: kind-based (chest, door, artifact, sign), colored by kind, prompt label.
+- `InteractableObject`: kind-based (chest, door, artifact, sign, etc.), colored by kind, prompt label. New interactable kinds are added by extending `InteractableObjectKind` in shared types.
 
 ## Rendering (`game/rendering/`)
 
@@ -45,4 +53,4 @@ Tiled JSON (`content/maps/`) -> `TileMapManager.parseMap()` -> `ParsedMap` -> Ph
 
 ## Input Blocking
 
-`GameplayInput.isBlocked()` checks: form focus (`formFocus.ts`), dialogue open, container open, input mode.
+`GameplayInput.isBlocked()` checks: form focus (`formFocus.ts`), dialogue open, container open, challenge active, input mode.

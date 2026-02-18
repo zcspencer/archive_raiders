@@ -18,10 +18,10 @@ alwaysApply: false
 
 ## Data Flow: Container Interaction
 
-1. Player presses X near chest → `InteractionHandler.handleChest()` sends `ClientMessage.OpenContainer`
-2. Server `ContainerService.openContainer()` rolls loot, returns nonce + preview → `ServerMessage.ContainerContents`
+1. Player presses X near chest -> `InteractionHandler.handleChest()` sends `ClientMessage.OpenContainer`
+2. Server `ContainerService.openContainer()` rolls loot (via `LootResolver` for `drops[]` or direct grant for legacy `loot[]`), returns nonce + preview -> `ServerMessage.ContainerContents`
 3. Client shows read-only preview in `ChestTransferPanel`
-4. Player clicks Claim → `ClientMessage.ClaimContainer` with nonce
+4. Player clicks Claim -> `ClientMessage.ClaimContainer` with nonce
 5. Server grants items/currency, sends `InventoryUpdate` + `CurrencyUpdate` (full snapshots)
 6. Client replaces store state; panel closes
 
@@ -29,16 +29,24 @@ alwaysApply: false
 
 1. Client sends `ClientMessage.EquipItem { instanceId }` or `ClientMessage.UnequipItem { slot }`
 2. Server validates item exists, has Equippable/Cosmetic component, calls `EquipmentService`
-3. Server updates `PlayerSchema` fields (`equippedHandItemId`, `equippedHandDefId`, etc.)
+3. Server updates `PlayerSchema` fields (`equippedHandItemId`, `equippedHandDefId`, etc.) via `syncPlayerEquipment()`
 4. Server sends `InventoryUpdate` back
 5. Remote clients read `equippedHandDefId` / `equippedHeadDefId` from schema for sprite rendering
 
 ## Tool System (Equipment-Based)
 
-- Old `equippedToolId`, `axeLevel`, etc. fields removed from `PlayerSchema`.
-- Tool interactions now check equipped hand item's component stats (e.g. `{ chop: 1 }` for axe).
+- Tool interactions check equipped hand item's component stats (e.g. `{ chop: 1 }` for axe).
 - `toolRules.ts` matches interaction payload against `TOOL_RULES` using `handStats` from equipped item.
 - On first join, server seeds starter items (axe, watering-can, seeds-bag) and auto-equips axe.
+- New tool behaviors are added by extending `TOOL_RULES` and adding appropriate item component stats.
+
+## Extending the Item System
+
+- **New item**: add `content/items/<id>.item.json`; the server loads it via `ItemDefinitionLoader`.
+- **New component**: add a module in `server/src/inventory/components/`, register in `ComponentRegistry`.
+- **New container**: add `content/containers/<id>.container.json`; ensure `id` matches map `objectId`.
+- **New loot table**: add `content/loot-tables/<id>.loot-table.json`; reference from container `drops`.
+- **New equipment slot**: add to `EQUIPMENT_SLOTS` in shared, extend `EquipmentService` and `PlayerSchema`.
 
 ## Key Files
 
@@ -47,13 +55,17 @@ alwaysApply: false
 | Shared | `types/itemDefinition.ts` | `ItemDefinition`, `ComponentDescriptor` |
 | Shared | `types/inventory.ts` | `ItemInstance` |
 | Shared | `types/container.ts` | `ContainerDefinition`, payloads |
+| Shared | `types/lootTable.ts` | `LootDrop`, `LootTableDefinition`, `ResolvedLoot` |
 | Shared | `constants/equipmentAnchors.ts` | Per-slot per-direction sprite anchors |
 | Server | `inventory/InventoryService.ts` | Inventory CRUD with slot management |
 | Server | `inventory/EquipmentService.ts` | Equip/unequip by slot |
 | Server | `inventory/CurrencyService.ts` | Currency balances |
 | Server | `inventory/ContainerService.ts` | Open/claim with nonce idempotency |
+| Server | `inventory/LootResolver.ts` | Resolves loot drops from table definitions |
+| Server | `inventory/LootTableLoader.ts` | Loads loot table JSON at startup |
 | Server | `inventory/ItemDefinitionLoader.ts` | Loads item JSON at startup |
-| Server | `inventory/components/` | Component registry (Equippable, Cosmetic, Readable, Container) |
+| Server | `inventory/components/` | Component registry (Equippable, Cosmetic, Readable, Container, ...) |
+| Server | `colyseus/rooms/inventoryTreeUtils.ts` | Nested item tree search helpers |
 | Server | `colyseus/services/toolRules.ts` | Stat-based tool interaction rules |
 | Client | `store/playerInventory.ts` | Server-authoritative item list |
 | Client | `store/container.ts` | Container loot preview state |

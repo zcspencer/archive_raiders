@@ -13,7 +13,7 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | File | Key Exports |
 |------|-------------|
 | `auth.ts` | `AuthUser`, `RegisterRequest`, `LoginRequest` |
-| `classroom.ts` | `Classroom`, `ClassroomMembership` |
+| `classroom.ts` | `Classroom`, `ClassroomMembership`, `ClassroomStudentSummary`, `ClassroomStudentEconomy` |
 | `player.ts` | `PlayerProfile` |
 | `task.ts` | `TaskDefinition`, `TaskAnswer`, `TaskResult` |
 | `messages.ts` | `ClientMessage`, `ServerMessage` enums |
@@ -25,18 +25,26 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | `currency.ts` | `CurrencyType` (`"coins" \| "museum_points"`), `CurrencyReward` |
 | `itemAction.ts` | `ItemAction` (`"drop" \| "equip" \| ...`), `ItemActionRequest` |
 | `container.ts` | `ContainerKind`, `ContainerDefinition`, `LootEntry`, `OpenContainerPayload`, `ClaimContainerPayload` |
+| `lootTable.ts` | `LootQuantity`, `LootSource`, `WeightedSource`, `LootTier`, `LootDrop`, `LootTableDefinition`, `ResolvedLoot` |
 | `resource.ts` | `PlayerResourceState` |
 | `npc.ts` | `NpcDefinition`, `DialogueLine` |
-| `map.ts` | `TiledMapData`, `MapNpcPlacement` |
+| `map.ts` | `TiledMapData`, `MapNpcPlacement`, `MapObjectPlacement` |
+| `invite.ts` | `InviteInfo`, `ClassroomInviteSummary`, `CreateInviteRequest`, `AcceptInviteRequest` |
+
+New type modules follow the convention: one file per domain, re-exported from `index.ts`.
 
 ## Zod Validators (`src/validators/`)
 
-One `*.schema.ts` per type module. Notable additions:
+One `*.schema.ts` per type module. Notable schemas:
 - `itemDefinition.schema.ts` — `itemDefinitionSchema`, `itemRaritySchema`, `componentDescriptorSchema`
 - `equipmentSlot.schema.ts` — `equipmentSlotSchema`
 - `currency.schema.ts` — `currencyTypeSchema`, `currencyRewardSchema`
 - `container.schema.ts` — `containerDefinitionSchema`, `openContainerPayloadSchema`, `claimContainerPayloadSchema`
+- `lootTable.schema.ts` — `lootDropSchema`, `lootTableDefinitionSchema`, `lootTierSchema`, `weightedSourceSchema`
 - `itemAction.schema.ts` — `itemActionSchema`, `equipItemPayloadSchema`, `unequipItemPayloadSchema`, `dropItemPayloadSchema`
+- `invite.schema.ts` — `createInviteRequestSchema`, `acceptInviteRequestSchema`, `inviteInfoSchema`
+
+New validators are added alongside their type module and re-exported from `index.ts`.
 
 ## Constants
 
@@ -55,4 +63,7 @@ Seeded RNG for deterministic randomness.
 - `ClientMessage` / `ServerMessage` enums (additive only)
 - `ItemDefinition` / `ItemInstance` shapes
 - `ContainerDefinition` shape
+- `LootTableDefinition` shape
 - Task validator function signature
+
+New types and validators may be added freely; existing contract shapes listed above must remain backward-compatible.

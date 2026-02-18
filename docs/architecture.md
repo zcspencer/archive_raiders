@@ -11,7 +11,7 @@ This document is the canonical architecture baseline for implementation batches.
 
 ## Core stack
 
-- Client: Phaser 4 + React 19 + Zustand + Tailwind 4
+- Client: Phaser 4 + React 19 + Zustand
 - Multiplayer: Colyseus
 - API: Fastify
 - Data: PostgreSQL + Redis

@@ -23,13 +23,17 @@ alwaysApply: false
 
 `id`, `gridX`, `gridY`, `stamina`, `maxStamina`, `selectedHotbarSlot`, `lastInteractAtMs`,
 `equippedHandItemId`, `equippedHeadItemId` (inventory instance IDs),
-`equippedHandDefId`, `equippedHeadDefId` (definition IDs for remote client sprite rendering).
+`equippedHandDefId`, `equippedHeadDefId` (definition IDs for remote client sprite rendering),
+`currentMapKey` (tracks which map the player is on).
 
 ## Messages (from `@odyssey/shared` enums)
+
+Both enums are **additive-only** — new message types may be added but existing values must not be renamed or removed.
 
 | Client -> Server | Payload |
 |---|---|
 | `Move` | `{ gridX, gridY }` |
+| `SetMap` | `{ mapKey }` |
 | `SelectHotbar` | `{ slotIndex }` |
 | `Interact` | `{ target, toolId, actionType, chargeMs }` |
 | `OpenContainer` | `{ objectId }` |
@@ -46,6 +50,13 @@ alwaysApply: false
 | `InventoryUpdate` | `ItemInstance[]` (full snapshot replace) |
 | `CurrencyUpdate` | `Record<CurrencyType, number>` (full snapshot) |
 | `EquipmentUpdate` | (via schema sync, not message) |
+
+### Adding a New Message
+
+1. Add the value to `ClientMessage` or `ServerMessage` enum in `packages/shared/src/types/messages.ts`.
+2. Add a Zod payload schema in `packages/shared/src/validators/`.
+3. Register the `onMessage` handler in `ShardRoom.registerMessageHandlers()`.
+4. Add the client-side sender in `gameRoomBridge` store and/or listener in `useColyseusRoom`.
 
 ## Auth Flow
 

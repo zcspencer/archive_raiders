@@ -22,25 +22,31 @@ alwaysApply: false
 
 ## Screen Flow (React)
 
-`LoginScreen` -> `RegisterScreen` (toggle) -> `ClassroomPickerScreen` -> `GameScreen`.
+`LoginScreen` -> `RegisterScreen` (toggle) -> `InviteAcceptScreen` (via invite link) -> `ClassroomPickerScreen` -> `GameScreen`.
 `GameScreen` calls `bootGame()` on mount, `destroyGame()` on unmount.
 
 ## API Layer (`src/api/`)
 
 - `client.ts` — base fetch wrapper with auth header injection.
-- `auth.ts` — login/register calls.
+- `auth.ts` — login/register calls, registration status check.
 - `classrooms.ts` — list/select classroom calls.
+- `invite.ts` — invite validation and accept flows.
+- New API modules are added here as server endpoints grow; each module has a barrel re-export in `api/index.ts`.
 
 ## Data Layer (`src/data/`)
 
 - `itemDefinitions.ts` — loads `content/items/*.item.json` via Vite `import.meta.glob` at build time. `getItemDefinition(id)` for UI lookups.
+- `taskDefinitions.ts` — loads `content/tasks/**/*.task.json` at build time. `getTaskDefinition(id)` for challenge lookups.
 
 ## Overlay Components (`src/ui/components/`)
 
 - `DialogueBox` — bottom-center NPC dialogue, advances on X/Enter/Space.
-- `InventoryPanel` — modal grid (24 slots) toggled by I key. Shows equipment (hand/head), currency wallet, item context menu (right-click for Drop/Equip/etc.).
+- `InventoryPanel` — modal grid (24 slots) toggled by I key. Shows equipment (hand/head), currency wallet, item context menu (right-click for Drop/Equip/Read/etc.). Styles in `InventoryPanel.styles.ts`.
 - `ChestTransferPanel` — read-only container loot preview from server. Claim button sends `ClaimContainer`. Loading state while waiting for `ContainerContents`.
 - `Toolbar` — bottom-center hotbar (3 tool slots, keys 1-3).
+- `ReadableContentDialog` — displays readable item content (text or URL) in a modal overlay.
+- `ChallengePanel` — wraps challenge components triggered by readable items or NPCs.
+- Challenge components (`challenges/` registry): `CopyPasteChallenge`, `FindCopyPasteChallenge`, `ZoomDiscoverChallenge`. New challenge types are added by registering in the challenge registry.
 
 ## Keyboard Shortcuts
 

@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
@@ -8,6 +8,29 @@ import { useReadableContentStore } from "../../store/readableContent";
 import { getItemDefinition, getReadableParams, hasEquippableComponent } from "../../data/itemDefinitions";
 import { getTaskDefinition } from "../../data/taskDefinitions";
 import { useChallengeStore } from "../../store/challenge";
+import {
+  backdropStyle,
+  panelStyle,
+  headerStyle,
+  titleStyle,
+  walletStyle,
+  walletItemStyle,
+  hintStyle,
+  sectionStyle,
+  sectionTitleStyle,
+  equipRowStyle,
+  equipSlotStyle,
+  equipLabelStyle,
+  equipPlaceholderStyle,
+  itemGridStyle,
+  emptySlotStyle,
+  filledSlotStyle,
+  itemNameStyle,
+  qtyBadgeStyle,
+  contextStyle,
+  contextBtnStyle,
+  emptyHintStyle
+} from "./InventoryPanel.styles";
 
 const SLOT_COUNT = 24;
 
@@ -154,164 +177,3 @@ export function InventoryPanel(): ReactElement | null {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Styles                                                             */
-/* ------------------------------------------------------------------ */
-
-const backdropStyle: CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: "rgba(0, 0, 0, 0.55)",
-  zIndex: 150,
-  pointerEvents: "auto"
-};
-
-const panelStyle: CSSProperties = {
-  width: 520,
-  maxWidth: "92vw",
-  maxHeight: "80vh",
-  overflowY: "auto",
-  padding: "24px 28px",
-  background: "rgba(15, 23, 42, 0.96)",
-  border: "2px solid #475569",
-  borderRadius: 14,
-  boxShadow: "0 12px 48px rgba(0,0,0,0.5)"
-};
-
-const headerStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "baseline",
-  justifyContent: "space-between",
-  marginBottom: 16,
-  flexWrap: "wrap",
-  gap: 8
-};
-
-const titleStyle: CSSProperties = {
-  margin: 0,
-  fontSize: 22,
-  fontWeight: 700,
-  color: "#f1f5f9"
-};
-
-const walletStyle: CSSProperties = {
-  display: "flex",
-  gap: 12,
-  fontSize: 13,
-  color: "#94a3b8"
-};
-
-const walletItemStyle: CSSProperties = {
-  fontWeight: 600
-};
-
-const hintStyle: CSSProperties = {
-  fontSize: 12,
-  color: "#64748b"
-};
-
-const sectionStyle: CSSProperties = {
-  marginBottom: 20
-};
-
-const sectionTitleStyle: CSSProperties = {
-  margin: "0 0 10px",
-  fontSize: 14,
-  fontWeight: 600,
-  color: "#94a3b8",
-  textTransform: "uppercase",
-  letterSpacing: "0.06em"
-};
-
-const equipRowStyle: CSSProperties = {
-  display: "flex",
-  gap: 12
-};
-
-const equipSlotStyle: CSSProperties = {
-  flex: 1,
-  padding: 10,
-  background: "rgba(30, 41, 59, 0.7)",
-  border: "1px solid #334155",
-  borderRadius: 10
-};
-
-const equipLabelStyle: CSSProperties = {
-  fontSize: 12,
-  color: "#94a3b8",
-  display: "block",
-  marginBottom: 6
-};
-
-const equipPlaceholderStyle: CSSProperties = {
-  fontSize: 13,
-  color: "#64748b"
-};
-
-const itemGridStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(6, 1fr)",
-  gap: 6
-};
-
-const emptySlotStyle: CSSProperties = {
-  aspectRatio: "1",
-  background: "rgba(30, 41, 59, 0.5)",
-  border: "1px solid #334155",
-  borderRadius: 6
-};
-
-const filledSlotStyle: CSSProperties = {
-  position: "relative",
-  aspectRatio: "1",
-  background: "rgba(30, 41, 59, 0.8)",
-  border: "1px solid #475569",
-  borderRadius: 6,
-  padding: 6,
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center"
-};
-
-const itemNameStyle: CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: "#e2e8f0",
-  textAlign: "center"
-};
-
-const qtyBadgeStyle: CSSProperties = {
-  fontSize: 10,
-  color: "#94a3b8",
-  marginTop: 2
-};
-
-const contextStyle: CSSProperties = {
-  position: "absolute",
-  top: "100%",
-  left: 0,
-  marginTop: 2,
-  background: "rgba(15, 23, 42, 0.98)",
-  border: "1px solid #475569",
-  borderRadius: 6,
-  padding: 4,
-  zIndex: 10
-};
-
-const contextBtnStyle: CSSProperties = {
-  padding: "4px 10px",
-  fontSize: 12,
-  cursor: "pointer"
-};
-
-const emptyHintStyle: CSSProperties = {
-  marginTop: 10,
-  marginBottom: 0,
-  fontSize: 13,
-  color: "#64748b",
-  textAlign: "center"
-};

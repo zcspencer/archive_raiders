@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="8">
+ <tileset firstgid="1" source="main.tsx"/>
+ <layer id="1" name="ground" width="10" height="10">
+  <data encoding="csv">
+150,150,150,150,150,150,150,150,150,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,73,73,150,
+150,150,150,150,99,150,150,150,150,150
+</data>
+ </layer>
+ <objectgroup id="3" name="objects">
+  <object id="1" name="village_tower_exit" type="interactable" x="128.516" y="286.758" width="32" height="33">
+   <properties>
+    <property name="destination_map" value="village"/>
+    <property name="destination_spawn" value="village_tower_exit_spawn"/>
+    <property name="label" value="Village Tower Exit"/>
+   </properties>
+  </object>
+  <object id="2" name="village_tower_inner_spawn" type="spawn" x="144.818" y="258.173">
+   <properties>
+    <property name="kind" value="spawn"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="collision">
+  <object id="6" x="-2.44379" y="-1.2219" width="328.69" height="31.1584">
+   <polygon points="0,0 322.851,1.36242 322.657,31.1584 36.5377,32.9308 35.515,288.25 290.812,290.057 290.936,31.3299 322.69,31.3733 321.353,320.74 3.93992,319.757"/>
+  </object>
+ </objectgroup>
+</map>

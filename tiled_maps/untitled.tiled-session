@@ -1,0 +1,44 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "village.tmx": {
+            "expandedObjectLayers": [
+                5
+            ],
+            "scale": 2.5506,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 469.497373167098,
+                "y": 360.11134634987843
+            }
+        },
+        "village_tower.tmx": {
+            "expandedObjectLayers": [
+                5,
+                3
+            ],
+            "scale": 4.2767,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 159.5856618420745,
+                "y": 272.52320714569646
+            }
+        }
+    },
+    "last.imagePath": "/Users/zach/src/github.com/zspencer/archive_raiders/tiled_maps",
+    "map.height": 10,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 10,
+    "openFiles": [
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

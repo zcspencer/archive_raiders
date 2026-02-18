@@ -14,8 +14,10 @@ pnpm workspaces + Turborepo. Package name prefix: `@odyssey/`.
 | `client` | `client/` | Phaser 4 + React 19 game | `src/main.tsx` | 5173 |
 | `server` | `server/` | Fastify 5 + Colyseus 0.16 | `src/index.ts` | 3000 |
 | `admin` | `admin/` | React 19 teacher dashboard | `src/App.tsx` | 5174 |
-| `shared` | `packages/shared/` | Types, Zod validators, constants | `src/index.ts` | — |
-| `task-validators` | `packages/task-validators/` | Pure task validator registry | `src/index.ts` | — |
+| `shared` | `packages/shared/` | Types, Zod validators, constants | `src/index.ts` | -- |
+| `task-validators` | `packages/task-validators/` | Pure task validator registry | `src/index.ts` | -- |
+
+New packages follow the `@odyssey/` naming prefix and are added to `pnpm-workspace.yaml`.
 
 ## Dependency Graph
 
@@ -26,23 +28,26 @@ pnpm workspaces + Turborepo. Package name prefix: `@odyssey/`.
 
 ## Key Config Files
 
-- `tsconfig.base.json` — shared compiler options (ES2022, strict, bundler resolution).
-- `turbo.json` — build/dev/typecheck/lint/test task definitions.
-- `eslint.config.mjs` — flat ESLint 9 config with typescript-eslint.
-- `pnpm-workspace.yaml` — workspace member globs.
-- `.env.example` — env var template (DATABASE_URL, JWT_SECRET, etc.).
+- `tsconfig.base.json` -- shared compiler options (ES2022, strict, bundler resolution).
+- `turbo.json` -- build/dev/typecheck/lint/test task definitions.
+- `eslint.config.mjs` -- flat ESLint 9 config with typescript-eslint.
+- `pnpm-workspace.yaml` -- workspace member globs.
+- `.env.example` -- env var template (DATABASE_URL, JWT_SECRET, etc.).
 
 ## Content Directory
 
-- `content/maps/*.json` — Tiled-format map definitions.
-- `content/npcs/*.json` — NPC dialogue definitions.
-- `content/tasks/**/*.task.json` — Task definitions (id, type, config, rewards).
-- `content/items/*.item.json` — Item definitions (Equippable, Cosmetic, Readable, Container components).
-- `content/containers/*.container.json` — Container loot tables (chest, crate, bookshelf, etc.).
+Content is data-driven JSON that drives game behavior. New content types follow the same pattern: Zod schema in shared, loader in server, validation in `pnpm content:validate`.
+
+- `content/maps/*.json` -- Tiled-format map definitions. New maps added as the world expands.
+- `content/npcs/*.json` -- NPC dialogue definitions.
+- `content/tasks/**/*.task.json` -- Task definitions (id, type, config, rewards).
+- `content/items/*.item.json` -- Item definitions (Equippable, Cosmetic, Readable, Container components, and future component types).
+- `content/containers/*.container.json` -- Container loot tables (chest, crate, bookshelf, etc.).
+- `content/loot-tables/*.loot-table.json` -- Standalone loot table definitions for shared/reusable drop logic.
 
 ## Documentation
 
-- `docs/architecture.md` — canonical architecture baseline.
-- `docs/implementation-roadmap.md` — what is built and what is next.
-- `docs/handoff.md` — multi-agent handoff log.
-- `docs/adr/` — architectural decision records.
+- `docs/architecture.md` -- canonical architecture baseline.
+- `docs/implementation-roadmap.md` -- what is built and what is next.
+- `docs/handoff.md` -- multi-agent handoff log.
+- `docs/adr/` -- architectural decision records.
