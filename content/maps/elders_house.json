@@ -52,7 +52,7 @@
           "width": 32,
           "height": 32,
           "properties": [
-            { "name": "objectId", "type": "string", "value": "elders_house_exit" },
+            { "name": "object_id", "type": "string", "value": "elders_house_exit" },
             { "name": "kind", "type": "string", "value": "door" },
             { "name": "label", "type": "string", "value": "Exit" }
           ]
@@ -66,7 +66,7 @@
           "width": 32,
           "height": 32,
           "properties": [
-            { "name": "objectId", "type": "string", "value": "dungeon_chest" },
+            { "name": "object_id", "type": "string", "value": "dungeon_chest" },
             { "name": "kind", "type": "string", "value": "chest" },
             { "name": "label", "type": "string", "value": "Elder's Chest" }
           ]

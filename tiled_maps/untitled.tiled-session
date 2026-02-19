@@ -9,13 +9,14 @@
     "fileStates": {
         "village.tmx": {
             "expandedObjectLayers": [
-                5
+                5,
+                6
             ],
-            "scale": 2.5506,
-            "selectedLayer": 2,
+            "scale": 1.633,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 469.497373167098,
-                "y": 360.11134634987843
+                "x": 806.1849357011636,
+                "y": 299.7550520514391
             }
         },
         "village_tower.tmx": {
@@ -23,21 +24,24 @@
                 5,
                 3
             ],
-            "scale": 4.2767,
-            "selectedLayer": 1,
+            "scale": 1.3413,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 159.5856618420745,
-                "y": 272.52320714569646
+                "x": 134.57093864161632,
+                "y": 173.3392976962648
             }
         }
     },
+    "last.exportedFilePath": "/Users/zach/src/github.com/zspencer/archive_raiders/content/maps",
     "last.imagePath": "/Users/zach/src/github.com/zspencer/archive_raiders/tiled_maps",
     "map.height": 10,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.width": 10,
     "openFiles": [
     ],
     "project": "untitled.tiled-project",
+    "property.type": "object",
     "recentFiles": [
     ],
     "tileset.lastUsedFormat": "tsx"

@@ -39,3 +39,13 @@ export function getNpcDefinition(npcId: string): NpcDefinition | null {
 export function getNpcDialogue(npcId: string): DialogueLine[] {
   return getNpcDefinition(npcId)?.dialogueLines ?? [];
 }
+
+/**
+ * Replaces the NPC definition cache with fresh definitions (used by dev content reload).
+ */
+export function replaceNpcDefinitions(defs: NpcDefinition[]): void {
+  cache.clear();
+  for (const def of defs) {
+    if (def.id) cache.set(def.id, def);
+  }
+}

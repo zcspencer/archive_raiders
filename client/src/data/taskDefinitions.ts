@@ -23,3 +23,13 @@ export function getTaskDefinition(id: string): TaskDefinition | undefined {
   loadDefinitions();
   return cache.get(id);
 }
+
+/**
+ * Replaces the task definition cache with fresh definitions (used by dev content reload).
+ */
+export function replaceTaskDefinitions(defs: TaskDefinition[]): void {
+  cache.clear();
+  for (const def of defs) {
+    if (def.id) cache.set(def.id, def);
+  }
+}

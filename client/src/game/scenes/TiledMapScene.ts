@@ -1,8 +1,11 @@
 import Phaser from "phaser";
-import { TILE_SIZE } from "@odyssey/shared";
-import type { ParsedMap } from "../map/TileMapManager";
-import { generateTilesetTexture, renderGroundLayer } from "../map/tileRenderer";
-import { generatePlayerTexture, animKeyForFacing, idleFrameForFacing } from "../rendering/playerSprite";
+import type { ParsedTiledMap } from "../map/TiledMapParser";
+import { renderTiledLayers } from "../map/tiledTileRenderer";
+import {
+  generatePlayerTexture,
+  animKeyForFacing,
+  idleFrameForFacing
+} from "../rendering/playerSprite";
 import {
   EquippedItemSpriteController,
   type EquippedState
@@ -19,54 +22,55 @@ import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
 
 /**
- * Scene-init data passed through `scene.start(key, data)`.
+ * Scene-init data passed through scene.start().
  */
-export interface GridMapSceneData {
+export interface TiledMapSceneData {
   mapKey?: string;
+  spawnName?: string;
   spawnGridX?: number;
   spawnGridY?: number;
 }
 
 /**
- * Abstract base scene for any map with grid movement, NPCs, objects,
- * and interaction. Subclasses provide the scene key and may add
- * additional behaviour (e.g. remote player reconciliation).
+ * Generic scene that loads any Tiled map. Replaces per-map scene subclasses.
  */
-export abstract class GridMapScene extends Phaser.Scene {
-  protected playerSprite!: Phaser.GameObjects.Sprite;
-  protected gridMovement!: GridMovement;
-  protected equippedSpriteController!: EquippedItemSpriteController;
-  protected remotePlayers!: RemotePlayersController;
-  protected input_!: GameplayInput;
-  protected interaction!: InteractionHandler;
-  protected npcs: Npc[] = [];
-  protected objects: InteractableObject[] = [];
-  private currentMapKey = "parsedMap";
+export class TiledMapScene extends Phaser.Scene {
+  constructor() {
+    super("TiledMapScene");
+  }
 
-  create(data?: GridMapSceneData): void {
-    const mapKey = data?.mapKey ?? "parsedMap";
+  private playerSprite!: Phaser.GameObjects.Sprite;
+  private gridMovement!: GridMovement;
+  private equippedSpriteController!: EquippedItemSpriteController;
+  private remotePlayers!: RemotePlayersController;
+  private input_!: GameplayInput;
+  private interaction!: InteractionHandler;
+  private npcs: Npc[] = [];
+  private objects: InteractableObject[] = [];
+  private currentMapKey = "parsedMap_village";
+
+  create(data?: TiledMapSceneData): void {
+    const mapKey = data?.mapKey ?? "parsedMap_village";
     this.currentMapKey = mapKey;
-    const mapData = this.registry.get(mapKey) as ParsedMap | undefined;
+    this.registry.set("__activeMapKey", mapKey);
+    const mapData = this.registry.get(mapKey) as ParsedTiledMap | undefined;
     if (!mapData) {
-      throw new Error(`${this.scene.key} requires ${mapKey} in registry`);
+      throw new Error(`TiledMapScene requires ${mapKey} in registry`);
     }
 
-    generateTilesetTexture(this);
     generatePlayerTexture(this);
-    renderGroundLayer(this, mapData.groundData, mapData.width, mapData.height);
+    renderTiledLayers(this, mapData);
 
     this.playerSprite = this.add.sprite(0, 0, "player_sprite", 0);
     this.playerSprite.setDepth(5);
 
-    const spawnX = data?.spawnGridX ?? mapData.playerSpawn.gridX;
-    const spawnY = data?.spawnGridY ?? mapData.playerSpawn.gridY;
-
+    const spawn = this.resolveSpawn(mapData, data);
     this.gridMovement = new GridMovement(
       this,
       this.playerSprite,
       mapData.collisionGrid,
-      spawnX,
-      spawnY,
+      spawn.gridX,
+      spawn.gridY,
       (gx, gy) => useGameRoomBridgeStore.getState().sendMove({ gridX: gx, gridY: gy })
     );
 
@@ -80,6 +84,7 @@ export abstract class GridMapScene extends Phaser.Scene {
     this.objects = [];
     this.spawnNpcs(mapData);
     this.spawnObjects(mapData);
+    this.spawnTransitions(mapData);
 
     this.input_ = new GameplayInput(this);
     this.interaction = new InteractionHandler((targetScene, sceneData) => {
@@ -119,12 +124,68 @@ export abstract class GridMapScene extends Phaser.Scene {
     this.updatePlayerAnimation();
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Overridable hooks                                                  */
-  /* ------------------------------------------------------------------ */
+  private resolveSpawn(
+    mapData: ParsedTiledMap,
+    data?: TiledMapSceneData
+  ): { gridX: number; gridY: number } {
+    if (data?.spawnGridX != null && data?.spawnGridY != null) {
+      return { gridX: data.spawnGridX, gridY: data.spawnGridY };
+    }
+    const name = data?.spawnName ?? (this.currentMapKey === "parsedMap_village" ? "village_west_spawn" : undefined);
+    if (name) {
+      const s = mapData.spawns.get(name);
+      if (s) return s;
+    }
+    const first = mapData.spawns.values().next().value;
+    if (first) return first;
+    return { gridX: 1, gridY: 1 };
+  }
 
-  /** Returns current equipment and facing for equipped sprite controller. */
-  protected getEquippedState(): EquippedState {
+  private spawnNpcs(mapData: ParsedTiledMap): void {
+    for (const p of mapData.npcs) {
+      const def = getNpcDefinition(p.npc_id);
+      const displayName = def?.displayName ?? p.npc_id;
+      this.npcs.push(
+        new Npc(this, p.npc_id, p.gridX, p.gridY, displayName)
+      );
+    }
+  }
+
+  private spawnObjects(mapData: ParsedTiledMap): void {
+    for (const p of mapData.interactables) {
+      this.objects.push(
+        new InteractableObject(
+          this,
+          p.object_id,
+          p.kind,
+          p.label,
+          p.gridX,
+          p.gridY,
+          p.task_id
+        )
+      );
+    }
+  }
+
+  private spawnTransitions(mapData: ParsedTiledMap): void {
+    for (const t of mapData.transitions) {
+      this.objects.push(
+        new InteractableObject(
+          this,
+          t.name,
+          "transition",
+          t.label ?? t.name,
+          t.gridX,
+          t.gridY,
+          undefined,
+          t.destination_map,
+          t.destination_spawn
+        )
+      );
+    }
+  }
+
+  private getEquippedState(): EquippedState {
     const room = useGameRoomBridgeStore.getState().room;
     const items = usePlayerInventoryStore.getState().items;
     const player = room?.state?.players?.get(
@@ -142,8 +203,7 @@ export abstract class GridMapScene extends Phaser.Scene {
     };
   }
 
-  /** Called each frame to update NPC/object proximity prompts. */
-  protected updatePrompts(px: number, py: number): void {
+  private updatePrompts(px: number, py: number): void {
     for (const npc of this.npcs) {
       npc.setInteractionPromptVisible(npc.isPlayerAdjacent(px, py));
     }
@@ -152,53 +212,22 @@ export abstract class GridMapScene extends Phaser.Scene {
     }
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Private helpers                                                    */
-  /* ------------------------------------------------------------------ */
-
-  private spawnNpcs(mapData: ParsedMap): void {
-    for (const placement of mapData.npcs) {
-      const def = getNpcDefinition(placement.npcId);
-      const displayName = def?.displayName ?? placement.npcId;
-      this.npcs.push(new Npc(this, placement.npcId, placement.gridX, placement.gridY, displayName));
-    }
-  }
-
-  private spawnObjects(mapData: ParsedMap): void {
-    for (const placement of mapData.objects) {
-      this.objects.push(
-        new InteractableObject(
-          this,
-          placement.objectId,
-          placement.kind,
-          placement.label,
-          placement.gridX,
-          placement.gridY,
-          placement.taskId
-        )
-      );
-    }
-  }
-
-  private setupCamera(mapData: ParsedMap): void {
-    const worldW = mapData.width * TILE_SIZE;
-    const worldH = mapData.height * TILE_SIZE;
+  private setupCamera(mapData: ParsedTiledMap): void {
+    const worldW = mapData.width * mapData.tileWidth;
+    const worldH = mapData.height * mapData.tileHeight;
     this.cameras.main.setBounds(0, 0, worldW, worldH);
     this.cameras.main.startFollow(this.playerSprite, true, 0.1, 0.1);
     this.cameras.main.setBackgroundColor("#1f2937");
   }
 
   private handleMovement(): void {
-    const keys = this.input_.keys;
     const dir = keysToDirection(
-      keys.left.isDown,
-      keys.right.isDown,
-      keys.up.isDown,
-      keys.down.isDown
+      this.input_.keys.left.isDown,
+      this.input_.keys.right.isDown,
+      this.input_.keys.up.isDown,
+      this.input_.keys.down.isDown
     );
-    if (dir) {
-      this.gridMovement.tryMove(dir);
-    }
+    if (dir) this.gridMovement.tryMove(dir);
   }
 
   private updatePlayerAnimation(): void {

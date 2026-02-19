@@ -44,6 +44,9 @@ services:
       ALLOW_PUBLIC_REGISTRATION: "true"
     ports:
       - "3000:3000"
+    volumes:
+      - ./content:/workspace/content
+      - ./server/src:/workspace/server/src
     depends_on:
       postgres:
         condition: service_healthy
@@ -60,6 +63,9 @@ services:
       VITE_API_URL: http://localhost:3000
     ports:
       - "5173:5173"
+    volumes:
+      - ./content:/workspace/content
+      - ./client/src:/workspace/client/src
     depends_on:
       - server
 

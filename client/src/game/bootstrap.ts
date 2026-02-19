@@ -14,6 +14,13 @@ export function bootGame(): Phaser.Game {
 }
 
 /**
+ * Returns the current Phaser game instance, or null if not booted.
+ */
+export function getGame(): Phaser.Game | null {
+  return gameInstance;
+}
+
+/**
  * Destroys the Phaser game instance so it can be re-created later.
  */
 export function destroyGame(): void {

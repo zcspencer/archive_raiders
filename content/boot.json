@@ -1,0 +1,30 @@
+{
+  "spritesheets": [
+    {
+      "key": "tileset_main",
+      "path": "/tilesets/tileset.png",
+      "frameWidth": 32,
+      "frameHeight": 32
+    }
+  ],
+  "maps": [
+    { "registryKey": "parsedMap_village", "file": "village.json" },
+    { "registryKey": "parsedMap_village_tower", "file": "village_tower.json" },
+    { "registryKey": "parsedMap_timber_nook", "file": "timber_nook.json" },
+    { "registryKey": "parsedMap_mosslight_cottage", "file": "mosslight_cottage.json" },
+    { "registryKey": "parsedMap_elders_house", "file": "elders_house.json" }
+  ],
+  "initialScene": {
+    "sceneKey": "TiledMapScene",
+    "mapKey": "parsedMap_village",
+    "spawnName": "village_west_spawn"
+  },
+  "loadingScreen": {
+    "backgroundColor": "#111827",
+    "text": "Loading...",
+    "textStyle": {
+      "color": "#ffffff",
+      "fontSize": "18px"
+    }
+  }
+}

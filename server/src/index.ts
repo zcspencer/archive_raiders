@@ -86,7 +86,12 @@ async function startServer(): Promise<void> {
       inviteService,
       taskService
     },
-    config
+    config,
+    {
+      itemDefinitionLoader,
+      containerDefinitionLoader,
+      lootTableLoader
+    }
   );
 
   const gameServer = new Server({

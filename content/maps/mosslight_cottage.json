@@ -52,7 +52,7 @@
           "width": 32,
           "height": 32,
           "properties": [
-            { "name": "objectId", "type": "string", "value": "mosslight_cottage_exit" },
+            { "name": "object_id", "type": "string", "value": "mosslight_cottage_exit" },
             { "name": "kind", "type": "string", "value": "door" },
             { "name": "label", "type": "string", "value": "Exit" }
           ]
@@ -76,10 +76,10 @@
           "width": 32,
           "height": 32,
           "properties": [
-            { "name": "objectId", "type": "string", "value": "ancient_computer" },
+            { "name": "object_id", "type": "string", "value": "ancient_computer" },
             { "name": "kind", "type": "string", "value": "computer" },
             { "name": "label", "type": "string", "value": "Ancient Terminal" },
-            { "name": "taskId", "type": "string", "value": "ancient-computer-password" }
+            { "name": "task_id", "type": "string", "value": "ancient-computer-password" }
           ]
         }
       ]

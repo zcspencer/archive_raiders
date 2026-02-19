@@ -52,7 +52,7 @@
           "width": 32,
           "height": 32,
           "properties": [
-            { "name": "objectId", "type": "string", "value": "timber_nook_exit" },
+            { "name": "object_id", "type": "string", "value": "timber_nook_exit" },
             { "name": "kind", "type": "string", "value": "door" },
             { "name": "label", "type": "string", "value": "Exit" }
           ]

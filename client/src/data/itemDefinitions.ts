@@ -24,6 +24,16 @@ export function getItemDefinition(id: string): ItemDefinition | undefined {
   return cache.get(id);
 }
 
+/**
+ * Replaces the item definition cache with fresh definitions (used by dev content reload).
+ */
+export function replaceItemDefinitions(defs: ItemDefinition[]): void {
+  cache.clear();
+  for (const def of defs) {
+    if (def.id) cache.set(def.id, def);
+  }
+}
+
 /** Readable component params (contentType + content). */
 export interface ReadableParams {
   contentType: "text" | "image" | "render";

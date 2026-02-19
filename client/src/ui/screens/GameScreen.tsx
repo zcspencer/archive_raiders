@@ -10,6 +10,12 @@ import { useContainerStore } from "../../store/container";
 import { useNotificationStore } from "../../store/notification";
 import { useReadableContentStore } from "../../store/readableContent";
 import { useChallengeStore } from "../../store/challenge";
+import { reloadServerContent, fetchAllContent } from "../../api/dev";
+import { ApiError } from "../../api/client";
+import { setMapDataOverrides } from "../../game/scenes/BootScene";
+import { replaceItemDefinitions } from "../../data/itemDefinitions";
+import { replaceTaskDefinitions } from "../../data/taskDefinitions";
+import { replaceNpcDefinitions } from "../../game/content/npcDialogue";
 import { DialogueBox } from "../components/DialogueBox";
 import { ReadableContentDialog } from "../components/ReadableContentDialog";
 import { ChallengePanel } from "../components/ChallengePanel";
@@ -41,6 +47,32 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   const dismissChallenge = useChallengeStore((s) => s.dismiss);
   const notificationMessage = useNotificationStore((s) => s.message);
   const setNotificationMessage = useNotificationStore((s) => s.setMessage);
+
+  const handleReloadContent = async (): Promise<void> => {
+    try {
+      const [serverResult, content] = await Promise.all([
+        reloadServerContent(),
+        fetchAllContent()
+      ]);
+
+      setMapDataOverrides(content.maps);
+      replaceItemDefinitions(Object.values(content.items));
+      replaceTaskDefinitions(Object.values(content.tasks));
+      replaceNpcDefinitions(Object.values(content.npcs));
+
+      destroyGame();
+      bootGame();
+
+      const mapCount = Object.keys(content.maps).length;
+      setNotificationMessage(
+        `Reloaded: ${mapCount} maps, ${serverResult.items} items`
+      );
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : "Failed to reload content";
+      setNotificationMessage(message);
+    }
+  };
 
   const roomConnection = useColyseusRoom({
     accessToken: props.accessToken,
@@ -133,6 +165,15 @@ export function GameScreen(props: GameScreenProps): ReactElement {
         <span style={classroomLabelStyle}>{props.classroom.name}</span>
         <span style={statusDotStyle(roomConnection.status === "connected")} />
         <span style={userLabelStyle}>{props.user.displayName}</span>
+        {import.meta.env.DEV ? (
+          <button
+            type="button"
+            style={logoutBtnStyle}
+            onClick={handleReloadContent}
+          >
+            Reload Content
+          </button>
+        ) : null}
         <button type="button" style={logoutBtnStyle} onClick={props.onLogout}>
           Sign out
         </button>

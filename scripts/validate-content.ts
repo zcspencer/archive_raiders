@@ -1,11 +1,38 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
-import { taskDefinitionSchema } from "@odyssey/shared";
+import {
+  taskDefinitionSchema,
+  tiledMapSchema,
+  containerDefinitionSchema,
+  bootConfigSchema
+} from "@odyssey/shared";
 
 const CONTENT_DIR = join(process.cwd(), "content");
 
+type Validator = (data: unknown) => void;
+
 /**
- * Validates JSON task content definitions.
+ * Routes file paths to validators. Returns null to skip validation.
+ */
+function validatorForPath(filePath: string): Validator | null {
+  if (filePath.includes("/tasks/") && filePath.endsWith(".task.json")) {
+    return (d) => taskDefinitionSchema.parse(d);
+  }
+  if (filePath.includes("/maps/") && filePath.endsWith(".json")) {
+    return (d) => tiledMapSchema.parse(d);
+  }
+  if (filePath.includes("/containers/") && filePath.endsWith(".container.json")) {
+    return (d) => containerDefinitionSchema.parse(d);
+  }
+  if (filePath.endsWith("/boot.json")) {
+    return (d) => bootConfigSchema.parse(d);
+  }
+  return null;
+}
+
+/**
+ * Validates content JSON files. Maps, tasks, and containers are validated
+ * against their schemas; other JSON files are skipped.
  */
 async function main(): Promise<void> {
   const files = await collectJsonFiles(CONTENT_DIR);
@@ -17,10 +44,13 @@ async function main(): Promise<void> {
   let hasErrors = false;
 
   for (const filePath of files) {
+    const validate = validatorForPath(filePath);
+    if (!validate) continue;
+
     try {
       const raw = await readFile(filePath, "utf-8");
       const parsed = JSON.parse(raw) as unknown;
-      taskDefinitionSchema.parse(parsed);
+      validate(parsed);
       console.log(`Validated: ${filePath}`);
     } catch (error: unknown) {
       hasErrors = true;
@@ -36,9 +66,6 @@ async function main(): Promise<void> {
   }
 }
 
-/**
- * Recursively collects JSON files under a directory.
- */
 async function collectJsonFiles(directoryPath: string): Promise<string[]> {
   try {
     const entries = await readdir(directoryPath, { withFileTypes: true });

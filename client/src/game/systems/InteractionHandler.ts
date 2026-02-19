@@ -84,7 +84,7 @@ export class InteractionHandler {
 
   /** Executes the actual interaction after any challenge gate has passed. */
   private proceedWithObject(obj: InteractableObject): void {
-    if (obj.kind === "door") {
+    if (obj.kind === "door" || obj.kind === "transition") {
       this.handleDoor(obj);
       return;
     }
@@ -103,9 +103,11 @@ export class InteractionHandler {
   }
 
   private handleDoor(obj: InteractableObject): void {
-    const transitions = doorTransitions[obj.objectId];
-    if (transitions) {
-      this.onSceneTransition(transitions.targetScene, transitions.data);
+    if (obj.transitionDestinationMap) {
+      this.onSceneTransition("TiledMapScene", {
+        mapKey: `parsedMap_${obj.transitionDestinationMap}`,
+        spawnName: obj.transitionDestinationSpawn ?? undefined
+      });
     }
   }
 
@@ -115,40 +117,3 @@ export class InteractionHandler {
     usePlayerControlStore.getState().setInputMode("ui");
   }
 }
-
-/* ------------------------------------------------------------------ */
-/*  Door transition table                                              */
-/* ------------------------------------------------------------------ */
-
-interface DoorTransition {
-  targetScene: string;
-  data: Record<string, unknown>;
-}
-
-/** Static mapping from door objectId to scene transition details. */
-const doorTransitions: Record<string, DoorTransition> = {
-  elder_house_door: {
-    targetScene: "EldersHouseScene",
-    data: { mapKey: "parsedMap_elders_house" }
-  },
-  mosslight_cottage_door: {
-    targetScene: "MosslightCottageScene",
-    data: { mapKey: "parsedMap_mosslight_cottage" }
-  },
-  timber_nook_door: {
-    targetScene: "TimberNookScene",
-    data: { mapKey: "parsedMap_timber_nook" }
-  },
-  elders_house_exit: {
-    targetScene: "VillageScene",
-    data: { mapKey: "parsedMap_village", spawnGridX: 4, spawnGridY: 7 }
-  },
-  mosslight_cottage_exit: {
-    targetScene: "VillageScene",
-    data: { mapKey: "parsedMap_village", spawnGridX: 13, spawnGridY: 7 }
-  },
-  timber_nook_exit: {
-    targetScene: "VillageScene",
-    data: { mapKey: "parsedMap_village", spawnGridX: 13, spawnGridY: 15 }
-  }
-};

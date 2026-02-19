@@ -8,21 +8,18 @@ alwaysApply: false
 
 ## Scene Lifecycle
 
-`BootScene` (loads assets, parses all maps, stores in registry) -> initial scene (currently `VillageScene`).
+`BootScene` (preloads tileset, parses Tiled maps, stores in registry) -> initial scene (`TiledMapScene`).
 
 ## Scene Hierarchy
 
-- `GridMapScene` (abstract base): map rendering, entity spawning, grid movement, interaction, camera follow, equipped item sprite sync.
-- Concrete scenes extend `GridMapScene`. Current scenes include `VillageScene`, `EldersHouseScene`, `MosslightCottageScene`, `TimberNookScene`. Additional `GridMapScene` subclasses are added as new maps are built.
-- Multiplayer scenes (e.g. `VillageScene`) add `RemotePlayersController` for Colyseus state sync.
-- Interior/single-player scenes (e.g. `EldersHouseScene`) omit remote players.
+- `TiledMapScene`: generic scene that loads any Tiled map. Handles map rendering, entity spawning, grid movement, interaction, camera follow, equipped item sprite sync, and `RemotePlayersController` for Colyseus state sync.
+- Transitions are data-driven via object properties (`destination_map`, `destination_spawn`).
 
-### Adding a New Scene
+### Adding a New Map
 
-1. Create a Tiled JSON map in `content/maps/`.
-2. Add a `GridMapScene` subclass in `client/src/game/scenes/`.
-3. Register the scene in `client/src/game/config.ts`.
-4. Add door/transition entries in `InteractionHandler` if reachable via doors.
+1. Create/export a Tiled JSON map to `content/maps/` (source of truth: `tiled_maps/`).
+2. Add the map import and `parseTiledMap()` registration in `BootScene`.
+3. Add transition objects with `destination_map` and `destination_spawn` for doors/portals.
 
 ## Systems (`game/systems/`)
 
@@ -39,17 +36,16 @@ alwaysApply: false
 - `Npc`: name label, "X to talk" prompt, `isPlayerAdjacent()`, `isPlayerFacing()`.
 - `InteractableObject`: kind-based (chest, door, artifact, sign, etc.), colored by kind, prompt label. New interactable kinds are added by extending `InteractableObjectKind` in shared types.
 
-## Rendering (`game/rendering/`)
+## Rendering (`game/rendering/`, `game/map/`)
 
-All textures are procedurally generated (no external art assets yet):
-- `tileRenderer.ts`: colored tile atlas from tile IDs.
+- `tiledTileRenderer.ts`: renders tile layers (ground, detail_down, detail_up) from real tileset spritesheet.
 - `playerSprite.ts`: 4-direction spritesheet with walk animations. `animKeyForFacing()`, `idleFrameForFacing()`.
 - `equippedItemSprite.ts`: `EquippedItemSpriteController` — manages child placeholder rectangles for hand/head equipment. Uses `EQUIPMENT_ANCHORS` from `@odyssey/shared` for offset/depth per facing direction. `sync()` called each frame from `updatePlayerAnimation()`.
 
 ## Map Pipeline
 
-Tiled JSON (`content/maps/`) -> `TileMapManager.parseMap()` -> `ParsedMap` -> Phaser registry.
-`ParsedMap` contains: ground tiles, collision grid, NPC placements, object placements, spawn point.
+Tiled JSON (`content/maps/`) -> `TiledMapParser.parseTiledMap()` -> `ParsedTiledMap` -> Phaser registry.
+`ParsedTiledMap` contains: ground/detail tile layers, collision grid (rasterized from polygon/ellipse objects or tile layer), named spawns, NPCs, interactables, transitions. Uses snake_case properties (`npc_id`, `object_id`, `destination_map`, `destination_spawn`).
 
 ## Input Blocking
 

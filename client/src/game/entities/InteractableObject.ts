@@ -4,6 +4,7 @@ import { TILE_SIZE } from "@odyssey/shared";
 const KIND_COLORS: Record<string, number> = {
   chest: 0xfbbf24,
   door: 0x8b5cf6,
+  transition: 0x8b5cf6,
   artifact: 0x06b6d4,
   sign: 0x94a3b8,
   computer: 0x22c55e
@@ -13,6 +14,7 @@ const KIND_COLORS: Record<string, number> = {
 const KIND_PROMPTS: Record<string, string> = {
   chest: "X to open",
   door: "X to enter",
+  transition: "X to enter",
   artifact: "X to examine",
   sign: "X to read",
   computer: "X to use"
@@ -42,6 +44,9 @@ export class InteractableObject {
   readonly gridY: number;
   /** Optional task definition ID that gates this interaction behind a challenge. */
   readonly taskId: string | undefined;
+  /** Data-driven transition target; when set, kind is typically "transition" or "door". */
+  readonly transitionDestinationMap?: string;
+  readonly transitionDestinationSpawn?: string;
   readonly body: Phaser.GameObjects.Rectangle;
   readonly label: Phaser.GameObjects.Text;
   readonly prompt: Phaser.GameObjects.Text;
@@ -53,10 +58,14 @@ export class InteractableObject {
     labelText: string,
     gridX: number,
     gridY: number,
-    taskId?: string
+    taskId?: string,
+    transitionDestinationMap?: string,
+    transitionDestinationSpawn?: string
   ) {
     this.objectId = objectId;
     this.kind = kind;
+    this.transitionDestinationMap = transitionDestinationMap;
+    this.transitionDestinationSpawn = transitionDestinationSpawn;
     this.gridX = gridX;
     this.gridY = gridY;
     this.taskId = taskId;
