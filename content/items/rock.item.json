@@ -1,0 +1,24 @@
+{
+  "id": "rock",
+  "version": 1,
+  "name": "Rock",
+  "description": "A rock that can be mined.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/rock",
+  "rarity": "Common",
+  "tags": ["rock"],
+  "components": [
+    {
+      "typeId": "Destroyable",
+      "params": {
+        "health": 8,
+        "drops": [
+          {
+            "method": "fixed",
+            "source": { "type": "item", "itemId": "old-circuit-board", "quantity": 1 }
+          }
+        ]
+      }
+    }
+  ]
+}

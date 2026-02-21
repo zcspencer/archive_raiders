@@ -1,21 +1,22 @@
 {
-    "id": "pickaxe",
-    "version": 1,
-    "name": "Pickaxe",
-    "description": "Mine rocks and ore.",
-    "maxStackSize": 1,
-    "inventorySprite": "items/pickaxe",
-    "equippedSprite": "items/pickaxe-held",
-    "rarity": "Uncommon",
-    "components": [
-        {
-            "typeId": "Equippable",
-            "params": {
-                "slot": "hand",
-                "stats": {
-                    "dig": 1
-                }
-            }
-        }
-    ]
+  "id": "pickaxe",
+  "version": 1,
+  "name": "Pickaxe",
+  "description": "Mine rocks and ore.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/pickaxe",
+  "equippedSprite": "items/pickaxe-held",
+  "rarity": "Uncommon",
+  "components": [
+    {
+      "typeId": "Equippable",
+      "params": {
+        "slot": "hand",
+        "baseDamage": 2,
+        "tagModifiers": { "rock": 3.0 },
+        "rate": 1,
+        "range": 1
+      }
+    }
+  ]
 }

@@ -5,24 +5,22 @@ import { registerComponent } from "./ComponentRegistry.js";
 
 const equippableParamsSchema = z.object({
   slot: equipmentSlotSchema,
-  stats: z.record(z.number()).optional()
+  baseDamage: z.number().nonnegative().default(0),
+  tagModifiers: z.record(z.number().positive()).optional(),
+  rate: z.number().positive().default(1),
+  range: z.number().int().positive().default(1)
 });
 
 /**
  * Registers the Equippable component. Provides equip/unequip actions.
- * Stat modifiers applied in onEquip/onUnequip (no-op for now; stats used by interaction/tool rules).
  */
 function register(): void {
   registerComponent({
     typeId: "Equippable",
     paramsSchema: equippableParamsSchema,
     getActions: (): ItemAction[] => ["equip", "unequip"],
-    onEquip: (): void => {
-      // Stat modifiers would be applied here; tool rules read from equipment + definition
-    },
-    onUnequip: (): void => {
-      // Stat modifiers removed
-    }
+    onEquip: (): void => {},
+    onUnequip: (): void => {}
   });
 }
 

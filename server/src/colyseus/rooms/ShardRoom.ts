@@ -2,26 +2,25 @@ import { Client, Room } from "colyseus";
 import {
   ClientMessage,
   ServerMessage,
+  attackTargetPayloadSchema,
   claimContainerPayloadSchema,
   dropItemPayloadSchema,
   equipItemPayloadSchema,
-  hotbarSelectPayloadSchema,
-  interactPayloadSchema,
   movePayloadSchema,
   setMapPayloadSchema,
   openContainerPayloadSchema,
   unequipItemPayloadSchema
 } from "@odyssey/shared";
-import { PlayerSchema, ShardState } from "../schema/ShardState.js";
-import { applyInteraction } from "../services/interactionService.js";
+import { PlayerSchema, ShardState, initializeWorldObjects, worldObjectKey } from "../schema/ShardState.js";
+import { calculateDamage, canAttack, isInRange } from "../services/damageService.js";
 import { applyMove } from "../services/movementService.js";
-import { findFirstInstanceByDefinitionId, findInstanceInTree } from "./inventoryTreeUtils.js";
 import {
-  type RoomServices,
-  type JoinAuthContext,
-  syncPlayerEquipment,
-  getHandStats
-} from "./roomServices.js";
+  findFirstInstanceByDefinitionId,
+  findInstanceInTree,
+  getDestroyableDrops,
+  getDestroyableHealth
+} from "./inventoryTreeUtils.js";
+import { type RoomServices, type JoinAuthContext, getHandEquippableParams, syncPlayerEquipment } from "./roomServices.js";
 
 interface JoinOptions {
   accessToken?: string;
@@ -52,6 +51,8 @@ export class ShardRoom extends Room<ShardState> {
   override onCreate(options: JoinOptions): void {
     const classroomId = options.classroomId ?? "default-classroom";
     this.setState(new ShardState(classroomId));
+    const loader = this.getServices().itemDefinitionLoader;
+    initializeWorldObjects(this.state.worldObjects, (id) => getDestroyableHealth(loader, id));
     this.registerMessageHandlers();
   }
 
@@ -95,8 +96,7 @@ export class ShardRoom extends Room<ShardState> {
     player.gridY = 10;
     player.stamina = 100;
     player.maxStamina = 100;
-    player.selectedHotbarSlot = 0;
-    player.lastInteractAtMs = 0;
+    player.lastAttackAtMs = 0;
     player.equippedHandItemId = "";
     player.equippedHeadItemId = "";
     player.equippedHandDefId = "";
@@ -127,8 +127,10 @@ export class ShardRoom extends Room<ShardState> {
 
     const finalInventory = await inventoryService.getInventory(authContext.user.id);
     const balances = await this.getServices().currencyService.getBalances(authContext.user.id);
+    const equipment = await equipmentService.getEquipment(authContext.user.id);
     client.send(ServerMessage.InventoryUpdate, finalInventory);
     client.send(ServerMessage.CurrencyUpdate, balances);
+    client.send(ServerMessage.EquipmentUpdate, equipment);
   }
 
   override onLeave(client: Client): void {
@@ -147,7 +149,9 @@ export class ShardRoom extends Room<ShardState> {
       }
       const player = this.state.players.get(client.sessionId);
       if (!player) return;
-      applyMove(player, payloadResult.data);
+      applyMove(player, payloadResult.data, (gx, gy) =>
+        this.state.worldObjects.has(worldObjectKey(gx, gy))
+      );
     });
 
     this.onMessage(ClientMessage.SetMap, (client, rawPayload: unknown) => {
@@ -161,31 +165,75 @@ export class ShardRoom extends Room<ShardState> {
       player.currentMapKey = payloadResult.data.mapKey;
     });
 
-    this.onMessage(ClientMessage.SelectHotbar, (client, rawPayload: unknown) => {
-      const payloadResult = hotbarSelectPayloadSchema.safeParse(rawPayload);
+    this.onMessage(ClientMessage.AttackTarget, async (client, rawPayload: unknown) => {
+      const payloadResult = attackTargetPayloadSchema.safeParse(rawPayload);
       if (!payloadResult.success) {
-        client.send(ServerMessage.Notification, "Invalid hotbar payload");
+        client.send(ServerMessage.Notification, "Invalid attack payload");
         return;
       }
-      const player = this.state.players.get(client.sessionId);
-      if (!player) return;
-      player.selectedHotbarSlot = payloadResult.data.slotIndex % 9;
-    });
-
-    this.onMessage(ClientMessage.Interact, async (client, rawPayload: unknown) => {
-      const payloadResult = interactPayloadSchema.safeParse(rawPayload);
-      if (!payloadResult.success) {
-        client.send(ServerMessage.Notification, "Invalid interact payload");
-        return;
-      }
+      const { gridX, gridY } = payloadResult.data;
       const player = this.state.players.get(client.sessionId);
       if (!player) return;
       const authContext = client.auth as JoinAuthContext | undefined;
       if (!authContext) return;
-      const handStats = await getHandStats(this.getServices(), authContext.user.id);
-      const result = applyInteraction(player, this.state.tiles, payloadResult.data, Date.now(), handStats);
-      if (!result.accepted) {
-        client.send(ServerMessage.Notification, result.reason);
+
+      const params = await getHandEquippableParams(this.getServices(), authContext.user.id);
+      if (!params || params.baseDamage <= 0) {
+        client.send(ServerMessage.Notification, "Equip a weapon to attack");
+        return;
+      }
+
+      const nowMs = Date.now();
+      if (!canAttack(player.lastAttackAtMs, params.rate, nowMs)) {
+        client.send(ServerMessage.Notification, "Attack too soon");
+        return;
+      }
+
+      if (!isInRange(player.gridX, player.gridY, gridX, gridY, params.range)) {
+        client.send(ServerMessage.Notification, "Target out of range");
+        return;
+      }
+
+      const key = worldObjectKey(gridX, gridY);
+      const worldObj = this.state.worldObjects.get(key);
+      if (!worldObj) {
+        client.send(ServerMessage.Notification, "Nothing to attack");
+        return;
+      }
+
+      const def = this.getServices().itemDefinitionLoader.getDefinition(worldObj.definitionId);
+      const targetTags = def?.tags ?? [];
+      const damage = calculateDamage(
+        { baseDamage: params.baseDamage, tagModifiers: params.tagModifiers, rate: params.rate, range: params.range },
+        targetTags
+      );
+      if (damage <= 0) return;
+
+      player.lastAttackAtMs = nowMs;
+      worldObj.health = Math.max(0, worldObj.health - damage);
+
+      this.broadcast(ServerMessage.ObjectDamaged, {
+        objectId: key,
+        newHealth: worldObj.health,
+        maxHealth: worldObj.maxHealth,
+        damage
+      });
+
+      if (worldObj.health <= 0) {
+        const drops = getDestroyableDrops(this.getServices().itemDefinitionLoader, worldObj.definitionId);
+        if (drops && drops.length > 0) {
+          const resolved = this.getServices().lootResolver.resolve(drops, () => Math.random());
+          if (resolved.length > 0) {
+            await this.getServices().inventoryService.addItems(
+              authContext.user.id,
+              resolved.map((r) => ({ definitionId: r.definitionId, quantity: r.quantity }))
+            );
+            const updated = await this.getServices().inventoryService.getInventory(authContext.user.id);
+            client.send(ServerMessage.InventoryUpdate, updated);
+          }
+        }
+        this.state.worldObjects.delete(key);
+        this.broadcast(ServerMessage.ObjectDestroyed, { objectId: key });
       }
     });
 
@@ -236,7 +284,9 @@ export class ShardRoom extends Room<ShardState> {
       await equipmentService.equip(authContext.user.id, payloadResult.data.instanceId, slot);
       await syncPlayerEquipment(this.getServices(), this.state, client.sessionId, authContext.user.id);
       const updated = await inventoryService.getInventory(authContext.user.id);
+      const equipment = await equipmentService.getEquipment(authContext.user.id);
       client.send(ServerMessage.InventoryUpdate, updated);
+      client.send(ServerMessage.EquipmentUpdate, equipment);
     });
 
     this.onMessage(ClientMessage.UnequipItem, async (client, rawPayload: unknown) => {
@@ -247,10 +297,13 @@ export class ShardRoom extends Room<ShardState> {
       }
       const authContext = client.auth as JoinAuthContext | undefined;
       if (!authContext) return;
-      await this.getServices().equipmentService.unequip(authContext.user.id, payloadResult.data.slot);
+      const { equipmentService, inventoryService } = this.getServices();
+      await equipmentService.unequip(authContext.user.id, payloadResult.data.slot);
       await syncPlayerEquipment(this.getServices(), this.state, client.sessionId, authContext.user.id);
-      const updated = await this.getServices().inventoryService.getInventory(authContext.user.id);
+      const updated = await inventoryService.getInventory(authContext.user.id);
+      const equipment = await equipmentService.getEquipment(authContext.user.id);
       client.send(ServerMessage.InventoryUpdate, updated);
+      client.send(ServerMessage.EquipmentUpdate, equipment);
     });
 
     this.onMessage(ClientMessage.DropItem, async (client, rawPayload: unknown) => {

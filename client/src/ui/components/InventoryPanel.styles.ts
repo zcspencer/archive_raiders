@@ -106,6 +106,14 @@ export const equipPlaceholderStyle: CSSProperties = {
   color: "#64748b"
 };
 
+/** Unequip button inside an equipment slot. */
+export const equipUnequipBtnStyle: CSSProperties = {
+  marginTop: 6,
+  padding: "2px 8px",
+  fontSize: 11,
+  cursor: "pointer"
+};
+
 /** 6-column grid for item slots. */
 export const itemGridStyle: CSSProperties = {
   display: "grid",

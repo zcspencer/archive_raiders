@@ -1,8 +1,10 @@
 import { useState, type ReactElement } from "react";
+import { EQUIPMENT_SLOTS } from "@odyssey/shared";
+import type { ItemInstance } from "@odyssey/shared";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
+import { usePlayerEquipmentStore } from "../../store/playerEquipment";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
-import { usePlayerHotbarStore } from "../../store/playerHotbar";
 import { useCurrencyStore } from "../../store/currency";
 import { useReadableContentStore } from "../../store/readableContent";
 import { getItemDefinition, getReadableParams, hasEquippableComponent } from "../../data/itemDefinitions";
@@ -22,6 +24,7 @@ import {
   equipSlotStyle,
   equipLabelStyle,
   equipPlaceholderStyle,
+  equipUnequipBtnStyle,
   itemGridStyle,
   emptySlotStyle,
   filledSlotStyle,
@@ -35,6 +38,23 @@ import {
 const SLOT_COUNT = 24;
 
 /**
+ * Finds an item by instanceId in a flat or nested item list.
+ */
+function findItemByInstanceId(
+  list: ItemInstance[],
+  instanceId: string
+): ItemInstance | undefined {
+  for (const item of list) {
+    if (item.instanceId === instanceId) return item;
+    if (item.containedItems?.length) {
+      const found = findItemByInstanceId(item.containedItems, instanceId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Inventory overlay panel toggled by pressing I.
  * Shows currency wallet, equipment slots, and item grid from server state.
  */
@@ -42,8 +62,10 @@ export function InventoryPanel(): ReactElement | null {
   const inventoryOpen = usePlayerControlStore((s) => s.inventoryOpen);
   const toggleInventory = usePlayerControlStore((s) => s.toggleInventory);
   const items = usePlayerInventoryStore((s) => s.items);
+  const equipment = usePlayerEquipmentStore((s) => s.equipment);
   const balances = useCurrencyStore((s) => s.balances);
-  const addToToolbar = usePlayerHotbarStore((s) => s.addToToolbar);
+  const sendEquipItem = useGameRoomBridgeStore((s) => s.sendEquipItem);
+  const sendUnequipItem = useGameRoomBridgeStore((s) => s.sendUnequipItem);
 
   const [contextItemId, setContextItemId] = useState<string | null>(null);
   const openReadable = useReadableContentStore((s) => s.openReadable);
@@ -72,18 +94,31 @@ export function InventoryPanel(): ReactElement | null {
           <span style={hintStyle}>Press I to close</span>
         </div>
 
-        {/* Equipment section (hand/head) */}
+        {/* Equipment section (data-driven from EQUIPMENT_SLOTS) */}
         <div style={sectionStyle}>
           <h3 style={sectionTitleStyle}>Equipment</h3>
           <div style={equipRowStyle}>
-            <div style={equipSlotStyle}>
-              <span style={equipLabelStyle}>Hand</span>
-              <div style={equipPlaceholderStyle}>—</div>
-            </div>
-            <div style={equipSlotStyle}>
-              <span style={equipLabelStyle}>Head</span>
-              <div style={equipPlaceholderStyle}>—</div>
-            </div>
+            {EQUIPMENT_SLOTS.map((slot) => {
+              const instanceId = equipment[slot] ?? null;
+              const item = instanceId ? findItemByInstanceId(items, instanceId) : null;
+              const def = item ? getItemDefinition(item.definitionId) : undefined;
+              const label = def?.name ?? "—";
+              return (
+                <div key={slot} style={equipSlotStyle}>
+                  <span style={equipLabelStyle}>{slot.charAt(0).toUpperCase() + slot.slice(1)}</span>
+                  <div style={equipPlaceholderStyle}>{label}</div>
+                  {instanceId ? (
+                    <button
+                      type="button"
+                      style={equipUnequipBtnStyle}
+                      onClick={() => sendUnequipItem(slot)}
+                    >
+                      Unequip
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -120,11 +155,11 @@ export function InventoryPanel(): ReactElement | null {
                           type="button"
                           style={contextBtnStyle}
                           onClick={() => {
-                            addToToolbar(item.instanceId);
+                            sendEquipItem(item.instanceId);
                             setContextItemId(null);
                           }}
                         >
-                          Add to toolbar
+                          Equip
                         </button>
                       ) : null}
                       {readableParams ? (

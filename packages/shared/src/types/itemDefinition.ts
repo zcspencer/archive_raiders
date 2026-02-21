@@ -1,9 +1,26 @@
+import type { EquipmentSlot } from "./equipmentSlot.js";
+
 /**
  * Item rarity. Important = single instance per player, cannot be dropped.
  */
 export const ITEM_RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Important"] as const;
 
 export type ItemRarity = (typeof ITEM_RARITIES)[number];
+
+/**
+ * Equippable component params. baseDamage and tagModifiers drive damage to destroyable targets.
+ */
+export interface EquippableParams {
+  slot: EquipmentSlot;
+  /** Base damage per attack; 0 = no damage (e.g. watering can). */
+  baseDamage?: number;
+  /** Tag -> multiplier (e.g. { "tree": 3.0 } = 300% damage vs items with tag "tree"). */
+  tagModifiers?: Record<string, number>;
+  /** Attacks per second. Default 1. */
+  rate?: number;
+  /** Range in tiles (Chebyshev distance). Default 1. */
+  range?: number;
+}
 
 /**
  * Descriptor for a component attached to an item definition.

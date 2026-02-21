@@ -17,11 +17,16 @@ alwaysApply: false
 
 - `players`: `MapSchema<PlayerSchema>` keyed by sessionId.
 - `tiles`: `MapSchema<TileSchema>` (32x32 world grid).
+- `worldObjects`: `MapSchema<WorldObjectSchema>` keyed by objectId (trees, rocks, etc.).
 - `classroomId`: string.
+
+## WorldObjectSchema Fields
+
+`objectId`, `definitionId`, `gridX`, `gridY`, `health`, `maxHealth`.
 
 ## PlayerSchema Fields
 
-`id`, `gridX`, `gridY`, `stamina`, `maxStamina`, `selectedHotbarSlot`, `lastInteractAtMs`,
+`id`, `gridX`, `gridY`, `stamina`, `maxStamina`, `lastAttackAtMs`,
 `equippedHandItemId`, `equippedHeadItemId` (inventory instance IDs),
 `equippedHandDefId`, `equippedHeadDefId` (definition IDs for remote client sprite rendering),
 `currentMapKey` (tracks which map the player is on).
@@ -34,8 +39,7 @@ Both enums are **additive-only** — new message types may be added but existing
 |---|---|
 | `Move` | `{ gridX, gridY }` |
 | `SetMap` | `{ mapKey }` |
-| `SelectHotbar` | `{ slotIndex }` |
-| `Interact` | `{ target, toolId, actionType, chargeMs }` |
+| `AttackTarget` | `{ gridX, gridY }` — damage world object at tile |
 | `OpenContainer` | `{ objectId }` |
 | `ClaimContainer` | `{ objectId, nonce }` |
 | `EquipItem` | `{ instanceId }` |
@@ -49,7 +53,9 @@ Both enums are **additive-only** — new message types may be added but existing
 | `ContainerContents` | `{ objectId, nonce, items, currencyRewards }` |
 | `InventoryUpdate` | `ItemInstance[]` (full snapshot replace) |
 | `CurrencyUpdate` | `Record<CurrencyType, number>` (full snapshot) |
-| `EquipmentUpdate` | (via schema sync, not message) |
+| `EquipmentUpdate` | `Record<EquipmentSlot, string \| null>` (full snapshot; sent on join, equip, unequip) |
+| `ObjectDamaged` | `{ objectId, newHealth, maxHealth, damage }` (broadcast) |
+| `ObjectDestroyed` | `{ objectId }` (broadcast) |
 
 ### Adding a New Message
 
@@ -57,6 +63,19 @@ Both enums are **additive-only** — new message types may be added but existing
 2. Add a Zod payload schema in `packages/shared/src/validators/`.
 3. Register the `onMessage` handler in `ShardRoom.registerMessageHandlers()`.
 4. Add the client-side sender in `gameRoomBridge` store and/or listener in `useColyseusRoom`.
+
+## Damage System (Attack Flow)
+
+1. Client sends `ClientMessage.AttackTarget` with `{ gridX, gridY }`.
+2. Server looks up world object at target position, validates equipped item has `baseDamage > 0`, checks rate cooldown and range.
+3. `damageService.calculateDamage()` computes `baseDamage * highestMatchingTagModifier`.
+4. Server applies damage to `WorldObjectSchema.health`, broadcasts `ServerMessage.ObjectDamaged`.
+5. If health reaches 0: resolves drops via `LootResolver`, grants items to attacker, broadcasts `ServerMessage.ObjectDestroyed`, removes world object from state.
+
+Key functions in `server/src/colyseus/services/damageService.ts`:
+- `calculateDamage(params, targetTags)` — damage with tag multiplier
+- `canAttack(lastAttackAtMs, rate, nowMs)` — rate-limit check
+- `isInRange(playerX, playerY, targetX, targetY, range)` — Chebyshev distance
 
 ## Auth Flow
 
@@ -72,7 +91,7 @@ Race condition on reconnect handled by catching duplicate key errors (pg error 2
 1. `useColyseusRoom` hook creates Colyseus client and calls `joinOrCreate("shard", { accessToken, classroomId })`.
 2. Room ref stored in `gameRoomBridge` Zustand store.
 3. `RemotePlayersController` reads room state to reconcile remote player sprites + equipment.
-4. Listeners for `Notification`, `ContainerContents`, `InventoryUpdate`, `CurrencyUpdate` registered in `useColyseusRoom`.
+4. Listeners for `Notification`, `ContainerContents`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `ObjectDamaged`, `ObjectDestroyed` registered in `useColyseusRoom`.
 
 ## Buffer Size
 

@@ -1,18 +1,21 @@
 {
-    "id": "sword",
-    "version": 1,
-    "name": "Sword",
-    "description": "A sturdy blade.",
-    "maxStackSize": 1,
-    "inventorySprite": "items/sword",
-    "equippedSprite": "items/sword-held",
-    "rarity": "Uncommon",
-    "components": [
-        {
-            "typeId": "Equippable",
-            "params": {
-                "slot": "hand"
-            }
-        }
-    ]
+  "id": "sword",
+  "version": 1,
+  "name": "Sword",
+  "description": "A sturdy blade.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/sword",
+  "equippedSprite": "items/sword-held",
+  "rarity": "Uncommon",
+  "components": [
+    {
+      "typeId": "Equippable",
+      "params": {
+        "slot": "hand",
+        "baseDamage": 4,
+        "rate": 1.5,
+        "range": 1
+      }
+    }
+  ]
 }

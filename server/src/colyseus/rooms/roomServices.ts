@@ -7,8 +7,9 @@ import type { EquipmentService } from "../../inventory/EquipmentService.js";
 import type { InventoryService } from "../../inventory/InventoryService.js";
 import type { ItemActionResolver } from "../../inventory/ItemActionResolver.js";
 import type { ItemDefinitionLoader } from "../../inventory/ItemDefinitionLoader.js";
+import type { LootResolver } from "../../inventory/LootResolver.js";
 import type { ShardState } from "../schema/ShardState.js";
-import { findDefinitionIdInTree, getEquippableStats } from "./inventoryTreeUtils.js";
+import { findDefinitionIdInTree, getEquippableParams } from "./inventoryTreeUtils.js";
 
 /**
  * Service dependencies injected into ShardRoom.
@@ -22,6 +23,7 @@ export interface RoomServices {
   equipmentService: EquipmentService;
   itemActionResolver: ItemActionResolver;
   itemDefinitionLoader: ItemDefinitionLoader;
+  lootResolver: LootResolver;
 }
 
 /**
@@ -54,13 +56,16 @@ export async function syncPlayerEquipment(
 }
 
 /**
- * Returns the Equippable stats for whatever item is currently in the player's hand slot.
+ * Returns the Equippable params for whatever item is currently in the player's hand slot.
  */
-export async function getHandStats(services: RoomServices, userId: string): Promise<Record<string, number> | undefined> {
+export async function getHandEquippableParams(
+  services: RoomServices,
+  userId: string
+): Promise<{ baseDamage: number; tagModifiers?: Record<string, number>; rate: number; range: number } | undefined> {
   const equipment = await services.equipmentService.getEquipment(userId);
   if (!equipment.hand) return undefined;
   const inventory = await services.inventoryService.getInventory(userId);
   const definitionId = findDefinitionIdInTree(inventory, equipment.hand);
   if (!definitionId) return undefined;
-  return getEquippableStats(services.itemDefinitionLoader, definitionId);
+  return getEquippableParams(services.itemDefinitionLoader, definitionId);
 }

@@ -42,6 +42,14 @@ export type LootDrop =
   | { method: "tiered"; tiers: LootTier[]; count?: number };
 
 /**
+ * Destroyable component params. Used for world objects that can be damaged and drop loot.
+ */
+export interface DestroyableParams {
+  health: number;
+  drops?: LootDrop[];
+}
+
+/**
  * Standalone loot table loaded from content/loot-tables/*.loot-table.json.
  * Can be referenced by `tableId` from any LootSource.
  */

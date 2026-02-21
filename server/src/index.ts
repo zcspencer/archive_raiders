@@ -105,7 +105,8 @@ async function startServer(): Promise<void> {
     currencyService,
     equipmentService,
     itemActionResolver,
-    itemDefinitionLoader
+    itemDefinitionLoader,
+    lootResolver
   });
   gameServer.define("shard", ShardRoom);
 

@@ -33,12 +33,14 @@ alwaysApply: false
 4. Server sends `InventoryUpdate` back
 5. Remote clients read `equippedHandDefId` / `equippedHeadDefId` from schema for sprite rendering
 
-## Tool System (Equipment-Based)
+## Damage System
 
-- Tool interactions check equipped hand item's component stats (e.g. `{ chop: 1 }` for axe).
-- `toolRules.ts` matches interaction payload against `TOOL_RULES` using `handStats` from equipped item.
+- Equippable items define `baseDamage`, `tagModifiers`, `rate`, and `range` instead of the old `stats` map.
+- World objects (trees, rocks) are `WorldObjectSchema` instances with health, backed by Destroyable component params.
+- `damageService.calculateDamage()` computes `baseDamage * highestMatchingTagModifier` (e.g. axe has `{ "tree": 3.0 }`).
+- `damageService.canAttack()` enforces rate limiting; `isInRange()` uses Chebyshev distance.
+- On destruction, drops are resolved via `LootResolver` and granted to the attacker.
 - On first join, server seeds starter items (axe, watering-can, seeds-bag) and auto-equips axe.
-- New tool behaviors are added by extending `TOOL_RULES` and adding appropriate item component stats.
 
 ## Extending the Item System
 
@@ -64,9 +66,9 @@ alwaysApply: false
 | Server | `inventory/LootResolver.ts` | Resolves loot drops from table definitions |
 | Server | `inventory/LootTableLoader.ts` | Loads loot table JSON at startup |
 | Server | `inventory/ItemDefinitionLoader.ts` | Loads item JSON at startup |
-| Server | `inventory/components/` | Component registry (Equippable, Cosmetic, Readable, Container, ...) |
+| Server | `inventory/components/` | Component registry (Equippable, Cosmetic, Readable, Container, Destroyable) |
 | Server | `colyseus/rooms/inventoryTreeUtils.ts` | Nested item tree search helpers |
-| Server | `colyseus/services/toolRules.ts` | Stat-based tool interaction rules |
+| Server | `colyseus/services/damageService.ts` | Damage calculation, rate check, range check |
 | Client | `store/playerInventory.ts` | Server-authoritative item list |
 | Client | `store/container.ts` | Container loot preview state |
 | Client | `store/currency.ts` | Currency balances |

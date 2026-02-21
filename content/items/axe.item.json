@@ -8,6 +8,15 @@
   "equippedSprite": "items/axe-held",
   "rarity": "Common",
   "components": [
-    { "typeId": "Equippable", "params": { "slot": "hand", "stats": { "chop": 1 } } }
+    {
+      "typeId": "Equippable",
+      "params": {
+        "slot": "hand",
+        "baseDamage": 2,
+        "tagModifiers": { "tree": 3.0 },
+        "rate": 1,
+        "range": 1
+      }
+    }
   ]
 }

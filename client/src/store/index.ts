@@ -7,6 +7,6 @@ export { useDialogueStore } from "./dialogue";
 export { useGameRoomBridgeStore } from "./gameRoomBridge";
 export { useNotificationStore } from "./notification";
 export { usePlayerControlStore } from "./playerControl";
-export { usePlayerHotbarStore } from "./playerHotbar";
+export { usePlayerEquipmentStore } from "./playerEquipment";
 export { usePlayerInventoryStore } from "./playerInventory";
 export { useReadableContentStore } from "./readableContent";

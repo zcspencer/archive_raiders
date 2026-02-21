@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interactPayloadSchema, movePayloadSchema } from "./interaction.schema.js";
+import { movePayloadSchema, tileCoordinateSchema } from "./interaction.schema.js";
 
 describe("interaction schemas", () => {
   it("accepts valid move payload", () => {
@@ -8,13 +8,8 @@ describe("interaction schemas", () => {
     expect(parsed.gridY).toBe(14);
   });
 
-  it("rejects invalid interact payload", () => {
-    const result = interactPayloadSchema.safeParse({
-      target: { gridX: -1, gridY: 2 },
-      toolId: "axe",
-      actionType: "primary",
-      chargeMs: 0
-    });
+  it("rejects invalid tile coordinate", () => {
+    const result = tileCoordinateSchema.safeParse({ gridX: -1, gridY: 2 });
     expect(result.success).toBe(false);
   });
 });

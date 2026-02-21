@@ -15,9 +15,11 @@ import { Npc } from "../entities/Npc";
 import { InteractableObject } from "../entities/InteractableObject";
 import { getNpcDefinition } from "../content/npcDialogue";
 import { getItemDefinition } from "../../data/itemDefinitions";
+import { AttackInput } from "../systems/attackInput";
 import { GameplayInput } from "../systems/GameplayInput";
 import { InteractionHandler } from "../systems/InteractionHandler";
 import { RemotePlayersController } from "../systems/RemotePlayersController";
+import { WorldObjectsController } from "../systems/WorldObjectsController";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerInventoryStore } from "../../store/playerInventory";
 
@@ -43,7 +45,9 @@ export class TiledMapScene extends Phaser.Scene {
   private gridMovement!: GridMovement;
   private equippedSpriteController!: EquippedItemSpriteController;
   private remotePlayers!: RemotePlayersController;
+  private worldObjects!: WorldObjectsController;
   private input_!: GameplayInput;
+  private attackInput!: AttackInput;
   private interaction!: InteractionHandler;
   private npcs: Npc[] = [];
   private objects: InteractableObject[] = [];
@@ -87,10 +91,23 @@ export class TiledMapScene extends Phaser.Scene {
     this.spawnTransitions(mapData);
 
     this.input_ = new GameplayInput(this);
+    this.attackInput = new AttackInput(this, {
+      getGridX: () => this.gridMovement.getGridX(),
+      getGridY: () => this.gridMovement.getGridY(),
+      isBlocked: () => this.input_.isBlocked(),
+      onAttackSent: (targetGridX, targetGridY) => {
+        const px = this.gridMovement.getGridX();
+        const py = this.gridMovement.getGridY();
+        const dx = targetGridX - px;
+        const dy = targetGridY - py;
+        this.equippedSpriteController.playAttackArc(dx, dy);
+      }
+    });
     this.interaction = new InteractionHandler((targetScene, sceneData) => {
       this.scene.start(targetScene, sceneData);
     });
     this.remotePlayers = new RemotePlayersController(this);
+    this.worldObjects = new WorldObjectsController(this, mapData.collisionGrid);
     useGameRoomBridgeStore.getState().sendSetMap({ mapKey: this.currentMapKey });
 
     this.setupCamera(mapData);
@@ -99,6 +116,7 @@ export class TiledMapScene extends Phaser.Scene {
   update(): void {
     const room = useGameRoomBridgeStore.getState().room;
     this.remotePlayers.reconcile(room, this.currentMapKey);
+    this.worldObjects.reconcile();
     const px = this.gridMovement.getGridX();
     const py = this.gridMovement.getGridY();
 

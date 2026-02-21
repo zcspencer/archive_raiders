@@ -2,7 +2,7 @@
   "id": "dungeon_chest",
   "kind": "chest",
   "drops": [
-    { "method": "fixed", "source": { "type": "item", "itemId": "scroll", "quantity": 1 } },
+    { "method": "fixed", "source": { "type": "item", "itemId": "pickaxe", "quantity": 1 } },
     {
       "method": "tiered",
       "count": 2,

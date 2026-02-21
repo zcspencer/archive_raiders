@@ -1,13 +1,1 @@
-{
-  "id": "watering-can",
-  "version": 1,
-  "name": "Watering Can",
-  "description": "Water crops and seedlings.",
-  "maxStackSize": 1,
-  "inventorySprite": "items/watering-can",
-  "equippedSprite": "items/watering-can-held",
-  "rarity": "Common",
-  "components": [
-    { "typeId": "Equippable", "params": { "slot": "hand", "stats": { "water": 1 } } }
-  ]
-}
+{"id":"watering-can","version":1,"name":"Watering Can","description":"Water crops and seedlings.","maxStackSize":1,"inventorySprite":"items/watering-can","equippedSprite":"items/watering-can-held","rarity":"Common","components":[{"typeId":"Equippable","params":{"slot":"hand"}}]}

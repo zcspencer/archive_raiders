@@ -1,5 +1,3 @@
-import type { ToolId, ToolUpgradeLevel } from "./tool.js";
-
 /**
  * Runtime item instance (one stack in inventory or inside a container).
  * containedItems is populated when this instance has the Container component.
@@ -19,20 +17,4 @@ export interface ItemInstance {
 export interface InventoryStack {
   itemId: string;
   quantity: number;
-}
-
-/**
- * Tool state tracked for gameplay checks.
- */
-export interface PlayerToolState {
-  toolId: ToolId;
-  upgradeLevel: ToolUpgradeLevel;
-}
-
-/**
- * One hotbar slot with optional equipped tool.
- */
-export interface HotbarSlot {
-  slotIndex: number;
-  toolId: ToolId | null;
 }

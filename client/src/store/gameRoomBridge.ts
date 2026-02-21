@@ -1,4 +1,4 @@
-import type { InteractPayload, MovePayload, SetMapPayload } from "@odyssey/shared";
+import type { AttackTargetPayload, EquipmentSlot, MovePayload, SetMapPayload } from "@odyssey/shared";
 import type { Room } from "colyseus.js";
 import { ClientMessage } from "@odyssey/shared";
 import { create } from "zustand";
@@ -9,10 +9,9 @@ interface GameRoomBridgeState {
   clearRoom: () => void;
   sendMove: (payload: MovePayload) => void;
   sendSetMap: (payload: SetMapPayload) => void;
-  sendInteract: (payload: InteractPayload) => void;
-  sendSelectHotbar: (slotIndex: number) => void;
+  sendAttack: (payload: AttackTargetPayload) => void;
   sendEquipItem: (instanceId: string) => void;
-  sendUnequipItem: (slot: "hand" | "head") => void;
+  sendUnequipItem: (slot: EquipmentSlot) => void;
   sendOpenContainer: (objectId: string) => void;
   sendClaimContainer: (objectId: string, nonce: string) => void;
   sendDropItem: (instanceId: string) => void;
@@ -31,11 +30,8 @@ export const useGameRoomBridgeStore = create<GameRoomBridgeState>((set, get) => 
   sendSetMap: (payload): void => {
     get().room?.send(ClientMessage.SetMap, payload);
   },
-  sendInteract: (payload): void => {
-    get().room?.send(ClientMessage.Interact, payload);
-  },
-  sendSelectHotbar: (slotIndex): void => {
-    get().room?.send(ClientMessage.SelectHotbar, { slotIndex });
+  sendAttack: (payload): void => {
+    get().room?.send(ClientMessage.AttackTarget, payload);
   },
   sendEquipItem: (instanceId): void => {
     get().room?.send(ClientMessage.EquipItem, { instanceId });

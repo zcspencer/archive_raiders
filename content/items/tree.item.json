@@ -1,0 +1,24 @@
+{
+  "id": "tree",
+  "version": 1,
+  "name": "Tree",
+  "description": "A tree that can be chopped down.",
+  "maxStackSize": 1,
+  "inventorySprite": "items/tree",
+  "rarity": "Common",
+  "tags": ["tree"],
+  "components": [
+    {
+      "typeId": "Destroyable",
+      "params": {
+        "health": 10,
+        "drops": [
+          {
+            "method": "fixed",
+            "source": { "type": "item", "itemId": "stick", "quantity": 2 }
+          }
+        ]
+      }
+    }
+  ]
+}

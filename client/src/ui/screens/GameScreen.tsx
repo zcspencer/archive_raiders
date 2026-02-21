@@ -2,9 +2,7 @@ import { useEffect, type CSSProperties, type ReactElement } from "react";
 import type { AuthUser, Classroom } from "@odyssey/shared";
 import { bootGame, destroyGame } from "../../game/bootstrap";
 import { useColyseusRoom } from "../../hooks/useColyseusRoom";
-import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { usePlayerControlStore } from "../../store/playerControl";
-import { usePlayerHotbarStore } from "../../store/playerHotbar";
 import { useDialogueStore } from "../../store/dialogue";
 import { useContainerStore } from "../../store/container";
 import { useNotificationStore } from "../../store/notification";
@@ -19,7 +17,6 @@ import { replaceNpcDefinitions } from "../../game/content/npcDialogue";
 import { DialogueBox } from "../components/DialogueBox";
 import { ReadableContentDialog } from "../components/ReadableContentDialog";
 import { ChallengePanel } from "../components/ChallengePanel";
-import { Toolbar } from "../components/Toolbar";
 import { InventoryPanel } from "../components/InventoryPanel";
 import { ChestTransferPanel } from "../components/ChestTransferPanel";
 
@@ -37,7 +34,6 @@ export function GameScreen(props: GameScreenProps): ReactElement {
   const setInputMode = usePlayerControlStore((s) => s.setInputMode);
   const toggleInventory = usePlayerControlStore((s) => s.toggleInventory);
   const inventoryOpen = usePlayerControlStore((s) => s.inventoryOpen);
-  const setSelectedHotbarSlot = usePlayerControlStore((s) => s.setSelectedHotbarSlot);
   const dialogueActive = useDialogueStore((s) => s.isActive);
   const containerOpen = useContainerStore((s) => s.currentContainerId !== null);
   const closeContainer = useContainerStore((s) => s.closeContainer);
@@ -139,24 +135,11 @@ export function GameScreen(props: GameScreenProps): ReactElement {
         }
         return;
       }
-
-      const slot = hotbarSlotFromKey(event.key);
-      if (slot !== null) {
-        setSelectedHotbarSlot(slot);
-        const bridge = useGameRoomBridgeStore.getState();
-        bridge.sendSelectHotbar(slot);
-        const instanceId = usePlayerHotbarStore.getState().slots[slot] ?? null;
-        if (instanceId) {
-          bridge.sendEquipItem(instanceId);
-        } else {
-          bridge.sendUnequipItem("hand");
-        }
-      }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [challengeActive, dismissChallenge, containerOpen, closeContainer, inventoryOpen, readableOpen, closeReadable, setInputMode, setSelectedHotbarSlot, toggleInventory]);
+  }, [challengeActive, dismissChallenge, containerOpen, closeContainer, inventoryOpen, readableOpen, closeReadable, setInputMode, toggleInventory]);
 
   return (
     <>
@@ -180,7 +163,6 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       </div>
 
       {/* HUD overlays */}
-      <Toolbar />
       <InventoryPanel />
       <ChestTransferPanel />
       <ChallengePanel />
@@ -198,15 +180,6 @@ export function GameScreen(props: GameScreenProps): ReactElement {
       ) : null}
     </>
   );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-
-function hotbarSlotFromKey(key: string): number | null {
-  if (key >= "1" && key <= "9") return Number(key) - 1;
-  return null;
 }
 
 /* ------------------------------------------------------------------ */

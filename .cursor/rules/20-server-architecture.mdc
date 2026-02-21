@@ -49,9 +49,14 @@ alwaysApply: false
 
 ### Component Registry (`server/src/inventory/components/`)
 
-Registry pattern (like task-validators). Current components: `Equippable`, `Cosmetic`, `Readable`, `Container`.
+Registry pattern (like task-validators). Current components: `Equippable`, `Cosmetic`, `Readable`, `Container`, `Destroyable`.
 Each component defines a Zod params schema, getActions, and lifecycle hooks (onEquip, onUnequip, onUse).
 New component types are added by creating a module in this directory and registering it in `ComponentRegistry`.
+
+### Colyseus Services (`server/src/colyseus/services/`)
+
+- `damageService.ts` — `calculateDamage()`, `canAttack()`, `isInRange()` for the attack/damage system.
+- `movementService.test.ts` — movement validation tests.
 
 ### Room Utilities (`server/src/colyseus/rooms/`)
 

@@ -8,8 +8,8 @@ import { useCurrencyStore } from "../store/currency";
 import { useNotificationStore } from "../store/notification";
 import { useGameRoomBridgeStore } from "../store/gameRoomBridge";
 import { usePlayerControlStore } from "../store/playerControl";
+import { usePlayerEquipmentStore } from "../store/playerEquipment";
 import { usePlayerInventoryStore } from "../store/playerInventory";
-import { usePlayerHotbarStore } from "../store/playerHotbar";
 
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -106,8 +106,6 @@ export function useColyseusRoom(
           if (Array.isArray(payload)) {
             const items = payload as ItemInstance[];
             usePlayerInventoryStore.getState().setItems(items);
-            const instanceIds = collectInstanceIds(items);
-            usePlayerHotbarStore.getState().pruneOrphans(instanceIds);
             useContainerStore.getState().closeContainer();
           }
         });
@@ -115,6 +113,17 @@ export function useColyseusRoom(
           if (payload && typeof payload === "object") {
             useCurrencyStore.getState().setBalances(payload as Record<string, number>);
           }
+        });
+        activeRoom.onMessage(ServerMessage.EquipmentUpdate, (payload: unknown) => {
+          if (payload && typeof payload === "object") {
+            usePlayerEquipmentStore.getState().setEquipment(payload as Record<string, string | null>);
+          }
+        });
+        activeRoom.onMessage(ServerMessage.ObjectDamaged, () => {
+          /* World object health is synced via room.state.worldObjects; WorldObjectsController reconciles. */
+        });
+        activeRoom.onMessage(ServerMessage.ObjectDestroyed, () => {
+          /* Object removed from room.state.worldObjects; WorldObjectsController reconciles. */
         });
 
         activeRoom.onLeave((code) => {
@@ -156,16 +165,4 @@ export function useColyseusRoom(
     errorMessage,
     sessionId
   };
-}
-
-function collectInstanceIds(items: ItemInstance[]): string[] {
-  const ids: string[] = [];
-  function walk(list: ItemInstance[]): void {
-    for (const item of list) {
-      ids.push(item.instanceId);
-      if (item.containedItems?.length) walk(item.containedItems);
-    }
-  }
-  walk(items);
-  return ids;
 }

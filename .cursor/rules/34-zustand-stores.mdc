@@ -17,9 +17,9 @@ Barrel re-exports are available from `client/src/store/index.ts`.
 | `classroom` | list, selected | Classroom selection before game join |
 | `dialogue` | speaker, lines, index | NPC dialogue overlay state |
 | `container` | currentContainerId, nonce, previewItems, previewCurrency | Server-provided container loot preview |
-| `playerControl` | inputMode, hotbarSlot, inventoryOpen | "game"/"ui" mode, inventory toggle, cursor tile |
+| `playerControl` | inputMode, inventoryOpen, cursorTile | "game"/"ui" mode, inventory toggle, cursor tile |
 | `playerInventory` | items: ItemInstance[] | Server-authoritative inventory; replaced on `InventoryUpdate` |
-| `playerHotbar` | slots, addToToolbar | Hotbar slot assignments for quick equip |
+| `playerEquipment` | equipment: Record<string, string \| null> | Server-authoritative equipment (slot -> instanceId); replaced on `EquipmentUpdate` |
 | `currency` | balances: Record<CurrencyType, number> | Server-authoritative currency; replaced on `CurrencyUpdate` |
 | `gameRoomBridge` | room ref | Colyseus room handle + message senders |
 | `notification` | message, type | Transient server notification display |
@@ -31,13 +31,13 @@ New stores follow the same pattern. Add the store file and re-export from `store
 ## gameRoomBridge (Phaser-React Bridge)
 
 - Holds the Colyseus `Room` reference set by `useColyseusRoom` hook.
-- Exposes message senders: `sendMove`, `sendSetMap`, `sendInteract`, `sendSelectHotbar`, `sendOpenContainer`, `sendClaimContainer`, `sendEquipItem`, `sendUnequipItem`, `sendDropItem`.
+- Exposes message senders: `sendMove`, `sendSetMap`, `sendAttack`, `sendOpenContainer`, `sendClaimContainer`, `sendEquipItem`, `sendUnequipItem`, `sendDropItem`.
 - Phaser systems call these to send messages to server.
 - New senders are added as new `ClientMessage` types are implemented.
 
 ## Server-Authoritative Pattern
 
-`playerInventory` and `currency` stores are **projection-only**. On receiving `InventoryUpdate` or `CurrencyUpdate`, the client **replaces** (not merges) the entire state. Client never mutates these optimistically.
+`playerInventory`, `playerEquipment`, and `currency` stores are **projection-only**. On receiving `InventoryUpdate`, `EquipmentUpdate`, or `CurrencyUpdate`, the client **replaces** (not merges) the entire state. Client never mutates these optimistically.
 
 ## Bridge Data Flow
 
@@ -45,5 +45,5 @@ New stores follow the same pattern. Add the store file and re-export from `store
    React components subscribe and render overlays.
 2. **React -> Phaser**: `playerControl.inputMode` blocks Phaser input when UI is active.
    `GameplayInput.isBlocked()` reads store state via `getState()`.
-3. **Both -> Server**: `gameRoomBridge.sendMove()` / `sendInteract()` / `sendOpenContainer()` relay to Colyseus.
-4. **Server -> Both**: `useColyseusRoom` registers message listeners that update stores on `ContainerContents`, `InventoryUpdate`, `CurrencyUpdate`, `Notification`.
+3. **Both -> Server**: `gameRoomBridge.sendMove()` / `sendAttack()` / `sendOpenContainer()` relay to Colyseus.
+4. **Server -> Both**: `useColyseusRoom` registers message listeners that update stores on `ContainerContents`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `Notification`.

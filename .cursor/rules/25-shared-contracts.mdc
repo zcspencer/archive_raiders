@@ -16,11 +16,10 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | `classroom.ts` | `Classroom`, `ClassroomMembership`, `ClassroomStudentSummary`, `ClassroomStudentEconomy` |
 | `player.ts` | `PlayerProfile` |
 | `task.ts` | `TaskDefinition`, `TaskAnswer`, `TaskResult` |
-| `messages.ts` | `ClientMessage`, `ServerMessage` enums |
-| `interaction.ts` | `MovePayload`, `InteractPayload`, `HotbarSelectPayload` |
-| `tool.ts` | `ToolId`, `ToolActionType` |
+| `messages.ts` | `ClientMessage`, `ServerMessage` enums, `AttackTargetPayload`, `ObjectDamagedPayload`, `ObjectDestroyedPayload`, `MovePayload`, `SetMapPayload` |
+| `interaction.ts` | `TileCoordinate` |
 | `inventory.ts` | `ItemInstance` (instanceId, definitionId, definitionVersion, quantity, containedItems?) |
-| `itemDefinition.ts` | `ItemDefinition`, `ItemRarity`, `ITEM_RARITIES`, `ComponentDescriptor` |
+| `itemDefinition.ts` | `ItemDefinition`, `ItemRarity`, `ITEM_RARITIES`, `ComponentDescriptor`, `EquippableParams` |
 | `equipmentSlot.ts` | `EquipmentSlot` (`"hand" \| "head"`), `EQUIPMENT_SLOTS` |
 | `currency.ts` | `CurrencyType` (`"coins" \| "museum_points"`), `CurrencyReward` |
 | `itemAction.ts` | `ItemAction` (`"drop" \| "equip" \| ...`), `ItemActionRequest` |
@@ -42,6 +41,7 @@ One `*.schema.ts` per type module. Notable schemas:
 - `container.schema.ts` — `containerDefinitionSchema`, `openContainerPayloadSchema`, `claimContainerPayloadSchema`
 - `lootTable.schema.ts` — `lootDropSchema`, `lootTableDefinitionSchema`, `lootTierSchema`, `weightedSourceSchema`
 - `itemAction.schema.ts` — `itemActionSchema`, `equipItemPayloadSchema`, `unequipItemPayloadSchema`, `dropItemPayloadSchema`
+- `messages.schema.ts` — `objectDamagedPayloadSchema`, `objectDestroyedPayloadSchema`
 - `invite.schema.ts` — `createInviteRequestSchema`, `acceptInviteRequestSchema`, `inviteInfoSchema`
 
 New validators are added alongside their type module and re-exported from `index.ts`.

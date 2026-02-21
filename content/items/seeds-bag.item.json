@@ -1,13 +1,1 @@
-{
-  "id": "seeds-bag",
-  "version": 1,
-  "name": "Seeds",
-  "description": "Plant new crops in tilled soil.",
-  "maxStackSize": 1,
-  "inventorySprite": "items/seeds-bag",
-  "equippedSprite": "items/seeds-bag-held",
-  "rarity": "Common",
-  "components": [
-    { "typeId": "Equippable", "params": { "slot": "hand", "stats": { "plant": 1 } } }
-  ]
-}
+{"id":"seeds-bag","version":1,"name":"Seeds","description":"Plant new crops in tilled soil.","maxStackSize":1,"inventorySprite":"items/seeds-bag","equippedSprite":"items/seeds-bag-held","rarity":"Common","components":[{"typeId":"Equippable","params":{"slot":"hand"}}]}

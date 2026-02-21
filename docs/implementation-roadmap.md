@@ -47,10 +47,20 @@ This roadmap is the handoff source of truth for future agents.
 ### Item System
 
 - Data-driven item definitions (`content/items/*.item.json`)
-- Component registry (Equippable, Cosmetic, Readable, Container)
+- Component registry (Equippable, Cosmetic, Readable, Container, Destroyable)
 - Item action resolver (drop, equip, unequip, use, read, open)
-- Equipment-based tool interactions (`toolRules.ts`)
 - Equipment sprite rendering with per-direction anchors
+
+### Damage System
+
+- Unified damage model replacing the old chop/water/plant tool-stat system
+- Equippable items define `baseDamage`, `tagModifiers`, `rate`, `range` (replaces old `stats` map)
+- World objects (trees, rocks) as `WorldObjectSchema` with health and Destroyable component
+- `damageService` with `calculateDamage()` (tag-based multipliers), `canAttack()` (rate limiting), `isInRange()` (Chebyshev distance)
+- `AttackTarget` client message; `ObjectDamaged`/`ObjectDestroyed` server broadcasts
+- Drops resolved via `LootResolver` on destruction, granted to the attacker
+- Mouse click-to-attack input with hold-to-repeat at item rate
+- Client-side `WorldObjectsController` reconciling Colyseus world objects to Phaser sprites
 
 ### Challenges & Readable Items
 
@@ -83,6 +93,7 @@ This roadmap is the handoff source of truth for future agents.
 - `TiledMapData` and layer schemas
 - `ItemDefinition` / `ItemInstance` shapes
 - `ContainerDefinition` shape
+- `WorldObjectSchema` fields (`objectId`, `definitionId`, `gridX`, `gridY`, `health`, `maxHealth`)
 - `ClientMessage` / `ServerMessage` enums (additive only)
 - Colyseus room name `shard`
 - Health endpoint `GET /health`

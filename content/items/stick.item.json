@@ -8,6 +8,14 @@
   "equippedSprite": "items/stick-held",
   "rarity": "Common",
   "components": [
-    { "typeId": "Equippable", "params": { "slot": "hand" } }
+    {
+      "typeId": "Equippable",
+      "params": {
+        "slot": "hand",
+        "baseDamage": 1,
+        "rate": 1,
+        "range": 1
+      }
+    }
   ]
 }
