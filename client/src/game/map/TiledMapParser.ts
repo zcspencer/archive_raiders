@@ -5,7 +5,8 @@ import type {
   TiledProperty,
   MapNpcPlacement,
   MapObjectPlacement,
-  MapTransition
+  MapTransition,
+  MapWorldObjectPlacement
 } from "@odyssey/shared";
 import { CollisionGrid } from "./collisionGrid";
 import { rasterizeCollision } from "./collisionRasterizer";
@@ -26,6 +27,7 @@ export interface ParsedTiledMap {
   npcs: MapNpcPlacement[];
   interactables: MapObjectPlacement[];
   transitions: MapTransition[];
+  worldObjectPlacements: MapWorldObjectPlacement[];
   firstGid: number;
   tilesetSource: string;
 }
@@ -53,6 +55,7 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
   const npcs: MapNpcPlacement[] = [];
   const interactables: MapObjectPlacement[] = [];
   const transitions: MapTransition[] = [];
+  const worldObjectPlacements: MapWorldObjectPlacement[] = [];
   const blockedTiles: Array<{ gx: number; gy: number }> = [];
 
   for (const obj of objectsLayer?.objects ?? []) {
@@ -61,6 +64,9 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
 
     if (obj.type === "spawn" || getProp(obj, "kind", "") === "spawn") {
       spawns.set(obj.name || `spawn_${obj.id}`, { gridX: gx, gridY: gy });
+    } else if (obj.type === "world_object" || getProp(obj, "kind", "") === "world_object") {
+      const defId = getProp(obj, "definition_id", obj.name);
+      worldObjectPlacements.push({ definition_id: defId, gridX: gx, gridY: gy });
     } else if (obj.type === "npc" || getProp(obj, "kind", "") === "npc") {
       const collidable = getBoolProp(obj, "is_collidable");
       npcs.push({
@@ -165,6 +171,7 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
     npcs,
     interactables,
     transitions,
+    worldObjectPlacements,
     firstGid,
     tilesetSource
   };

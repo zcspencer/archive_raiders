@@ -1,4 +1,5 @@
 import { MapSchema, Schema, type } from "@colyseus/schema";
+import type { MapWorldObjectPlacement } from "@odyssey/shared";
 
 const WORLD_WIDTH_TILES = 32;
 const WORLD_HEIGHT_TILES = 32;
@@ -12,6 +13,7 @@ export class TileSchema extends Schema {
 
 export class WorldObjectSchema extends Schema {
   @type("string") declare objectId: string;
+  @type("string") declare mapKey: string;
   @type("string") declare definitionId: string;
   @type("uint16") declare gridX: number;
   @type("uint16") declare gridY: number;
@@ -54,41 +56,35 @@ export class ShardState extends Schema {
 }
 
 /**
- * Key for world objects map: "gridX,gridY".
+ * Composite key for the worldObjects map: "mapKey:gridX,gridY".
  */
-export function worldObjectKey(gridX: number, gridY: number): string {
-  return `${gridX},${gridY}`;
+export function worldObjectKey(mapKey: string, gridX: number, gridY: number): string {
+  return `${mapKey}:${gridX},${gridY}`;
 }
 
 /**
- * Populates state.worldObjects with tree/rock objects using the same seed-based placement as before.
- * getHealth must return the max health for the given definition ID (from Destroyable component).
+ * Spawns world objects for a single map from explicit placements (Tiled or procedural).
+ * @param getHealth resolves max health from item definition Destroyable component.
  */
-export function initializeWorldObjects(
+export function spawnWorldObjectsForMap(
   worldObjects: MapSchema<WorldObjectSchema>,
+  mapKey: string,
+  placements: MapWorldObjectPlacement[],
   getHealth: (definitionId: string) => number | undefined
 ): void {
-  for (let gridX = 0; gridX < WORLD_WIDTH_TILES; gridX += 1) {
-    for (let gridY = 0; gridY < WORLD_HEIGHT_TILES; gridY += 1) {
-      const seed = (gridX * 31 + gridY * 17) % 20;
-      let definitionId: string | undefined;
-      if (seed === 0 || seed === 1) {
-        definitionId = "tree";
-      } else if (seed === 2 || seed === 3) {
-        definitionId = "rock";
-      }
-      if (!definitionId) continue;
-      const maxHealth = getHealth(definitionId);
-      if (maxHealth === undefined || maxHealth <= 0) continue;
-      const obj = new WorldObjectSchema();
-      obj.objectId = worldObjectKey(gridX, gridY);
-      obj.definitionId = definitionId;
-      obj.gridX = gridX;
-      obj.gridY = gridY;
-      obj.health = maxHealth;
-      obj.maxHealth = maxHealth;
-      worldObjects.set(obj.objectId, obj);
-    }
+  for (const p of placements) {
+    const maxHealth = getHealth(p.definition_id);
+    if (maxHealth === undefined || maxHealth <= 0) continue;
+    const key = worldObjectKey(mapKey, p.gridX, p.gridY);
+    const obj = new WorldObjectSchema();
+    obj.objectId = key;
+    obj.mapKey = mapKey;
+    obj.definitionId = p.definition_id;
+    obj.gridX = p.gridX;
+    obj.gridY = p.gridY;
+    obj.health = maxHealth;
+    obj.maxHealth = maxHealth;
+    worldObjects.set(key, obj);
   }
 }
 

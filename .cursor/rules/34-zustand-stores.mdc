@@ -16,7 +16,7 @@ Barrel re-exports are available from `client/src/store/index.ts`.
 | `auth` | user session, token | Login/register, localStorage persistence |
 | `classroom` | list, selected | Classroom selection before game join |
 | `dialogue` | speaker, lines, index | NPC dialogue overlay state |
-| `container` | currentContainerId, nonce, previewItems, previewCurrency | Server-provided container loot preview |
+| `container` | mode, currentContainerId, nonce, previewItems, previewCurrency | Loot preview panel (containers and destroy-drop loot). `mode`: `"container"` (requires claim) or `"loot_drop"` (already granted). |
 | `playerControl` | inputMode, inventoryOpen, cursorTile | "game"/"ui" mode, inventory toggle, cursor tile |
 | `playerInventory` | items: ItemInstance[] | Server-authoritative inventory; replaced on `InventoryUpdate` |
 | `playerEquipment` | equipment: Record<string, string \| null> | Server-authoritative equipment (slot -> instanceId); replaced on `EquipmentUpdate` |
@@ -46,4 +46,4 @@ New stores follow the same pattern. Add the store file and re-export from `store
 2. **React -> Phaser**: `playerControl.inputMode` blocks Phaser input when UI is active.
    `GameplayInput.isBlocked()` reads store state via `getState()`.
 3. **Both -> Server**: `gameRoomBridge.sendMove()` / `sendAttack()` / `sendOpenContainer()` relay to Colyseus.
-4. **Server -> Both**: `useColyseusRoom` registers message listeners that update stores on `ContainerContents`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `Notification`.
+4. **Server -> Both**: `useColyseusRoom` registers message listeners that update stores on `ContainerContents`, `LootDropPreview`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `Notification`.

@@ -7,6 +7,7 @@
   "inventorySprite": "items/tree",
   "rarity": "Common",
   "tags": ["tree"],
+  "mapSprite": { "sheetKey": "tileset_main", "frame": 233 },
   "components": [
     {
       "typeId": "Destroyable",

@@ -13,7 +13,7 @@
       "params": {
         "slot": "hand",
         "baseDamage": 2,
-        "tagModifiers": { "rock": 3.0 },
+        "tagModifiers": { "rock": 30.0 },
         "rate": 1,
         "range": 1
       }

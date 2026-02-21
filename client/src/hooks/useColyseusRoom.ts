@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Client, type Room } from "colyseus.js";
-import type { CurrencyReward } from "@odyssey/shared";
+import type { CurrencyReward, ItemRarity } from "@odyssey/shared";
 import { ServerMessage } from "@odyssey/shared";
 import type { ItemInstance } from "@odyssey/shared";
 import { useContainerStore } from "../store/container";
@@ -106,7 +106,10 @@ export function useColyseusRoom(
           if (Array.isArray(payload)) {
             const items = payload as ItemInstance[];
             usePlayerInventoryStore.getState().setItems(items);
-            useContainerStore.getState().closeContainer();
+            const container = useContainerStore.getState();
+            if (container.mode === "container") {
+              container.closeContainer();
+            }
           }
         });
         activeRoom.onMessage(ServerMessage.CurrencyUpdate, (payload: unknown) => {
@@ -124,6 +127,13 @@ export function useColyseusRoom(
         });
         activeRoom.onMessage(ServerMessage.ObjectDestroyed, () => {
           /* Object removed from room.state.worldObjects; WorldObjectsController reconciles. */
+        });
+        activeRoom.onMessage(ServerMessage.LootDropPreview, (payload: unknown) => {
+          if (payload && typeof payload === "object" && "items" in payload) {
+            const p = payload as { items: Array<{ definitionId: string; name: string; quantity: number; rarity?: ItemRarity }> };
+            useContainerStore.getState().setLootDropPreview(p.items);
+            usePlayerControlStore.getState().setInputMode("ui");
+          }
         });
 
         activeRoom.onLeave((code) => {

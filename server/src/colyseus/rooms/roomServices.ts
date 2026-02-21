@@ -1,4 +1,4 @@
-import type { AuthUser } from "@odyssey/shared";
+import type { AuthUser, MapWorldObjectPlacement } from "@odyssey/shared";
 import type { AuthService } from "../../auth/AuthService.js";
 import type { ClassroomService } from "../../classroom/ClassroomService.js";
 import type { ContainerService } from "../../inventory/ContainerService.js";
@@ -24,6 +24,8 @@ export interface RoomServices {
   itemActionResolver: ItemActionResolver;
   itemDefinitionLoader: ItemDefinitionLoader;
   lootResolver: LootResolver;
+  /** Per-map world object placements loaded from Tiled maps at boot. */
+  mapPlacements: Map<string, MapWorldObjectPlacement[]>;
 }
 
 /**

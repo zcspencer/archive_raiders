@@ -16,7 +16,7 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | `classroom.ts` | `Classroom`, `ClassroomMembership`, `ClassroomStudentSummary`, `ClassroomStudentEconomy` |
 | `player.ts` | `PlayerProfile` |
 | `task.ts` | `TaskDefinition`, `TaskAnswer`, `TaskResult` |
-| `messages.ts` | `ClientMessage`, `ServerMessage` enums, `AttackTargetPayload`, `ObjectDamagedPayload`, `ObjectDestroyedPayload`, `MovePayload`, `SetMapPayload` |
+| `messages.ts` | `ClientMessage`, `ServerMessage` enums, `AttackTargetPayload`, `ObjectDamagedPayload`, `ObjectDestroyedPayload`, `LootDropPreviewPayload`, `MovePayload`, `SetMapPayload` |
 | `interaction.ts` | `TileCoordinate` |
 | `inventory.ts` | `ItemInstance` (instanceId, definitionId, definitionVersion, quantity, containedItems?) |
 | `itemDefinition.ts` | `ItemDefinition`, `ItemRarity`, `ITEM_RARITIES`, `ComponentDescriptor`, `EquippableParams` |
@@ -27,7 +27,7 @@ All exports from `packages/shared/src/index.ts`. Import as `@odyssey/shared`.
 | `lootTable.ts` | `LootQuantity`, `LootSource`, `WeightedSource`, `LootTier`, `LootDrop`, `LootTableDefinition`, `ResolvedLoot` |
 | `resource.ts` | `PlayerResourceState` |
 | `npc.ts` | `NpcDefinition`, `DialogueLine` |
-| `map.ts` | `TiledMapData`, `MapNpcPlacement`, `MapObjectPlacement` |
+| `map.ts` | `TiledMapData`, `MapNpcPlacement`, `MapObjectPlacement`, `MapWorldObjectPlacement` |
 | `invite.ts` | `InviteInfo`, `ClassroomInviteSummary`, `CreateInviteRequest`, `AcceptInviteRequest` |
 
 New type modules follow the convention: one file per domain, re-exported from `index.ts`.

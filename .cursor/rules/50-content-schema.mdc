@@ -34,15 +34,95 @@ alwaysApply: false
 - Required fields: `id`, `kind`, `currencyRewards[]`, and exactly one of `loot[]` or `drops[]`.
 - `id` must match the `objectId` in map files (e.g. `village_chest` in both `village.json` and `village_chest.container.json`).
 - `kind`: `"chest" | "crate" | "bag" | "bookshelf" | "cabinet"` — extensible by adding values to `containerKindSchema`.
-- `loot[]`: `{ definitionId, quantity, weight? }` — references item definition IDs directly.
-- `drops[]`: loot table entries using `lootDropSchema` (supports `fixed`, `uniform`, `weighted`, `tiered` methods and table references). See `lootTable.schema.ts` for the full schema.
+- `loot[]`: legacy format — `{ definitionId, quantity, weight? }`. Prefer `drops[]` for new containers.
+- `drops[]`: loot drop entries using the drop methods and source types described in the Loot Drop Reference below.
 - `currencyRewards[]`: `{ currencyType, amount }`.
 
 ## Loot Table Definitions (`content/loot-tables/*.loot-table.json`)
 
 - Schema: `lootTableDefinitionSchema` from `@odyssey/shared`.
-- Standalone tables referenced by `tableId` from container `drops` or other tables.
-- Supports nested resolution, tag-based item selection, and rarity filtering.
+- Required fields: `id`, `drops[]` (array of loot drop entries).
+- Standalone tables referenced by `{ "type": "table", "tableId": "<id>" }` from any `drops[]` array (containers, destroyable items, or other loot tables).
+- Tables resolve recursively (max depth 10).
+
+## Destroyable Item Drops
+
+Items with a `Destroyable` component (e.g. rocks, trees) configure loot via `components[].params.drops[]`. This uses the same drop methods and source types as containers and loot tables. When drops resolve to nothing (empty result), the server sends a `"You found nothing."` notification toast.
+
+## Loot Drop Reference
+
+Drops are configured anywhere a `drops[]` array appears: container definitions, destroyable item params, and loot table definitions. All use the same schema (`lootDropSchema` from `@odyssey/shared`).
+
+### Drop Methods
+
+Each entry in a `drops[]` array has a `method` that controls selection. All methods support optional `count` (default 1) to roll multiple times.
+
+| Method | Selects from | Use when |
+|---|---|---|
+| `fixed` | A single `source` | Guaranteed drop |
+| `uniform` | `pool: LootSource[]` (equal chance) | Equal-probability alternatives |
+| `weighted` | `pool: WeightedSource[]` (by weight) | Probability-controlled outcomes (including chance of nothing) |
+| `tiered` | `tiers: LootTier[]` → tier pool | Rarity-tier systems (Common/Rare/Epic) |
+
+### Source Types
+
+Each source has a `type` that determines what it produces.
+
+| Type | Produces | Required fields |
+|---|---|---|
+| `item` | A specific item | `itemId`, `quantity` (integer or `{ min, max }` range) |
+| `table` | Delegates to a loot table | `tableId` |
+| `tag` | Random item matching tag (+ optional rarity filter) | `tag`, `quantity`, `rarity?` |
+| `nothing` | No loot (empty result) | (none) |
+
+### Common Patterns
+
+**Guaranteed single item:**
+```json
+{ "method": "fixed", "source": { "type": "item", "itemId": "herb", "quantity": 1 } }
+```
+
+**Guaranteed loot table roll:**
+```json
+{ "method": "fixed", "source": { "type": "table", "tableId": "gem_loot" } }
+```
+
+**Chance-based drop (e.g. 90% nothing, 10% loot table):**
+```json
+{
+  "method": "weighted",
+  "pool": [
+    { "weight": 90, "source": { "type": "nothing" } },
+    { "weight": 10, "source": { "type": "table", "tableId": "gem_loot" } }
+  ]
+}
+```
+
+**Random item by tag (e.g. any gem):**
+```json
+{ "method": "fixed", "source": { "type": "tag", "tag": "gem", "quantity": 1 } }
+```
+
+**Random item by tag + rarity filter:**
+```json
+{ "method": "fixed", "source": { "type": "tag", "tag": "gem", "rarity": "Rare", "quantity": 1 } }
+```
+
+**Tiered rarity system:**
+```json
+{
+  "method": "tiered",
+  "tiers": [
+    { "name": "Common", "weight": 60, "pool": [{ "weight": 100, "source": { "type": "tag", "tag": "gem", "rarity": "Common", "quantity": 1 } }] },
+    { "name": "Rare", "weight": 30, "pool": [{ "weight": 100, "source": { "type": "table", "tableId": "rare_gear" } }] },
+    { "name": "Epic", "weight": 10, "pool": [{ "weight": 100, "source": { "type": "item", "itemId": "ancient-map", "quantity": 1 } }] }
+  ]
+}
+```
+
+**Multiple rolls from one drop:** add `"count": 3` to roll 3 times independently.
+
+**Random quantity range:** use `{ "min": 1, "max": 5 }` instead of a fixed number for `quantity`.
 
 ## NPC Definitions (`content/npcs/*.json`)
 
@@ -53,6 +133,16 @@ alwaysApply: false
 ## Maps (`content/maps/*.json`)
 
 - Tiled-format JSON exported from the Tiled editor.
-- Object `properties` use snake_case: `object_id`, `npc_id`, `kind`, `label`, `destination_map`, `destination_spawn`, `task_id`, `is_visible`, `is_collidable`. When `is_visible` is false, the sprite is not rendered (object still exists for interaction). When `is_collidable` is false, the player can pass through.
+- Object `properties` use snake_case: `object_id`, `npc_id`, `kind`, `label`, `destination_map`, `destination_spawn`, `task_id`, `is_visible`, `is_collidable`, `definition_id`. When `is_visible` is false, the sprite is not rendered (object still exists for interaction). When `is_collidable` is false, the player can pass through.
 - Container `object_id` must match a container definition `id`.
 - New maps are registered in `BootScene`; `TiledMapScene` loads them. Transitions use `destination_map` and `destination_spawn` on objects.
+
+### World Object Placement in Tiled
+
+Destroyable world objects (trees, rocks) are placed in the `objects` layer with:
+- `type`: `"world_object"`
+- `definition_id` property: references an item definition with a `Destroyable` component (e.g. `"tree"`, `"rock"`)
+
+The server reads these placements at boot via `loadAllMapPlacements()`. Objects can also be placed procedurally using `generateProceduralPlacements()` for maps that need dense, generated content.
+
+World objects are map-scoped — each is keyed `"mapKey:gridX,gridY"` and only rendered on the correct map.

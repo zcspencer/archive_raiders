@@ -12,16 +12,24 @@
             "scaleInDock": 2.0352,
             "scaleInEditor": 1
         },
+        "mine_1.tmx": {
+            "scale": 0.5181,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 583.864118895966,
+                "y": 592.5497008299556
+            }
+        },
         "village.tmx": {
             "expandedObjectLayers": [
                 6,
                 5
             ],
-            "scale": 0.5201,
+            "scale": 0.6694,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 668.1407421649682,
-                "y": 519.1309363583925
+                "x": 419.03196892739766,
+                "y": 400.35853002688987
             }
         },
         "village_tower.tmx": {
@@ -52,9 +60,10 @@
     "project": "untitled.tiled-project",
     "property.type": "bool",
     "recentFiles": [
-        "main.tsx",
+        "mine_1.tmx",
         "village_tower.tmx",
-        "village.tmx"
+        "village.tmx",
+        "main.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

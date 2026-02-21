@@ -17,12 +17,15 @@ alwaysApply: false
 
 - `players`: `MapSchema<PlayerSchema>` keyed by sessionId.
 - `tiles`: `MapSchema<TileSchema>` (32x32 world grid).
-- `worldObjects`: `MapSchema<WorldObjectSchema>` keyed by objectId (trees, rocks, etc.).
+- `worldObjects`: `MapSchema<WorldObjectSchema>` keyed by `"mapKey:gridX,gridY"` (map-scoped).
 - `classroomId`: string.
 
 ## WorldObjectSchema Fields
 
-`objectId`, `definitionId`, `gridX`, `gridY`, `health`, `maxHealth`.
+`objectId`, `mapKey`, `definitionId`, `gridX`, `gridY`, `health`, `maxHealth`.
+
+World objects are scoped per map via their `mapKey` field and composite key format `"mapKey:gridX,gridY"`.
+Use `worldObjectKey(mapKey, gridX, gridY)` to build keys. Client filters by `currentMapKey` when rendering.
 
 ## PlayerSchema Fields
 
@@ -56,6 +59,7 @@ Both enums are **additive-only** — new message types may be added but existing
 | `EquipmentUpdate` | `Record<EquipmentSlot, string \| null>` (full snapshot; sent on join, equip, unequip) |
 | `ObjectDamaged` | `{ objectId, newHealth, maxHealth, damage }` (broadcast) |
 | `ObjectDestroyed` | `{ objectId }` (broadcast) |
+| `LootDropPreview` | `{ items: { definitionId, name, quantity, rarity }[] }` (to attacker only) |
 
 ### Adding a New Message
 
@@ -64,13 +68,27 @@ Both enums are **additive-only** — new message types may be added but existing
 3. Register the `onMessage` handler in `ShardRoom.registerMessageHandlers()`.
 4. Add the client-side sender in `gameRoomBridge` store and/or listener in `useColyseusRoom`.
 
+## World Object Placement (Hybrid)
+
+World objects (trees, rocks) are placed per-map via two mechanisms:
+
+1. **Manual (Tiled)**: Place objects with `type: "world_object"` and `definition_id` property in the map's `objects` layer. Parsed by `TiledMapParser` into `worldObjectPlacements[]`.
+2. **Procedural**: Use `generateProceduralPlacements()` from `mapPlacement.ts` with density/spacing rules and a seeded RNG.
+
+Server loads all map placements at boot via `loadAllMapPlacements()` and passes them to `ShardRoom` via `RoomServices.mapPlacements`. On room creation, `spawnWorldObjectsForMap()` is called for each map.
+
+Key files:
+- `server/src/colyseus/services/mapPlacement.ts` — `extractWorldObjectPlacements()`, `generateProceduralPlacements()`, `loadAllMapPlacements()`
+- `server/src/colyseus/schema/ShardState.ts` — `spawnWorldObjectsForMap()`, `worldObjectKey()`
+
 ## Damage System (Attack Flow)
 
 1. Client sends `ClientMessage.AttackTarget` with `{ gridX, gridY }`.
-2. Server looks up world object at target position, validates equipped item has `baseDamage > 0`, checks rate cooldown and range.
-3. `damageService.calculateDamage()` computes `baseDamage * highestMatchingTagModifier`.
-4. Server applies damage to `WorldObjectSchema.health`, broadcasts `ServerMessage.ObjectDamaged`.
-5. If health reaches 0: resolves drops via `LootResolver`, grants items to attacker, broadcasts `ServerMessage.ObjectDestroyed`, removes world object from state.
+2. Server builds map-scoped key using `worldObjectKey(player.currentMapKey, gridX, gridY)`.
+3. Validates equipped item has `baseDamage > 0`, rate cooldown passed, target in range.
+4. `damageService.calculateDamage()` computes `baseDamage * highestMatchingTagModifier`.
+5. Server applies damage to `WorldObjectSchema.health`, broadcasts `ServerMessage.ObjectDamaged`.
+6. If health reaches 0: resolves drops via `LootResolver`, grants items to attacker, sends `InventoryUpdate` + `LootDropPreview` (with item names/rarities) to attacker, broadcasts `ServerMessage.ObjectDestroyed`, removes world object from state. Client shows loot panel (shared with container UI).
 
 Key functions in `server/src/colyseus/services/damageService.ts`:
 - `calculateDamage(params, targetTags)` — damage with tag multiplier
@@ -91,7 +109,7 @@ Race condition on reconnect handled by catching duplicate key errors (pg error 2
 1. `useColyseusRoom` hook creates Colyseus client and calls `joinOrCreate("shard", { accessToken, classroomId })`.
 2. Room ref stored in `gameRoomBridge` Zustand store.
 3. `RemotePlayersController` reads room state to reconcile remote player sprites + equipment.
-4. Listeners for `Notification`, `ContainerContents`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `ObjectDamaged`, `ObjectDestroyed` registered in `useColyseusRoom`.
+4. Listeners for `Notification`, `ContainerContents`, `LootDropPreview`, `InventoryUpdate`, `EquipmentUpdate`, `CurrencyUpdate`, `ObjectDamaged`, `ObjectDestroyed` registered in `useColyseusRoom`.
 
 ## Buffer Size
 

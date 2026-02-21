@@ -62,6 +62,9 @@ export class LootResolver {
 
   /** Resolve a single source into concrete items. */
   private resolveSource(source: LootSource, rng: () => number, depth: number): ResolvedLoot[] {
+    if (source.type === "nothing") {
+      return [];
+    }
     if (source.type === "item") {
       const quantity = resolveQuantity(source.quantity, rng);
       return [{ definitionId: source.itemId, quantity }];

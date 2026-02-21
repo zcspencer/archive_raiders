@@ -121,3 +121,13 @@ export interface MapTransition {
   /** Whether the object blocks movement (default true). */
   is_collidable?: boolean;
 }
+
+/**
+ * Parsed world object placement from the map object layer.
+ * Used by the server to spawn destroyable objects (trees, rocks, etc.) at specific positions.
+ */
+export interface MapWorldObjectPlacement {
+  definition_id: string;
+  gridX: number;
+  gridY: number;
+}

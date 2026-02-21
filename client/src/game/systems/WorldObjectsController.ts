@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { TILE_SIZE } from "@odyssey/shared";
 import type { CollisionGrid } from "../map/collisionGrid";
+import { getItemDefinition } from "../../data/itemDefinitions";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 
 const DEFINITION_COLORS: Record<string, number> = {
@@ -15,6 +16,7 @@ const HEALTH_BAR_OFFSET_Y = -16;
 
 interface WorldObjectSnapshot {
   objectId: string;
+  mapKey: string;
   definitionId: string;
   gridX: number;
   gridY: number;
@@ -23,7 +25,7 @@ interface WorldObjectSnapshot {
 }
 
 interface WorldObjectSprites {
-  body: Phaser.GameObjects.Rectangle;
+  body: Phaser.GameObjects.Rectangle | Phaser.GameObjects.Image;
   healthBarBg: Phaser.GameObjects.Rectangle;
   healthBarFill: Phaser.GameObjects.Rectangle;
   gridX: number;
@@ -40,7 +42,10 @@ function readWorldObjectSnapshots(room: unknown): WorldObjectSnapshot[] {
 
   const snapshots: WorldObjectSnapshot[] = [];
   worldObjects.forEach((value, objectId) => {
-    const obj = value as { definitionId?: string; gridX?: number; gridY?: number; health?: number; maxHealth?: number };
+    const obj = value as {
+      mapKey?: string; definitionId?: string;
+      gridX?: number; gridY?: number; health?: number; maxHealth?: number;
+    };
     if (
       typeof obj.definitionId === "string" &&
       typeof obj.gridX === "number" &&
@@ -50,6 +55,7 @@ function readWorldObjectSnapshots(room: unknown): WorldObjectSnapshot[] {
     ) {
       snapshots.push({
         objectId,
+        mapKey: obj.mapKey ?? "",
         definitionId: obj.definitionId,
         gridX: obj.gridX,
         gridY: obj.gridY,
@@ -69,18 +75,22 @@ export class WorldObjectsController {
   private readonly scene: Phaser.Scene;
   private readonly collisionGrid: CollisionGrid | null;
   private readonly sprites = new Map<string, WorldObjectSprites>();
+  private readonly currentMapKey: string;
 
-  constructor(scene: Phaser.Scene, collisionGrid?: CollisionGrid) {
+  constructor(scene: Phaser.Scene, currentMapKey: string, collisionGrid?: CollisionGrid) {
     this.scene = scene;
+    this.currentMapKey = currentMapKey;
     this.collisionGrid = collisionGrid ?? null;
   }
 
   /**
    * Call each frame (or when room state may have changed) to sync sprites with room.state.worldObjects.
+   * Only renders objects belonging to the current map.
    */
   reconcile(): void {
     const room = useGameRoomBridgeStore.getState().room;
-    const snapshots = readWorldObjectSnapshots(room);
+    const allSnapshots = readWorldObjectSnapshots(room);
+    const snapshots = allSnapshots.filter((s) => s.mapKey === this.currentMapKey);
     const currentIds = new Set(snapshots.map((s) => s.objectId));
 
     for (const id of this.sprites.keys()) {
@@ -114,11 +124,21 @@ export class WorldObjectsController {
   private upsertObject(snap: WorldObjectSnapshot): void {
     const worldX = snap.gridX * TILE_SIZE + TILE_SIZE / 2;
     const worldY = snap.gridY * TILE_SIZE + TILE_SIZE / 2;
-    const color = DEFINITION_COLORS[snap.definitionId] ?? DEFAULT_COLOR;
 
     let sprites = this.sprites.get(snap.objectId);
     if (!sprites) {
-      const body = this.scene.add.rectangle(worldX, worldY, 20, 20, color);
+      const def = getItemDefinition(snap.definitionId);
+      const mapSprite = def?.mapSprite;
+      const body =
+        mapSprite != null
+          ? this.scene.add.image(worldX, worldY, mapSprite.sheetKey, mapSprite.frame)
+          : this.scene.add.rectangle(
+              worldX,
+              worldY,
+              20,
+              20,
+              DEFINITION_COLORS[snap.definitionId] ?? DEFAULT_COLOR
+            );
       body.setDepth(1);
 
       const barY = worldY + HEALTH_BAR_OFFSET_Y;

@@ -107,7 +107,7 @@ export class TiledMapScene extends Phaser.Scene {
       this.scene.start(targetScene, sceneData);
     });
     this.remotePlayers = new RemotePlayersController(this);
-    this.worldObjects = new WorldObjectsController(this, mapData.collisionGrid);
+    this.worldObjects = new WorldObjectsController(this, this.currentMapKey, mapData.collisionGrid);
     useGameRoomBridgeStore.getState().sendSetMap({ mapKey: this.currentMapKey });
 
     this.setupCamera(mapData);

@@ -56,6 +56,7 @@ New component types are added by creating a module in this directory and registe
 ### Colyseus Services (`server/src/colyseus/services/`)
 
 - `damageService.ts` — `calculateDamage()`, `canAttack()`, `isInRange()` for the attack/damage system.
+- `mapPlacement.ts` — `extractWorldObjectPlacements()`, `generateProceduralPlacements()`, `loadAllMapPlacements()` for hybrid Tiled + procedural world object placement.
 - `movementService.test.ts` — movement validation tests.
 
 ### Room Utilities (`server/src/colyseus/rooms/`)

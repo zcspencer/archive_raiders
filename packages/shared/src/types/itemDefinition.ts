@@ -23,6 +23,15 @@ export interface EquippableParams {
 }
 
 /**
+ * Sprite configuration for rendering an item as a world object on the map.
+ * References a spritesheet key (from boot.json) and frame index.
+ */
+export interface MapSpriteConfig {
+  sheetKey: string;
+  frame: number;
+}
+
+/**
  * Descriptor for a component attached to an item definition.
  * Params are validated by the server component registry.
  */
@@ -43,6 +52,8 @@ export interface ItemDefinition {
   maxStackSize: number;
   inventorySprite: string;
   equippedSprite?: string;
+  /** Sprite config for world objects on the map (trees, rocks). Uses spritesheet + frame. */
+  mapSprite?: MapSpriteConfig;
   /** Defaults to Common. Important = single instance per player, cannot be dropped. */
   rarity?: ItemRarity;
   /** Freeform tags for grouping items (e.g. "gem", "food"). Used by tag-based loot sources. */

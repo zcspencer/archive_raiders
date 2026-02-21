@@ -33,11 +33,17 @@ const tagSourceSchema = z.object({
   rarity: itemRaritySchema.optional()
 });
 
+/** Empty source: produces no loot. Useful for weighted pools with a chance of nothing. */
+const nothingSourceSchema = z.object({
+  type: z.literal("nothing")
+});
+
 /** Discriminated union of source types. */
 export const lootSourceSchema = z.discriminatedUnion("type", [
   itemSourceSchema,
   tableSourceSchema,
-  tagSourceSchema
+  tagSourceSchema,
+  nothingSourceSchema
 ]);
 
 /** Source with a weight. */

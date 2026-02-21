@@ -7,6 +7,7 @@
   "inventorySprite": "items/rock",
   "rarity": "Common",
   "tags": ["rock"],
+  "mapSprite": { "sheetKey": "tileset_main", "frame": 140 },
   "components": [
     {
       "typeId": "Destroyable",
@@ -14,8 +15,11 @@
         "health": 8,
         "drops": [
           {
-            "method": "fixed",
-            "source": { "type": "item", "itemId": "old-circuit-board", "quantity": 1 }
+            "method": "weighted",
+            "pool": [
+              { "weight": 90, "source": { "type": "nothing" } },
+              { "weight": 10, "source": { "type": "table", "tableId": "gem_loot" } }
+            ]
           }
         ]
       }

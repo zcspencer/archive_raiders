@@ -13,6 +13,14 @@ export const itemRaritySchema = z.enum([
 ]);
 
 /**
+ * Runtime validator for map sprite config (spritesheet key + frame index for world objects).
+ */
+export const mapSpriteConfigSchema = z.object({
+  sheetKey: z.string().min(1),
+  frame: z.number().int().nonnegative()
+});
+
+/**
  * Runtime validator for component descriptor (params validated loosely; server registry does deep validation).
  */
 export const componentDescriptorSchema = z.object({
@@ -31,6 +39,7 @@ export const itemDefinitionSchema = z.object({
   maxStackSize: z.number().int().positive(),
   inventorySprite: z.string().min(1),
   equippedSprite: z.string().min(1).optional(),
+  mapSprite: mapSpriteConfigSchema.optional(),
   rarity: itemRaritySchema.default("Common"),
   tags: z.array(z.string().min(1)).optional(),
   components: z.array(componentDescriptorSchema)

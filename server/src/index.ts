@@ -23,6 +23,7 @@ import {
   LootTableLoader,
   LootResolver
 } from "./inventory/index.js";
+import { loadAllMapPlacements } from "./colyseus/services/mapPlacement.js";
 import { EmailService, InviteService } from "./invite/index.js";
 import { TaskService } from "./task/TaskService.js";
 
@@ -62,6 +63,7 @@ async function startServer(): Promise<void> {
   const lootTableLoader = new LootTableLoader(config.CONTENT_DIR);
   await lootTableLoader.loadAll();
   const lootResolver = new LootResolver(lootTableLoader, itemDefinitionLoader);
+  const mapPlacements = await loadAllMapPlacements(config.CONTENT_DIR);
   const containerService = new ContainerService(
     db,
     containerDefinitionLoader,
@@ -106,7 +108,8 @@ async function startServer(): Promise<void> {
     equipmentService,
     itemActionResolver,
     itemDefinitionLoader,
-    lootResolver
+    lootResolver,
+    mapPlacements
   });
   gameServer.define("shard", ShardRoom);
 

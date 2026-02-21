@@ -11,7 +11,7 @@ import {
   openContainerPayloadSchema,
   unequipItemPayloadSchema
 } from "@odyssey/shared";
-import { PlayerSchema, ShardState, initializeWorldObjects, worldObjectKey } from "../schema/ShardState.js";
+import { PlayerSchema, ShardState, spawnWorldObjectsForMap, worldObjectKey } from "../schema/ShardState.js";
 import { calculateDamage, canAttack, isInRange } from "../services/damageService.js";
 import { applyMove } from "../services/movementService.js";
 import {
@@ -51,8 +51,11 @@ export class ShardRoom extends Room<ShardState> {
   override onCreate(options: JoinOptions): void {
     const classroomId = options.classroomId ?? "default-classroom";
     this.setState(new ShardState(classroomId));
-    const loader = this.getServices().itemDefinitionLoader;
-    initializeWorldObjects(this.state.worldObjects, (id) => getDestroyableHealth(loader, id));
+    const { itemDefinitionLoader, mapPlacements } = this.getServices();
+    const getHealth = (id: string) => getDestroyableHealth(itemDefinitionLoader, id);
+    for (const [mapKey, placements] of mapPlacements) {
+      spawnWorldObjectsForMap(this.state.worldObjects, mapKey, placements, getHealth);
+    }
     this.registerMessageHandlers();
   }
 
@@ -150,7 +153,7 @@ export class ShardRoom extends Room<ShardState> {
       const player = this.state.players.get(client.sessionId);
       if (!player) return;
       applyMove(player, payloadResult.data, (gx, gy) =>
-        this.state.worldObjects.has(worldObjectKey(gx, gy))
+        this.state.worldObjects.has(worldObjectKey(player.currentMapKey, gx, gy))
       );
     });
 
@@ -194,7 +197,7 @@ export class ShardRoom extends Room<ShardState> {
         return;
       }
 
-      const key = worldObjectKey(gridX, gridY);
+      const key = worldObjectKey(player.currentMapKey, gridX, gridY);
       const worldObj = this.state.worldObjects.get(key);
       if (!worldObj) {
         client.send(ServerMessage.Notification, "Nothing to attack");
@@ -230,6 +233,20 @@ export class ShardRoom extends Room<ShardState> {
             );
             const updated = await this.getServices().inventoryService.getInventory(authContext.user.id);
             client.send(ServerMessage.InventoryUpdate, updated);
+
+            const { itemDefinitionLoader } = this.getServices();
+            const previewItems = resolved.map((r) => {
+              const itemDef = itemDefinitionLoader.getDefinition(r.definitionId);
+              return {
+                definitionId: r.definitionId,
+                name: itemDef?.name ?? r.definitionId,
+                quantity: r.quantity,
+                rarity: itemDef?.rarity ?? "Common"
+              };
+            });
+            client.send(ServerMessage.LootDropPreview, { items: previewItems });
+          } else {
+            client.send(ServerMessage.Notification, "You found nothing.");
           }
         }
         this.state.worldObjects.delete(key);

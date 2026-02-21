@@ -1,6 +1,6 @@
 ---
 description: Item, inventory, equipment, and container system architecture
-globs: server/src/inventory/**,client/src/store/playerInventory.ts,client/src/store/container.ts,client/src/store/currency.ts,client/src/data/itemDefinitions.ts,content/items/**,content/containers/**
+globs: server/src/inventory/**,client/src/store/playerInventory.ts,client/src/store/container.ts,client/src/store/currency.ts,client/src/data/itemDefinitions.ts,content/items/**,content/containers/**,content/loot-tables/**
 alwaysApply: false
 ---
 
@@ -39,8 +39,17 @@ alwaysApply: false
 - World objects (trees, rocks) are `WorldObjectSchema` instances with health, backed by Destroyable component params.
 - `damageService.calculateDamage()` computes `baseDamage * highestMatchingTagModifier` (e.g. axe has `{ "tree": 3.0 }`).
 - `damageService.canAttack()` enforces rate limiting; `isInRange()` uses Chebyshev distance.
-- On destruction, drops are resolved via `LootResolver` and granted to the attacker.
+- On destruction, drops are resolved via `LootResolver`, granted to the attacker, and a `LootDropPreview` is sent to display the loot panel.
 - On first join, server seeds starter items (axe, watering-can, seeds-bag) and auto-equips axe.
+
+## Data Flow: Destroy-Drop Loot
+
+1. World object health reaches 0 from `AttackTarget` damage.
+2. Server resolves drops via `LootResolver`.
+3. **If items drop**: grants via `InventoryService.addItems()`, sends `InventoryUpdate` + `LootDropPreview` (with item names/rarities) to attacker. Client opens `useContainerStore` in `"loot_drop"` mode; `ChestTransferPanel` renders loot preview. "Collect" closes panel (no server round-trip; items already granted).
+4. **If nothing drops** (e.g. `"nothing"` source selected in a weighted pool): server sends `ServerMessage.Notification` with `"You found nothing."`. Client shows auto-dismissing toast (4s) via `useNotificationStore`.
+
+The loot panel UI (`ChestTransferPanel`) and store (`useContainerStore`) are shared between containers and destroy-drop loot via a `mode` field (`"container"` vs `"loot_drop"`).
 
 ## Extending the Item System
 
@@ -70,7 +79,7 @@ alwaysApply: false
 | Server | `colyseus/rooms/inventoryTreeUtils.ts` | Nested item tree search helpers |
 | Server | `colyseus/services/damageService.ts` | Damage calculation, rate check, range check |
 | Client | `store/playerInventory.ts` | Server-authoritative item list |
-| Client | `store/container.ts` | Container loot preview state |
+| Client | `store/container.ts` | Loot preview state (containers + destroy drops) |
 | Client | `store/currency.ts` | Currency balances |
 | Client | `data/itemDefinitions.ts` | Build-time item definition cache |
 | Client | `game/rendering/equippedItemSprite.ts` | Equipment sprite rendering |

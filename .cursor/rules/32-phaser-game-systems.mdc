@@ -30,6 +30,7 @@ alwaysApply: false
 | `InteractionHandler` | Routes X-press to NPC dialogue, container open, door transition, or challenge |
 | `interactionDetection` | Finds adjacent entity player is facing (NPCs prioritized) |
 | `RemotePlayersController` | Diffs Colyseus room state; creates/updates/removes remote sprites + equipment placeholders |
+| `WorldObjectsController` | Reconciles Colyseus `worldObjects` with Phaser sprites; filters by `currentMapKey`; manages health bars and collision |
 
 ## Entities (`game/entities/`)
 

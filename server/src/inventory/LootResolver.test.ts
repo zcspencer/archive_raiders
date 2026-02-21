@@ -252,6 +252,49 @@ describe("LootResolver", () => {
     expect(result).toEqual([{ definitionId: "sapphire", quantity: 1 }]);
   });
 
+  it("nothing source returns empty results", () => {
+    const resolver = buildResolver();
+    const drops = [
+      {
+        method: "fixed" as const,
+        source: { type: "nothing" as const }
+      }
+    ];
+    const rng = createSeededRng(42);
+    const result = resolver.resolve(drops, rng);
+    expect(result).toEqual([]);
+  });
+
+  it("weighted pool with nothing source can produce empty or item results", () => {
+    const resolver = buildResolver();
+    const drops = [
+      {
+        method: "weighted" as const,
+        pool: [
+          {
+            weight: 50,
+            source: { type: "nothing" as const }
+          },
+          {
+            weight: 50,
+            source: { type: "item" as const, itemId: "gem", quantity: 1 }
+          }
+        ]
+      }
+    ];
+    let gemCount = 0;
+    let emptyCount = 0;
+    const rng = createSeededRng(12345);
+    for (let i = 0; i < 200; i++) {
+      const result = resolver.resolve(drops, rng);
+      if (result.length === 0) emptyCount++;
+      if (result.length === 1 && result[0]!.definitionId === "gem") gemCount++;
+    }
+    expect(gemCount + emptyCount).toBe(200);
+    expect(gemCount).toBeGreaterThan(0);
+    expect(emptyCount).toBeGreaterThan(0);
+  });
+
   it("tag source throws when no items match", () => {
     const resolver = buildResolver(undefined, []);
     const drops = [

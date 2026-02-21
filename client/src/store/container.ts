@@ -8,7 +8,11 @@ export interface ContainerItemPreview {
   rarity?: ItemRarity;
 }
 
+/** "container" requires claim; "loot_drop" is already granted (informational preview). */
+export type LootPanelMode = "container" | "loot_drop";
+
 interface ContainerState {
+  mode: LootPanelMode | null;
   currentContainerId: string | null;
   nonce: string | null;
   previewItems: ContainerItemPreview[];
@@ -21,13 +25,17 @@ interface ContainerState {
     currencyRewards: CurrencyReward[];
   }) => void;
   setOpening: (objectId: string) => void;
+  /** Show a loot drop preview (items already granted to player). */
+  setLootDropPreview: (items: ContainerItemPreview[]) => void;
   closeContainer: () => void;
 }
 
 /**
- * Zustand store for open container state (preview from server). Server is source of truth.
+ * Zustand store for loot preview panels (containers and destroy-drop loot).
+ * Server is source of truth.
  */
 export const useContainerStore = create<ContainerState>((set) => ({
+  mode: null,
   currentContainerId: null,
   nonce: null,
   previewItems: [],
@@ -35,23 +43,34 @@ export const useContainerStore = create<ContainerState>((set) => ({
 
   setContents: (payload): void =>
     set({
+      mode: "container",
       currentContainerId: payload.objectId,
       nonce: payload.nonce,
       previewItems: payload.items,
       previewCurrency: payload.currencyRewards
     }),
 
-  /** Call when sending OpenContainer so the panel can show loading until ContainerContents arrives. */
   setOpening: (objectId: string): void =>
     set({
+      mode: "container",
       currentContainerId: objectId,
       nonce: null,
       previewItems: [],
       previewCurrency: []
     }),
 
+  setLootDropPreview: (items): void =>
+    set({
+      mode: "loot_drop",
+      currentContainerId: "loot-drop",
+      nonce: "loot-drop",
+      previewItems: items,
+      previewCurrency: []
+    }),
+
   closeContainer: (): void =>
     set({
+      mode: null,
       currentContainerId: null,
       nonce: null,
       previewItems: [],

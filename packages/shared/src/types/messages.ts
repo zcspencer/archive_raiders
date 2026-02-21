@@ -32,7 +32,8 @@ export enum ServerMessage {
   CurrencyUpdate = "currency-update",
   ContainerContents = "container-contents",
   ObjectDamaged = "object-damaged",
-  ObjectDestroyed = "object-destroyed"
+  ObjectDestroyed = "object-destroyed",
+  LootDropPreview = "loot-drop-preview"
 }
 
 /**
@@ -73,4 +74,17 @@ export interface ObjectDamagedPayload {
  */
 export interface ObjectDestroyedPayload {
   objectId: string;
+}
+
+/**
+ * Sent to the attacker when a destroyed world object drops loot.
+ * Items are already granted; the client shows a preview panel.
+ */
+export interface LootDropPreviewPayload {
+  items: Array<{
+    definitionId: string;
+    name: string;
+    quantity: number;
+    rarity?: string;
+  }>;
 }

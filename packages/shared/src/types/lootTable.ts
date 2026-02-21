@@ -12,7 +12,8 @@ import type { ItemRarity } from "./itemDefinition.js";
 export type LootSource =
   | { type: "item"; itemId: string; quantity: LootQuantity }
   | { type: "table"; tableId: string }
-  | { type: "tag"; tag: string; quantity: LootQuantity; rarity?: ItemRarity };
+  | { type: "tag"; tag: string; quantity: LootQuantity; rarity?: ItemRarity }
+  | { type: "nothing" };
 
 /**
  * A source paired with a probability weight for weighted/tiered selection.

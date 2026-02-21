@@ -14,10 +14,12 @@ const RARITY_COLORS: Record<ItemRarity, string> = {
 };
 
 /**
- * Modal that appears when a container is opened. Shows server-provided loot preview (read-only).
- * Single "Claim" button sends claim to server; "Close" dismisses without claiming.
+ * Loot preview panel shared by containers and world-object destroy drops.
+ * In "container" mode: shows Claim + Close buttons (claim sends message to server).
+ * In "loot_drop" mode: items are already granted; shows only a Collect button.
  */
 export function ChestTransferPanel(): ReactElement | null {
+  const mode = useContainerStore((s) => s.mode);
   const currentContainerId = useContainerStore((s) => s.currentContainerId);
   const nonce = useContainerStore((s) => s.nonce);
   const previewItems = useContainerStore((s) => s.previewItems);
@@ -26,11 +28,12 @@ export function ChestTransferPanel(): ReactElement | null {
   const setInputMode = usePlayerControlStore((s) => s.setInputMode);
   const sendClaimContainer = useGameRoomBridgeStore((s) => s.sendClaimContainer);
 
-  /* Don't render until we have contents; avoids flash when server returns "already looted". */
   if (!currentContainerId || nonce === null) return null;
 
+  const isContainer = mode === "container";
+
   const handleClaim = (): void => {
-    if (nonce) {
+    if (isContainer && nonce) {
       sendClaimContainer(currentContainerId, nonce);
     }
     closeContainer();
@@ -42,12 +45,15 @@ export function ChestTransferPanel(): ReactElement | null {
     setInputMode("game");
   };
 
+  const title = isContainer ? "Container" : "Loot";
+  const ariaLabel = isContainer ? "Container contents" : "Loot dropped";
+
   return (
     <div style={backdropStyle} role="presentation">
-      <div style={panelStyle} role="dialog" aria-label="Container contents">
-        <h2 style={titleStyle}>Container</h2>
+      <div style={panelStyle} role="dialog" aria-label={ariaLabel}>
+        <h2 style={titleStyle}>{title}</h2>
 
-        {nonce === null ? (
+        {isContainer && nonce === null ? (
           <p style={emptyStyle}>Loading...</p>
         ) : (
           <>
@@ -97,13 +103,15 @@ export function ChestTransferPanel(): ReactElement | null {
             type="button"
             style={confirmBtnStyle}
             onClick={handleClaim}
-            disabled={nonce === null}
+            disabled={isContainer && nonce === null}
           >
-            Claim
+            {isContainer ? "Claim" : "Collect"}
           </button>
-          <button type="button" style={cancelBtnStyle} onClick={handleClose}>
-            Close
-          </button>
+          {isContainer && (
+            <button type="button" style={cancelBtnStyle} onClick={handleClose}>
+              Close
+            </button>
+          )}
         </div>
       </div>
     </div>
