@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="village_west_spawn" type="spawn">
+  <properties>
+   <property name="kind" value="spawn"/>
+  </properties>
+ </object>
+</template>

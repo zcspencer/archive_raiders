@@ -53,6 +53,6 @@ alwaysApply: false
 ## Maps (`content/maps/*.json`)
 
 - Tiled-format JSON exported from the Tiled editor.
-- Object `properties` use snake_case: `object_id`, `npc_id`, `kind`, `label`, `destination_map`, `destination_spawn`, `task_id`.
+- Object `properties` use snake_case: `object_id`, `npc_id`, `kind`, `label`, `destination_map`, `destination_spawn`, `task_id`, `is_visible`, `is_collidable`. When `is_visible` is false, the sprite is not rendered (object still exists for interaction). When `is_collidable` is false, the player can pass through.
 - Container `object_id` must match a container definition `id`.
 - New maps are registered in `BootScene`; `TiledMapScene` loads them. Transitions use `destination_map` and `destination_spawn` on objects.

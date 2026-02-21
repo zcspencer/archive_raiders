@@ -146,7 +146,7 @@ export class TiledMapScene extends Phaser.Scene {
       const def = getNpcDefinition(p.npc_id);
       const displayName = def?.displayName ?? p.npc_id;
       this.npcs.push(
-        new Npc(this, p.npc_id, p.gridX, p.gridY, displayName)
+        new Npc(this, p.npc_id, p.gridX, p.gridY, displayName, p.is_visible !== false)
       );
     }
   }
@@ -161,7 +161,10 @@ export class TiledMapScene extends Phaser.Scene {
           p.label,
           p.gridX,
           p.gridY,
-          p.task_id
+          p.task_id,
+          undefined,
+          undefined,
+          p.is_visible !== false
         )
       );
     }
@@ -179,7 +182,8 @@ export class TiledMapScene extends Phaser.Scene {
           t.gridY,
           undefined,
           t.destination_map,
-          t.destination_spawn
+          t.destination_spawn,
+          t.is_visible !== false
         )
       );
     }

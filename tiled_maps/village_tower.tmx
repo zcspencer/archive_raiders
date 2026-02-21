@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="9">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="11">
  <editorsettings>
   <export target="../content/maps/village_tower.json" format="json"/>
  </editorsettings>
@@ -8,7 +8,7 @@
   <data encoding="csv">
 150,150,150,150,150,150,150,150,150,150,
 150,73,73,73,73,73,73,73,73,150,
-150,73,73,73,73,73,73,73,73,150,
+150,73,73,73,73,73,73,29,73,150,
 150,73,73,73,74,74,73,73,73,150,
 150,73,73,73,74,74,73,73,73,150,
 150,73,73,73,74,74,73,73,73,150,
@@ -24,17 +24,27 @@
   </object>
  </objectgroup>
  <objectgroup id="3" name="objects">
-  <object id="1" name="village_tower_exit" type="interactable" x="128.401" y="291.035" width="32" height="27.5773">
+  <object id="1" name="village_tower_exit" type="interactable" x="128.401" y="288.039" width="32" height="30.573">
    <properties>
     <property name="destination_map" value="village"/>
     <property name="destination_spawn" value="village_tower_exit_spawn"/>
+    <property name="is_visible" type="bool" value="false"/>
     <property name="kind" value="transition"/>
     <property name="label" value="Exit Time"/>
    </properties>
   </object>
-  <object id="2" name="village_tower_inner_spawn" type="spawn" x="248.932" y="155.491">
+  <object id="2" name="village_tower_inner_spawn" type="spawn" x="145.775" y="263.595">
    <properties>
     <property name="kind" value="spawn"/>
+   </properties>
+  </object>
+  <object id="10" name="mine_enterance" type="interactable" x="224.082" y="66.1313" width="32" height="30.573">
+   <properties>
+    <property name="destination_map" value="mine_1"/>
+    <property name="destination_spawn" value="mine_1_spawn"/>
+    <property name="is_visible" type="bool" value="false"/>
+    <property name="kind" value="transition"/>
+    <property name="label" value="Enter Mine"/>
    </properties>
   </object>
  </objectgroup>

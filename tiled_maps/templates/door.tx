@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="village_tower_door" type="interactable" width="32" height="33">
+  <properties>
+   <property name="destination_map" value="village_tower"/>
+   <property name="destination_spawn" value="village_tower_inner_spawn"/>
+   <property name="is_visible" type="bool" value="false"/>
+   <property name="kind" value="transition"/>
+   <property name="label" value="Village Tower"/>
+  </properties>
+ </object>
+</template>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="village_stump_hidden_chest" type="interactable" width="31.9011" height="31.615">
+  <properties>
+   <property name="is_visible" type="bool" value="false"/>
+   <property name="kind" value="container"/>
+   <property name="label" value="Village Stump Chest"/>
+   <property name="object_id" value="dungeon_chest"/>
+  </properties>
+ </object>
+</template>

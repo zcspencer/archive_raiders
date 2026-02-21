@@ -60,7 +60,8 @@ export class InteractableObject {
     gridY: number,
     taskId?: string,
     transitionDestinationMap?: string,
-    transitionDestinationSpawn?: string
+    transitionDestinationSpawn?: string,
+    isVisible = true
   ) {
     this.objectId = objectId;
     this.kind = kind;
@@ -76,10 +77,12 @@ export class InteractableObject {
 
     this.body = scene.add.rectangle(worldX, worldY, 20, 20, color);
     this.body.setDepth(1);
+    this.body.setVisible(isVisible);
 
     this.label = scene.add.text(worldX, worldY - 16, labelText, LABEL_STYLE);
     this.label.setOrigin(0.5, 1);
     this.label.setDepth(2);
+    this.label.setVisible(isVisible);
 
     const promptText = KIND_PROMPTS[kind] ?? "X to interact";
     this.prompt = scene.add.text(worldX, worldY - 30, promptText, PROMPT_STYLE);

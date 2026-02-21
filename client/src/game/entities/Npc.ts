@@ -26,7 +26,14 @@ export class Npc {
   readonly label: Phaser.GameObjects.Text;
   readonly prompt: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, npcId: string, gridX: number, gridY: number, displayName: string) {
+  constructor(
+    scene: Phaser.Scene,
+    npcId: string,
+    gridX: number,
+    gridY: number,
+    displayName: string,
+    isVisible = true
+  ) {
     this.npcId = npcId;
     this.gridX = gridX;
     this.gridY = gridY;
@@ -36,10 +43,12 @@ export class Npc {
 
     this.body = scene.add.ellipse(worldX, worldY, 24, 24, NPC_COLOR);
     this.body.setDepth(1);
+    this.body.setVisible(isVisible);
 
     this.label = scene.add.text(worldX, worldY - 18, displayName, NPC_LABEL_STYLE);
     this.label.setOrigin(0.5, 1);
     this.label.setDepth(2);
+    this.label.setVisible(isVisible);
 
     this.prompt = scene.add.text(worldX, worldY - 36, "X to talk", PROMPT_STYLE);
     this.prompt.setOrigin(0.5, 1);

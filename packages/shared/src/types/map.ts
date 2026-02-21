@@ -82,6 +82,10 @@ export interface MapNpcPlacement {
   npc_id: string;
   gridX: number;
   gridY: number;
+  /** Whether to render the sprite (default true). */
+  is_visible?: boolean;
+  /** Whether the object blocks movement (default true). */
+  is_collidable?: boolean;
 }
 
 /**
@@ -96,6 +100,10 @@ export interface MapObjectPlacement {
   gridY: number;
   /** Optional task definition ID that gates this interaction. */
   task_id?: string;
+  /** Whether to render the sprite (default true). */
+  is_visible?: boolean;
+  /** Whether the object blocks movement (default true). */
+  is_collidable?: boolean;
 }
 
 /**
@@ -108,4 +116,8 @@ export interface MapTransition {
   destination_map: string;
   destination_spawn: string;
   label?: string;
+  /** Whether to render the sprite (default true). */
+  is_visible?: boolean;
+  /** Whether the object blocks movement (default true). */
+  is_collidable?: boolean;
 }

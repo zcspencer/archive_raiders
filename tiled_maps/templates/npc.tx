@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="bob_blacksmith" type="interactable" width="28.8413" height="29.3697">
+  <properties>
+   <property name="enabled" value="true"/>
+   <property name="is_collidable" type="bool" value="true"/>
+   <property name="is_visible" type="bool" value="false"/>
+   <property name="kind" value="npc"/>
+   <property name="npc_id" value="blacksmith"/>
+   <property name="one_shot" value="false"/>
+  </properties>
+ </object>
+</template>

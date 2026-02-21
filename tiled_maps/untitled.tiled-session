@@ -3,20 +3,25 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "village.tmx",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "main.tsx": {
+            "scaleInDock": 2.0352,
+            "scaleInEditor": 1
+        },
         "village.tmx": {
             "expandedObjectLayers": [
-                5,
-                6
+                6,
+                5
             ],
-            "scale": 1.633,
+            "scale": 0.5201,
             "selectedLayer": 3,
             "viewCenter": {
-                "x": 806.1849357011636,
-                "y": 299.7550520514391
+                "x": 668.1407421649682,
+                "y": 519.1309363583925
             }
         },
         "village_tower.tmx": {
@@ -24,25 +29,32 @@
                 5,
                 3
             ],
-            "scale": 1.3413,
-            "selectedLayer": 0,
+            "scale": 1.31,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 134.57093864161632,
-                "y": 173.3392976962648
+                "x": 188.93129770992365,
+                "y": 174.04580152671753
             }
         }
     },
     "last.exportedFilePath": "/Users/zach/src/github.com/zspencer/archive_raiders/content/maps",
     "last.imagePath": "/Users/zach/src/github.com/zspencer/archive_raiders/tiled_maps",
+    "last.objectTemplatePath": "/Users/zach/src/github.com/zspencer/archive_raiders/tiled_maps/templates",
     "map.height": 10,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.width": 10,
     "openFiles": [
+        "village.tmx",
+        "village_tower.tmx",
+        "main.tsx"
     ],
     "project": "untitled.tiled-project",
-    "property.type": "object",
+    "property.type": "bool",
     "recentFiles": [
+        "main.tsx",
+        "village_tower.tmx",
+        "village.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

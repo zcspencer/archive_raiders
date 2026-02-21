@@ -62,39 +62,48 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
     if (obj.type === "spawn" || getProp(obj, "kind", "") === "spawn") {
       spawns.set(obj.name || `spawn_${obj.id}`, { gridX: gx, gridY: gy });
     } else if (obj.type === "npc" || getProp(obj, "kind", "") === "npc") {
+      const collidable = getBoolProp(obj, "is_collidable");
       npcs.push({
         npc_id: getProp(obj, "npc_id", obj.name),
         gridX: gx,
-        gridY: gy
+        gridY: gy,
+        is_visible: getBoolProp(obj, "is_visible", "is_visable"),
+        is_collidable: collidable
       });
-      blockedTiles.push({ gx, gy });
+      if (collidable) blockedTiles.push({ gx, gy });
     } else {
       const destMap = getOptionalProp(obj, "destination_map");
       const objectId = getOptionalProp(obj, "object_id");
       const kind = getProp(obj, "kind", "interactable");
 
       if (destMap) {
+        const collidable = getBoolProp(obj, "is_collidable");
         transitions.push({
           name: obj.name || `transition_${obj.id}`,
           gridX: gx,
           gridY: gy,
           destination_map: destMap,
           destination_spawn: getProp(obj, "destination_spawn", ""),
-          label: getOptionalProp(obj, "label")
+          label: getOptionalProp(obj, "label"),
+          is_visible: getBoolProp(obj, "is_visible", "is_visable"),
+          is_collidable: collidable
         });
-        blockedTiles.push({ gx, gy });
+        if (collidable) blockedTiles.push({ gx, gy });
       } else if (objectId) {
+        const collidable = getBoolProp(obj, "is_collidable");
         interactables.push({
           object_id: objectId,
           kind: kind === "container" ? "chest" : kind,
           label: getProp(obj, "label", obj.name),
           gridX: gx,
           gridY: gy,
+          is_visible: getBoolProp(obj, "is_visible", "is_visable"),
+          is_collidable: collidable,
           ...(getOptionalProp(obj, "task_id") && {
             task_id: getOptionalProp(obj, "task_id")
           })
         });
-        blockedTiles.push({ gx, gy });
+        if (collidable) blockedTiles.push({ gx, gy });
       }
     }
   }
@@ -183,6 +192,16 @@ function getProp(obj: TiledObject, name: string, fallback: string): string {
 function getOptionalProp(obj: TiledObject, name: string): string | undefined {
   const p = obj.properties?.find((x: TiledProperty) => x.name === name);
   return p ? String(p.value) : undefined;
+}
+
+/** Parses is_visible / is_collidable from properties. Accepts "true"/"false" or boolean. Default true. */
+function getBoolProp(obj: TiledObject, name: string, alias?: string): boolean {
+  const p =
+    obj.properties?.find((x: TiledProperty) => x.name === name) ??
+    (alias ? obj.properties?.find((x: TiledProperty) => x.name === alias) : undefined);
+  if (!p) return true;
+  if (typeof p.value === "boolean") return p.value;
+  return String(p.value).toLowerCase() === "true";
 }
 
 function stripExtension(path: string): string {
