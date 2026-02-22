@@ -35,7 +35,10 @@ export function FindCopyPasteChallenge({ task, onResult }: ChallengeProps): Reac
     if (timedOut) return;
     const isCorrect = password === config.password;
     if (isCorrect) {
-      onResult({ isCorrect: true, score: 100, feedback: "Access granted!" });
+      onResult(
+        { password },
+        { isCorrect: true, score: 100, feedback: "Access granted!" }
+      );
     } else {
       setFeedback("Incorrect password. Use Find to locate it in the text above.");
     }
@@ -43,7 +46,10 @@ export function FindCopyPasteChallenge({ task, onResult }: ChallengeProps): Reac
 
   const handleTimeUp = (): void => {
     setTimedOut(true);
-    onResult({ isCorrect: false, score: 0, feedback: "Time's up!" });
+    onResult(
+      { password },
+      { isCorrect: false, score: 0, feedback: "Time's up!" }
+    );
   };
 
   return (

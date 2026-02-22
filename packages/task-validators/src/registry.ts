@@ -1,4 +1,5 @@
 import type { TaskAnswer, TaskDefinition, TaskResult } from "@odyssey/shared";
+import { validateFindCopyPaste } from "./validators/findCopyPaste.js";
 import { validateShortcut } from "./validators/shortcut.js";
 
 export type ValidatorFn = (
@@ -7,7 +8,8 @@ export type ValidatorFn = (
 ) => TaskResult;
 
 const registry: Record<string, ValidatorFn> = {
-  shortcut: validateShortcut
+  shortcut: validateShortcut,
+  "find-copy-paste": validateFindCopyPaste
 };
 
 /**

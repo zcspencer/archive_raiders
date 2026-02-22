@@ -1,5 +1,6 @@
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { TaskCompletionService } from "../../task/TaskCompletionService.js";
 import {
   ClassroomAccessError,
   TaskNotFoundError,
@@ -29,7 +30,9 @@ describe("task routes", () => {
       url: "/tasks/shortcut-ctrl-f/submit",
       payload: {
         classroomId: "class-1",
-        answer: { pressedKeys: "ctrl+f" }
+        answer: { pressedKeys: "ctrl+f" },
+        attemptId: "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee",
+        startedAt: "2025-02-22T12:00:00.000Z"
       },
       headers: {
         authorization: "Bearer test-token"
@@ -51,7 +54,8 @@ describe("task routes", () => {
       url: "/tasks/missing-task/submit",
       payload: {
         classroomId: "class-1",
-        answer: { pressedKeys: "ctrl+f" }
+        answer: { pressedKeys: "ctrl+f" },
+        attemptId: "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee"
       },
       headers: {
         authorization: "Bearer test-token"
@@ -72,7 +76,8 @@ describe("task routes", () => {
       url: "/tasks/shortcut-ctrl-f/submit",
       payload: {
         classroomId: "class-1",
-        answer: { pressedKeys: "ctrl+f" }
+        answer: { pressedKeys: "ctrl+f" },
+        attemptId: "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee"
       },
       headers: {
         authorization: "Bearer test-token"
@@ -103,11 +108,49 @@ describe("task routes", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  async function buildApp(taskService: TaskService): Promise<ReturnType<typeof Fastify>> {
+  it("returns completed task IDs for GET /tasks/completions", async () => {
+    const taskCompletionService = {
+      getCompletedTaskIds: vi.fn().mockResolvedValue(["task-a", "task-b"])
+    } as unknown as TaskCompletionService;
+
+    const app = await buildApp(undefined, taskCompletionService);
+    const response = await app.inject({
+      method: "GET",
+      url: "/tasks/completions",
+      headers: {
+        authorization: "Bearer test-token"
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ taskIds: ["task-a", "task-b"] });
+    expect(taskCompletionService.getCompletedTaskIds).toHaveBeenCalledWith("user-1");
+  });
+
+  async function buildApp(
+    taskService?: TaskService,
+    taskCompletionService?: TaskCompletionService
+  ): Promise<ReturnType<typeof Fastify>> {
     const app = Fastify();
     apps.push(app);
 
-    await registerTaskRoutes(app, taskService, authenticate);
+    const mockTaskService =
+      taskService ??
+      ({
+        submit: vi.fn()
+      } as unknown as TaskService);
+    const mockTaskCompletionService =
+      taskCompletionService ??
+      ({
+        getCompletedTaskIds: vi.fn()
+      } as unknown as TaskCompletionService);
+
+    await registerTaskRoutes(
+      app,
+      mockTaskService,
+      mockTaskCompletionService,
+      authenticate
+    );
     await app.ready();
     return app;
   }

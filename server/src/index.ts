@@ -25,6 +25,7 @@ import {
 } from "./inventory/index.js";
 import { loadAllMapPlacements } from "./colyseus/services/mapPlacement.js";
 import { EmailService, InviteService } from "./invite/index.js";
+import { TaskCompletionService } from "./task/TaskCompletionService.js";
 import { TaskService } from "./task/TaskService.js";
 
 /**
@@ -51,7 +52,12 @@ async function startServer(): Promise<void> {
     emailService,
     config.INVITE_URL_BASE
   );
-  const taskService = new TaskService(classroomService, config.CONTENT_DIR);
+  const taskCompletionService = new TaskCompletionService(db);
+  const taskService = new TaskService(
+    classroomService,
+    config.CONTENT_DIR,
+    taskCompletionService
+  );
 
   const inventoryService = new InventoryService(db);
   const equipmentService = new EquipmentService(db);
@@ -86,7 +92,8 @@ async function startServer(): Promise<void> {
       inventoryService,
       currencyService,
       inviteService,
-      taskService
+      taskService,
+      taskCompletionService
     },
     config,
     {

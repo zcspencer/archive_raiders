@@ -3,6 +3,8 @@ import { Client, type Room } from "colyseus.js";
 import type { CurrencyReward, ItemRarity } from "@odyssey/shared";
 import { ServerMessage } from "@odyssey/shared";
 import type { ItemInstance } from "@odyssey/shared";
+import { fetchCompletions } from "../api/task";
+import { useCompletionStore } from "../store/completion";
 import { useContainerStore } from "../store/container";
 import { useCurrencyStore } from "../store/currency";
 import { useNotificationStore } from "../store/notification";
@@ -59,6 +61,7 @@ export function useColyseusRoom(
     async function connect(): Promise<void> {
       if (!options.accessToken || !options.classroomId) {
         clearRoom();
+        useCompletionStore.getState().clear();
         setStatus("idle");
         setErrorMessage(null);
         setSessionId(null);
@@ -79,6 +82,17 @@ export function useColyseusRoom(
         setSessionId(activeRoom.sessionId);
         setStatus("connected");
         setRoom(activeRoom);
+
+        try {
+          const { taskIds } = await fetchCompletions(options.accessToken);
+          if (!cancelled) {
+            useCompletionStore.getState().setCompletedTaskIds(taskIds);
+          }
+        } catch {
+          if (!cancelled) {
+            useCompletionStore.getState().setCompletedTaskIds([]);
+          }
+        }
 
         activeRoom.onMessage(ServerMessage.Notification, (payload: unknown) => {
           const msg = typeof payload === "string" ? payload : String(payload);

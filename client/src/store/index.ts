@@ -1,6 +1,7 @@
 export { useAuthStore } from "./auth";
 export { useChallengeStore } from "./challenge";
 export { useClassroomStore } from "./classroom";
+export { useCompletionStore } from "./completion";
 export { useContainerStore } from "./container";
 export { useCurrencyStore } from "./currency";
 export { useDialogueStore } from "./dialogue";

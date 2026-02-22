@@ -180,6 +180,7 @@ export class TiledMapScene extends Phaser.Scene {
           p.gridX,
           p.gridY,
           p.task_id,
+          p.task_repeats,
           undefined,
           undefined,
           p.is_visible !== false
@@ -199,6 +200,7 @@ export class TiledMapScene extends Phaser.Scene {
           t.gridX,
           t.gridY,
           t.task_id,
+          t.task_repeats,
           t.destination_map,
           t.destination_spawn,
           t.is_visible !== false

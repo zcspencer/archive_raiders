@@ -5,6 +5,7 @@ import { taskDefinitionSchema } from "@odyssey/shared";
 import { getValidator } from "@odyssey/task-validators";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
 import { resolveContentDirectory } from "../contentPath.js";
+import type { TaskCompletionService } from "./TaskCompletionService.js";
 
 /**
  * Error raised when task content cannot be found for an id.
@@ -25,26 +26,29 @@ export class ClassroomAccessError extends Error {
 }
 
 /**
- * Coordinates classroom-scoped task validation requests.
+ * Coordinates classroom-scoped task validation requests and persistence.
  */
 export class TaskService {
   private readonly resolvedContentDir: string;
 
   constructor(
     private readonly classroomService: ClassroomService,
-    contentDir: string
+    contentDir: string,
+    private readonly taskCompletionService: TaskCompletionService
   ) {
     this.resolvedContentDir = resolveContentDirectory(contentDir);
   }
 
   /**
-   * Validates a task answer for a classroom-scoped user.
+   * Validates a task answer for a classroom-scoped user and persists the attempt.
    */
   async submit(
     user: AuthUser,
     taskId: string,
     classroomId: string,
-    answer: TaskAnswer
+    answer: TaskAnswer,
+    attemptId: string,
+    startedAt: string | null
   ): Promise<TaskResult> {
     const hasAccess = await this.classroomService.isUserInClassroom(user, classroomId);
     if (!hasAccess) {
@@ -53,7 +57,19 @@ export class TaskService {
 
     const definition = await this.getTaskDefinition(taskId);
     const validator = getValidator(definition.type);
-    return validator(definition, answer);
+    const result = validator(definition, answer);
+
+    await this.taskCompletionService.recordAttempt(
+      user.id,
+      classroomId,
+      taskId,
+      attemptId,
+      result.isCorrect,
+      result.score,
+      startedAt
+    );
+
+    return result;
   }
 
   private async getTaskDefinition(taskId: string): Promise<TaskDefinition> {

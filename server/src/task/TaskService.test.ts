@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { AuthUser } from "@odyssey/shared";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import type { ClassroomService } from "../classroom/ClassroomService.js";
+import type { TaskCompletionService } from "./TaskCompletionService.js";
 import { ClassroomAccessError, TaskNotFoundError, TaskService } from "./TaskService.js";
 
 const user: AuthUser = {
@@ -18,6 +19,8 @@ describe("TaskService", () => {
   let classroomService: ClassroomService;
   let isUserInClassroom: ReturnType<typeof vi.fn>;
 
+  let taskCompletionService: TaskCompletionService;
+
   beforeEach(async () => {
     contentDir = await mkdtemp(join(tmpdir(), "task-service-test-"));
     await mkdir(join(contentDir, "tasks"), { recursive: true });
@@ -25,6 +28,9 @@ describe("TaskService", () => {
     classroomService = {
       isUserInClassroom
     } as unknown as ClassroomService;
+    taskCompletionService = {
+      recordAttempt: vi.fn().mockResolvedValue(undefined)
+    } as unknown as TaskCompletionService;
   });
 
   afterEach(async () => {
@@ -43,10 +49,19 @@ describe("TaskService", () => {
       rewards: { currency: 0, xp: 0, items: [] }
     });
 
-    const service = new TaskService(classroomService, contentDir);
-    const result = await service.submit(user, "shortcut-ctrl-f", "class-1", {
-      pressedKeys: "ctrl+f"
-    });
+    const service = new TaskService(
+      classroomService,
+      contentDir,
+      taskCompletionService
+    );
+    const result = await service.submit(
+      user,
+      "shortcut-ctrl-f",
+      "class-1",
+      { pressedKeys: "ctrl+f" },
+      "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee",
+      null
+    );
 
     expect(result.isCorrect).toBe(true);
     expect(result.score).toBe(100);
@@ -55,18 +70,40 @@ describe("TaskService", () => {
 
   it("throws when classroom access is denied", async () => {
     isUserInClassroom.mockResolvedValueOnce(false);
-    const service = new TaskService(classroomService, contentDir);
+    const service = new TaskService(
+      classroomService,
+      contentDir,
+      taskCompletionService
+    );
 
     await expect(
-      service.submit(user, "shortcut-ctrl-f", "class-1", { pressedKeys: "ctrl+f" })
+      service.submit(
+        user,
+        "shortcut-ctrl-f",
+        "class-1",
+        { pressedKeys: "ctrl+f" },
+        "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee",
+        null
+      )
     ).rejects.toBeInstanceOf(ClassroomAccessError);
   });
 
   it("throws when task definition cannot be found", async () => {
-    const service = new TaskService(classroomService, contentDir);
+    const service = new TaskService(
+      classroomService,
+      contentDir,
+      taskCompletionService
+    );
 
     await expect(
-      service.submit(user, "missing-task", "class-1", { pressedKeys: "ctrl+f" })
+      service.submit(
+        user,
+        "missing-task",
+        "class-1",
+        { pressedKeys: "ctrl+f" },
+        "aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee",
+        null
+      )
     ).rejects.toBeInstanceOf(TaskNotFoundError);
   });
 });
