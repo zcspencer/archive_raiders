@@ -100,6 +100,8 @@ export interface MapObjectPlacement {
   gridY: number;
   /** Optional task definition ID that gates this interaction. */
   task_id?: string;
+  /** When false or absent, gate is skipped after first successful completion; when true, task is required every time. */
+  task_repeats?: boolean;
   /** Whether to render the sprite (default true). */
   is_visible?: boolean;
   /** Whether the object blocks movement (default true). */
@@ -116,6 +118,10 @@ export interface MapTransition {
   destination_map: string;
   destination_spawn: string;
   label?: string;
+  /** Optional task definition ID that gates this transition (door/portal). */
+  task_id?: string;
+  /** When false or absent, gate is skipped after first successful completion; when true, task is required every time. */
+  task_repeats?: boolean;
   /** Whether to render the sprite (default true). */
   is_visible?: boolean;
   /** Whether the object blocks movement (default true). */

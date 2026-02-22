@@ -91,6 +91,12 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
           destination_map: destMap,
           destination_spawn: getProp(obj, "destination_spawn", ""),
           label: getOptionalProp(obj, "label"),
+          ...(getOptionalProp(obj, "task_id") && {
+            task_id: getOptionalProp(obj, "task_id")
+          }),
+          ...(hasProp(obj, "task_repeats") && {
+            task_repeats: getBoolProp(obj, "task_repeats")
+          }),
           is_visible: getBoolProp(obj, "is_visible", "is_visable"),
           is_collidable: collidable
         });
@@ -107,6 +113,9 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
           is_collidable: collidable,
           ...(getOptionalProp(obj, "task_id") && {
             task_id: getOptionalProp(obj, "task_id")
+          }),
+          ...(hasProp(obj, "task_repeats") && {
+            task_repeats: getBoolProp(obj, "task_repeats")
           })
         });
         if (collidable) blockedTiles.push({ gx, gy });
@@ -199,6 +208,10 @@ function getProp(obj: TiledObject, name: string, fallback: string): string {
 function getOptionalProp(obj: TiledObject, name: string): string | undefined {
   const p = obj.properties?.find((x: TiledProperty) => x.name === name);
   return p ? String(p.value) : undefined;
+}
+
+function hasProp(obj: TiledObject, name: string): boolean {
+  return obj.properties?.some((x: TiledProperty) => x.name === name) ?? false;
 }
 
 /** Parses is_visible / is_collidable from properties. Accepts "true"/"false" or boolean. Default true. */

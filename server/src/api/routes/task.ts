@@ -6,6 +6,7 @@ import {
   TaskNotFoundError,
   type TaskService
 } from "../../task/TaskService.js";
+import type { TaskCompletionService } from "../../task/TaskCompletionService.js";
 
 type AuthPreHandler = (
   request: FastifyRequest,
@@ -14,15 +15,18 @@ type AuthPreHandler = (
 
 const submitTaskBodySchema = z.object({
   classroomId: z.string().min(1),
-  answer: z.record(z.unknown())
+  answer: z.record(z.unknown()),
+  attemptId: z.string().uuid(),
+  startedAt: z.string().datetime().optional()
 });
 
 /**
- * Registers task submission API routes.
+ * Registers task submission and completions API routes.
  */
 export async function registerTaskRoutes(
   app: FastifyInstance,
   taskService: TaskService,
+  taskCompletionService: TaskCompletionService,
   authenticate: AuthPreHandler
 ): Promise<void> {
   app.post("/tasks/:taskId/submit", { preHandler: [authenticate] }, async (request, reply) => {
@@ -50,7 +54,9 @@ export async function registerTaskRoutes(
         user,
         taskId,
         parsedBody.data.classroomId,
-        parsedBody.data.answer
+        parsedBody.data.answer,
+        parsedBody.data.attemptId,
+        parsedBody.data.startedAt ?? null
       );
       reply.code(200).send(result);
     } catch (error) {
@@ -64,5 +70,16 @@ export async function registerTaskRoutes(
       }
       throw error;
     }
+  });
+
+  app.get("/tasks/completions", { preHandler: [authenticate] }, async (request, reply) => {
+    const user = request.authUser;
+    if (!user) {
+      reply.code(401).send({ error: "Authentication required" });
+      return;
+    }
+
+    const taskIds = await taskCompletionService.getCompletedTaskIds(user.id);
+    reply.code(200).send({ taskIds });
   });
 }

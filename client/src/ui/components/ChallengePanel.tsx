@@ -2,7 +2,7 @@ import { useEffect, type CSSProperties, type ReactElement } from "react";
 import { useChallengeStore } from "../../store/challenge";
 import { usePlayerControlStore } from "../../store/playerControl";
 import { getChallengeComponent } from "./challenges/registry";
-import type { TaskResult } from "@odyssey/shared";
+import type { TaskAnswer, TaskResult } from "@odyssey/shared";
 
 /**
  * Modal overlay that presents the active challenge mini-game.
@@ -33,10 +33,9 @@ export function ChallengePanel(): ReactElement | null {
 
   const ChallengeComponent = getChallengeComponent(activeTask.type);
 
-  const handleResult = (result: TaskResult): void => {
-    completeChallenge(result);
+  const handleResult = (answer: TaskAnswer, result: TaskResult): void => {
+    completeChallenge(answer, result);
     if (result.isCorrect) {
-      /* onSuccess callback + dismiss handled by the store. */
       setInputMode("game");
     }
   };

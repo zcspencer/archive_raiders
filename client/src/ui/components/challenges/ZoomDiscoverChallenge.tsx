@@ -66,7 +66,10 @@ export function ZoomDiscoverChallenge({ task, onResult }: ChallengeProps): React
     const isCorrect =
       answer.trim().toLowerCase() === config.hiddenDetail.trim().toLowerCase();
     if (isCorrect) {
-      onResult({ isCorrect: true, score: 100, feedback: "Correct! You found the hidden detail." });
+      onResult(
+        { discoveredValue: answer },
+        { isCorrect: true, score: 100, feedback: "Correct! You found the hidden detail." }
+      );
     } else {
       setFeedback("That's not quite right. Keep zooming and look carefully.");
     }
@@ -74,7 +77,10 @@ export function ZoomDiscoverChallenge({ task, onResult }: ChallengeProps): React
 
   const handleTimeUp = (): void => {
     setTimedOut(true);
-    onResult({ isCorrect: false, score: 0, feedback: "Time's up!" });
+    onResult(
+      { discoveredValue: answer },
+      { isCorrect: false, score: 0, feedback: "Time's up!" }
+    );
   };
 
   return (

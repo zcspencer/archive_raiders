@@ -176,6 +176,16 @@
                          "name":"label",
                          "type":"string",
                          "value":"Village Tower"
+                        }, 
+                        {
+                         "name":"task_id",
+                         "type":"string",
+                         "value":"ancient-computer-password"
+                        }, 
+                        {
+                         "name":"task_repeats",
+                         "type":"bool",
+                         "value":false
                         }],
                  "rotation":0,
                  "type":"interactable",

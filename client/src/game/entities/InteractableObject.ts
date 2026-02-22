@@ -44,6 +44,8 @@ export class InteractableObject {
   readonly gridY: number;
   /** Optional task definition ID that gates this interaction behind a challenge. */
   readonly taskId: string | undefined;
+  /** When true, task is required every time; when false or undefined, gate is skipped after first completion. */
+  readonly taskRepeats: boolean;
   /** Data-driven transition target; when set, kind is typically "transition" or "door". */
   readonly transitionDestinationMap?: string;
   readonly transitionDestinationSpawn?: string;
@@ -59,6 +61,7 @@ export class InteractableObject {
     gridX: number,
     gridY: number,
     taskId?: string,
+    taskRepeats?: boolean,
     transitionDestinationMap?: string,
     transitionDestinationSpawn?: string,
     isVisible = true
@@ -70,6 +73,7 @@ export class InteractableObject {
     this.gridX = gridX;
     this.gridY = gridY;
     this.taskId = taskId;
+    this.taskRepeats = taskRepeats === true;
 
     const worldX = gridX * TILE_SIZE + TILE_SIZE / 2;
     const worldY = gridY * TILE_SIZE + TILE_SIZE / 2;
