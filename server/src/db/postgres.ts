@@ -145,6 +145,38 @@ export class PostgresDatabase {
       CREATE INDEX IF NOT EXISTS classroom_invites_token_idx
       ON classroom_invites(token);
     `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS task_completions (
+        id UUID PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        classroom_id UUID NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+        task_id TEXT NOT NULL,
+        attempt_id UUID NOT NULL,
+        is_correct BOOLEAN NOT NULL,
+        score INT NOT NULL DEFAULT 0,
+        started_at_client TIMESTAMPTZ,
+        started_at_server TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    await this.pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS task_completions_attempt_idx
+      ON task_completions(attempt_id);
+    `);
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS task_completions_user_task_idx
+      ON task_completions(user_id, task_id);
+    `);
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS task_completions_classroom_task_idx
+      ON task_completions(classroom_id, task_id);
+    `);
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS task_completions_user_classroom_idx
+      ON task_completions(user_id, classroom_id);
+    `);
   }
 
   /**

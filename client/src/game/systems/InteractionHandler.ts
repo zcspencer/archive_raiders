@@ -7,6 +7,7 @@ import { usePlayerControlStore } from "../../store/playerControl";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
 import { useContainerStore } from "../../store/container";
 import { useChallengeStore } from "../../store/challenge";
+import { useCompletionStore } from "../../store/completion";
 import { getTaskDefinition } from "../../data/taskDefinitions";
 
 /** Callback a scene provides so the handler can trigger scene transitions. */
@@ -70,13 +71,18 @@ export class InteractionHandler {
 
   private handleObject(obj: InteractableObject): void {
     if (obj.taskId) {
-      const task = getTaskDefinition(obj.taskId);
-      if (task) {
-        useChallengeStore.getState().startChallenge(task, () => {
-          this.proceedWithObject(obj);
-        });
-        usePlayerControlStore.getState().setInputMode("ui");
-        return;
+      const alreadyDone =
+        !obj.taskRepeats &&
+        useCompletionStore.getState().completedTaskIds.has(obj.taskId);
+      if (!alreadyDone) {
+        const task = getTaskDefinition(obj.taskId);
+        if (task) {
+          useChallengeStore.getState().startChallenge(task, () => {
+            this.proceedWithObject(obj);
+          });
+          usePlayerControlStore.getState().setInputMode("ui");
+          return;
+        }
       }
     }
     this.proceedWithObject(obj);

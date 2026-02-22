@@ -8,6 +8,7 @@ import type { InventoryService } from "../inventory/InventoryService.js";
 import type { ItemDefinitionLoader } from "../inventory/ItemDefinitionLoader.js";
 import type { LootTableLoader } from "../inventory/LootTableLoader.js";
 import type { InviteService } from "../invite/index.js";
+import type { TaskCompletionService } from "../task/TaskCompletionService.js";
 import type { TaskService } from "../task/TaskService.js";
 import { buildAuthenticatePreHandler } from "./middleware/auth.js";
 import { requireRole } from "./middleware/role.js";
@@ -24,6 +25,7 @@ interface RouteServices {
   currencyService: CurrencyService;
   inviteService: InviteService;
   taskService: TaskService;
+  taskCompletionService: TaskCompletionService;
 }
 
 export interface DevLoaders {
@@ -64,7 +66,12 @@ export async function registerRoutes(
     authenticate,
     requireTeacher
   );
-  await registerTaskRoutes(app, services.taskService, authenticate);
+  await registerTaskRoutes(
+    app,
+    services.taskService,
+    services.taskCompletionService,
+    authenticate
+  );
 
   if (process.env.NODE_ENV !== "production" && devLoaders) {
     await registerDevRoutes(

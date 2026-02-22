@@ -32,7 +32,10 @@ export function CopyPasteChallenge({ task, onResult }: ChallengeProps): ReactEle
     if (timedOut) return;
     const isCorrect = pasted === config.expectedValue;
     if (isCorrect) {
-      onResult({ isCorrect: true, score: 100, feedback: "Key accepted!" });
+      onResult(
+        { pastedValue: pasted },
+        { isCorrect: true, score: 100, feedback: "Key accepted!" }
+      );
     } else {
       setFeedback("That doesn't match. Select the content above, copy it, and paste it here.");
     }
@@ -40,7 +43,10 @@ export function CopyPasteChallenge({ task, onResult }: ChallengeProps): ReactEle
 
   const handleTimeUp = (): void => {
     setTimedOut(true);
-    onResult({ isCorrect: false, score: 0, feedback: "Time's up!" });
+    onResult(
+      { pastedValue: pasted },
+      { isCorrect: false, score: 0, feedback: "Time's up!" }
+    );
   };
 
   return (
