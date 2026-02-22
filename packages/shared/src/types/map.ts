@@ -116,6 +116,8 @@ export interface MapTransition {
   destination_map: string;
   destination_spawn: string;
   label?: string;
+  /** Optional task definition ID that gates this transition (door/portal). */
+  task_id?: string;
   /** Whether to render the sprite (default true). */
   is_visible?: boolean;
   /** Whether the object blocks movement (default true). */

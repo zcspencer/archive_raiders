@@ -91,6 +91,9 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
           destination_map: destMap,
           destination_spawn: getProp(obj, "destination_spawn", ""),
           label: getOptionalProp(obj, "label"),
+          ...(getOptionalProp(obj, "task_id") && {
+            task_id: getOptionalProp(obj, "task_id")
+          }),
           is_visible: getBoolProp(obj, "is_visible", "is_visable"),
           is_collidable: collidable
         });

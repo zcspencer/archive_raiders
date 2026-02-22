@@ -69,6 +69,7 @@
     <property name="is_visible" type="bool" value="false"/>
     <property name="kind" value="transition"/>
     <property name="label" value="Village Tower"/>
+    <property name="task_id" value="ancient-computer-password"/>
    </properties>
   </object>
   <object id="3" name="village_tower_exit_spawn" type="spawn" x="464.014" y="333.306">

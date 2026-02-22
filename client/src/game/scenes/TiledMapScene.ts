@@ -198,7 +198,7 @@ export class TiledMapScene extends Phaser.Scene {
           t.label ?? t.name,
           t.gridX,
           t.gridY,
-          undefined,
+          t.task_id,
           t.destination_map,
           t.destination_spawn,
           t.is_visible !== false
