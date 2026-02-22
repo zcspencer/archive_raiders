@@ -1,4 +1,4 @@
-import type { AttackTargetPayload, EquipmentSlot, MovePayload, SetMapPayload } from "@odyssey/shared";
+import type { AttackTargetPayload, ClaimTaskLootPayload, EquipmentSlot, MovePayload, SetMapPayload } from "@odyssey/shared";
 import type { Room } from "colyseus.js";
 import { ClientMessage } from "@odyssey/shared";
 import { create } from "zustand";
@@ -15,6 +15,7 @@ interface GameRoomBridgeState {
   sendOpenContainer: (objectId: string) => void;
   sendClaimContainer: (objectId: string, nonce: string) => void;
   sendDropItem: (instanceId: string) => void;
+  sendClaimTaskLoot: (taskId: string) => void;
 }
 
 /**
@@ -47,5 +48,8 @@ export const useGameRoomBridgeStore = create<GameRoomBridgeState>((set, get) => 
   },
   sendDropItem: (instanceId): void => {
     get().room?.send(ClientMessage.DropItem, { instanceId });
+  },
+  sendClaimTaskLoot: (taskId): void => {
+    get().room?.send(ClientMessage.ClaimTaskLoot, { taskId } satisfies ClaimTaskLootPayload);
   }
 }));

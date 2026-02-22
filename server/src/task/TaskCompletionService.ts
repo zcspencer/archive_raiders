@@ -77,6 +77,25 @@ export class TaskCompletionService {
   }
 
   /**
+   * Returns the most recent attempt for a user and task, if any.
+   * Used to resolve task-gated loot (completedTableId vs incompletedTableId).
+   */
+  async getLatestAttemptForTask(
+    userId: string,
+    taskId: string
+  ): Promise<{ isCorrect: boolean } | null> {
+    const rows = await this.db.query<{ is_correct: boolean }>(
+      `SELECT is_correct FROM task_completions
+       WHERE user_id = $1 AND task_id = $2
+       ORDER BY completed_at DESC
+       LIMIT 1`,
+      [userId, taskId]
+    );
+    if (rows.length === 0) return null;
+    return { isCorrect: rows[0]!.is_correct };
+  }
+
+  /**
    * Returns distinct task IDs the user has successfully completed (is_correct = true).
    * Used for the completions endpoint and gate-skipping; scoped per-user globally, not per-classroom.
    */

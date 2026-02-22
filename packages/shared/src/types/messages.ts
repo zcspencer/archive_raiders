@@ -16,7 +16,8 @@ export enum ClientMessage {
   UnequipItem = "unequip-item",
   DropItem = "drop-item",
   UseItem = "use-item",
-  AttackTarget = "attack-target"
+  AttackTarget = "attack-target",
+  ClaimTaskLoot = "claim-task-loot"
 }
 
 /**
@@ -87,4 +88,11 @@ export interface LootDropPreviewPayload {
     quantity: number;
     rarity?: string;
   }>;
+}
+
+/**
+ * Payload for claiming loot from a task-gated drop after the player has completed (or failed) the task.
+ */
+export interface ClaimTaskLootPayload {
+  taskId: string;
 }

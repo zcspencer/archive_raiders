@@ -1,4 +1,5 @@
 import type { TaskAnswer, TaskDefinition, TaskResult } from "@odyssey/shared";
+import type { TaskValidatorDescriptor } from "../registry.js";
 
 interface FindCopyPasteConfig {
   password: string;
@@ -37,3 +38,8 @@ export function validateFindCopyPaste(
       : "Incorrect password. Use Find to locate it in the text above."
   };
 }
+
+export const findCopyPasteValidator: TaskValidatorDescriptor = {
+  taskType: "find-copy-paste",
+  validate: validateFindCopyPaste
+};

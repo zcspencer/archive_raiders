@@ -1,4 +1,5 @@
 import type { TaskAnswer, TaskDefinition, TaskResult } from "@odyssey/shared";
+import type { TaskValidatorDescriptor } from "../registry.js";
 
 interface ShortcutConfig {
   targetShortcut: string;
@@ -36,3 +37,8 @@ export function validateShortcut(
       : `Expected ${config.targetShortcut}.`
   };
 }
+
+export const shortcutValidator: TaskValidatorDescriptor = {
+  taskType: "shortcut",
+  validate: validateShortcut
+};

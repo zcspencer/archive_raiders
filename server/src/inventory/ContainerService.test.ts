@@ -38,7 +38,7 @@ function createCurrencyService(): CurrencyService {
 
 function createLootResolver(): LootResolver {
   return {
-    resolve: vi.fn().mockReturnValue([])
+    resolve: vi.fn().mockReturnValue({ items: [], pendingTasks: [] })
   } as unknown as LootResolver;
 }
 

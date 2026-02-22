@@ -153,8 +153,8 @@ export class ContainerService {
   private rollLoot(definition: ContainerDefinition, seed: number): RolledLoot[] {
     if (definition.drops) {
       const rng = createSeededRng(seed);
-      const resolved = this.lootResolver.resolve(definition.drops, rng);
-      return resolved.map((r) => ({
+      const { items } = this.lootResolver.resolve(definition.drops, rng);
+      return items.map((r) => ({
         definitionId: r.definitionId,
         quantity: r.quantity,
         name: this.itemLoader.getDefinition(r.definitionId)?.name ?? r.definitionId

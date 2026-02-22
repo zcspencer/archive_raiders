@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="6" height="6" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="51">
+ <editorsettings>
+  <export target="../../content/maps/village_house_1.json" format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="main.tsx"/>
+ <tileset firstgid="668" source="tilesets/house.tsx"/>
+ <layer id="1" name="ground" width="6" height="6">
+  <data encoding="csv">
+31,31,31,31,31,31,
+31,31,31,31,31,31,
+31,31,31,31,31,31,
+31,31,31,31,31,31,
+31,31,31,31,31,31,
+31,31,31,31,31,31
+</data>
+ </layer>
+ <objectgroup id="6" name="collision"/>
+ <layer id="3" name="detail_down" width="6" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="5" name="objects">
+  <object id="47" name="village_house_1_spawn" type="spawn" x="79.8004" y="141.262">
+   <properties>
+    <property name="kind" value="spawn"/>
+   </properties>
+  </object>
+  <object id="48" name="village_house_1_exit" type="interactable" x="64.0916" y="158.551" width="32" height="33">
+   <properties>
+    <property name="destination_map" value="village"/>
+    <property name="destination_spawn" value="village_house_1_exit_spawn"/>
+    <property name="is_visible" type="bool" value="true"/>
+    <property name="kind" value="transition"/>
+    <property name="label" value="Exit"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer id="4" name="detail_up" width="6" height="6">
+  <data encoding="csv">
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0,
+0,0,0,0,0,0
+</data>
+ </layer>
+</map>

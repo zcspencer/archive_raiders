@@ -20,8 +20,8 @@ import {
   InventoryService,
   ItemActionResolver,
   ItemDefinitionLoader,
-  LootTableLoader,
-  LootResolver
+  LootResolver,
+  LootTableLoader
 } from "./inventory/index.js";
 import { loadAllMapPlacements } from "./colyseus/services/mapPlacement.js";
 import { EmailService, InviteService } from "./invite/index.js";
@@ -116,6 +116,8 @@ async function startServer(): Promise<void> {
     itemActionResolver,
     itemDefinitionLoader,
     lootResolver,
+    lootTableLoader,
+    taskCompletionService,
     mapPlacements
   });
   gameServer.define("shard", ShardRoom);

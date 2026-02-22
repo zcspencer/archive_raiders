@@ -16,3 +16,10 @@ export const objectDamagedPayloadSchema = z.object({
 export const objectDestroyedPayloadSchema = z.object({
   objectId: z.string().min(1)
 });
+
+/**
+ * Runtime validator for ClaimTaskLoot message payload (client -> server).
+ */
+export const claimTaskLootPayloadSchema = z.object({
+  taskId: z.string().min(1)
+});

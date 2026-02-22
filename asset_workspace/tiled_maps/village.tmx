@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="36" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="46">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="36" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="52">
  <editorsettings>
-  <export target="../content/maps/village.json" format="json"/>
+  <export target="../../content/maps/village.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="main.tsx"/>
+ <tileset firstgid="668" source="tilesets/house.tsx"/>
  <layer id="1" name="ground" width="36" height="20">
   <data encoding="csv">
 24,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,26,
@@ -36,6 +37,9 @@
    <ellipse/>
   </object>
   <object id="13" x="544.793" y="511.794" width="63.5541" height="64.1652"/>
+  <object id="46" x="159.825" y="256.064">
+   <polygon points="0,0 0.245507,-82.2449 19.6406,-118.089 46.8919,-128.155 95.7478,-83.2269 95.9933,-0.982029"/>
+  </object>
  </objectgroup>
  <layer id="3" name="detail_down" width="36" height="20">
   <data encoding="csv">
@@ -43,10 +47,10 @@
 0,0,0,187,0,0,0,0,0,0,0,0,0,0,0,0,0,0,236,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,187,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,162,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,187,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,187,0,0,0,
+0,0,0,0,0,668,669,670,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,671,672,673,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,674,675,676,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,162,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,187,677,678,679,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,187,0,0,0,
 0,0,0,0,0,0,0,0,0,0,236,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -105,149 +109,23 @@
     <property name="one_shot" value="false"/>
    </properties>
   </object>
-  <object id="17" name="rock" type="world_object" x="835.49" y="322.03" width="25.5" height="25.77">
+  <object id="47" name="village_house_1_exit_spawn" type="spawn" x="208.619" y="266.945">
    <properties>
-    <property name="definition_id" value="rock"/>
+    <property name="kind" value="spawn"/>
    </properties>
   </object>
-  <object id="18" name="rock" type="world_object" x="900.631" y="355.738" width="25.5" height="25.77">
+  <object id="48" name="village_tower_door" type="interactable" x="191.33" y="222.076" width="32" height="33">
    <properties>
-    <property name="definition_id" value="rock"/>
+    <property name="destination_map" value="village_house_1"/>
+    <property name="destination_spawn" value="village_house_1_spawn"/>
+    <property name="is_visible" type="bool" value="false"/>
+    <property name="kind" value="transition"/>
+    <property name="label" value="Village House Door"/>
    </properties>
   </object>
-  <object id="19" name="rock" type="world_object" x="930.064" y="259.027" width="25.5" height="25.77">
+  <object id="49" name="rocks" type="world_object" x="866.919" y="4.88547" width="279.462" height="434.344">
    <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="20" name="rock" type="world_object" x="835.867" y="258.489" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="21" name="rock" type="world_object" x="867.489" y="228.591" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="22" name="rock" type="world_object" x="866.914" y="291.26" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="23" name="rock" type="world_object" x="899.686" y="291.26" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="24" name="rock" type="world_object" x="964.08" y="293.56" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="25" name="rock" type="world_object" x="926.708" y="323.457" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="26" name="rock" type="world_object" x="929.008" y="390.726" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="27" name="rock" type="world_object" x="962.355" y="354.504" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="28" name="rock" type="world_object" x="995.127" y="321.732" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="29" name="rock" type="world_object" x="996.277" y="256.764" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="30" name="rock" type="world_object" x="961.78" y="229.741" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="31" name="rock" type="world_object" x="898.536" y="193.52" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="32" name="rock" type="world_object" x="931.883" y="193.52" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="33" name="rock" type="world_object" x="929.008" y="228.017" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="34" name="rock" type="world_object" x="896.236" y="228.017" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="35" name="rock" type="world_object" x="864.04" y="355.079" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="36" name="rock" type="world_object" x="863.616" y="419.584" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="37" name="rock" type="world_object" x="900.756" y="421.37" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="38" name="rock" type="world_object" x="900.756" y="389.229" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="39" name="rock" type="world_object" x="863.616" y="387.086" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="40" name="rock" type="world_object" x="965.037" y="389.229" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="41" name="rock" type="world_object" x="996.821" y="358.517" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="42" name="rock" type="world_object" x="1028.25" y="356.017" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="43" name="rock" type="world_object" x="1027.18" y="318.52" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="44" name="rock" type="world_object" x="993.607" y="291.379" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
-   </properties>
-  </object>
-  <object id="45" name="rock" type="world_object" x="1025.03" y="288.879" width="25.5" height="25.77">
-   <properties>
-    <property name="definition_id" value="rock"/>
+    <property name="definition_id" value="solid_rock"/>
    </properties>
   </object>
  </objectgroup>

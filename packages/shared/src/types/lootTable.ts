@@ -6,14 +6,21 @@ export type LootQuantity = number | { min: number; max: number };
 import type { ItemRarity } from "./itemDefinition.js";
 
 /**
- * A source that produces loot -- a concrete item, a table reference, or a tag-based query.
+ * A source that produces loot -- a concrete item, a table reference, a tag-based query, or a task-gated drop.
  * Tag sources pick uniformly from all items matching the tag (and optional rarity filter).
+ * Task sources defer resolution until the player completes (or fails) the task; then completedTableId or incompletedTableId is rolled.
  */
 export type LootSource =
   | { type: "item"; itemId: string; quantity: LootQuantity }
   | { type: "table"; tableId: string }
   | { type: "tag"; tag: string; quantity: LootQuantity; rarity?: ItemRarity }
-  | { type: "nothing" };
+  | { type: "nothing" }
+  | {
+      type: "task";
+      taskId: string;
+      completedTableId: string;
+      incompletedTableId?: string;
+    };
 
 /**
  * A source paired with a probability weight for weighted/tiered selection.
@@ -65,4 +72,22 @@ export interface LootTableDefinition {
 export interface ResolvedLoot {
   definitionId: string;
   quantity: number;
+}
+
+/**
+ * A task-gated drop that was selected during loot resolution but not yet claimed.
+ * Resolved when the player completes (or fails) the task via ClaimTaskLoot.
+ */
+export interface PendingTaskDrop {
+  taskId: string;
+  completedTableId: string;
+  incompletedTableId?: string;
+}
+
+/**
+ * Result of resolving a drops array: immediate items plus any task-gated drops to claim later.
+ */
+export interface LootResolution {
+  items: ResolvedLoot[];
+  pendingTasks: PendingTaskDrop[];
 }

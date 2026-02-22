@@ -4,7 +4,9 @@ import type {
   LootQuantity,
   ResolvedLoot,
   WeightedSource,
-  LootTier
+  LootTier,
+  LootResolution,
+  PendingTaskDrop
 } from "@odyssey/shared";
 import type { ItemDefinitionLoader } from "./ItemDefinitionLoader.js";
 import type { LootTableLoader } from "./LootTableLoader.js";
@@ -13,7 +15,7 @@ import type { LootTableLoader } from "./LootTableLoader.js";
 const MAX_DEPTH = 10;
 
 /**
- * Resolves loot drops into concrete item lists using an RNG function.
+ * Resolves loot drops into concrete items and pending task-gated drops using an RNG function.
  */
 export class LootResolver {
   constructor(
@@ -22,26 +24,28 @@ export class LootResolver {
   ) {}
 
   /**
-   * Resolves an array of drops into a flat list of concrete items.
+   * Resolves an array of drops into immediate items and pending task drops.
    * @param drops - The drop instructions to resolve.
    * @param rng - A function returning a float in [0, 1). Use createSeededRng for determinism.
    * @param depth - Current recursion depth (callers should omit; used internally).
    */
-  resolve(drops: LootDrop[], rng: () => number, depth: number = 0): ResolvedLoot[] {
+  resolve(drops: LootDrop[], rng: () => number, depth: number = 0): LootResolution {
     if (depth >= MAX_DEPTH) {
       throw new Error(`Loot table recursion limit exceeded (depth=${depth})`);
     }
 
-    const results: ResolvedLoot[] = [];
+    const items: ResolvedLoot[] = [];
+    const pendingTasks: PendingTaskDrop[] = [];
     for (const drop of drops) {
       const count = drop.count ?? 1;
       for (let i = 0; i < count; i++) {
         const source = this.selectSource(drop, rng);
-        const resolved = this.resolveSource(source, rng, depth);
-        results.push(...resolved);
+        const partial = this.resolveSource(source, rng, depth);
+        items.push(...partial.items);
+        pendingTasks.push(...partial.pendingTasks);
       }
     }
-    return results;
+    return { items, pendingTasks };
   }
 
   /** Pick a source from a drop based on its method. */
@@ -60,14 +64,18 @@ export class LootResolver {
     }
   }
 
-  /** Resolve a single source into concrete items. */
-  private resolveSource(source: LootSource, rng: () => number, depth: number): ResolvedLoot[] {
+  /** Resolve a single source into items and/or pending task drops. */
+  private resolveSource(
+    source: LootSource,
+    rng: () => number,
+    depth: number
+  ): { items: ResolvedLoot[]; pendingTasks: PendingTaskDrop[] } {
     if (source.type === "nothing") {
-      return [];
+      return { items: [], pendingTasks: [] };
     }
     if (source.type === "item") {
       const quantity = resolveQuantity(source.quantity, rng);
-      return [{ definitionId: source.itemId, quantity }];
+      return { items: [{ definitionId: source.itemId, quantity }], pendingTasks: [] };
     }
     if (source.type === "tag") {
       const candidates = this.itemLoader
@@ -81,7 +89,15 @@ export class LootResolver {
       }
       const picked = candidates[Math.floor(rng() * candidates.length)]!;
       const quantity = resolveQuantity(source.quantity, rng);
-      return [{ definitionId: picked.id, quantity }];
+      return { items: [{ definitionId: picked.id, quantity }], pendingTasks: [] };
+    }
+    if (source.type === "task") {
+      const pending: PendingTaskDrop = {
+        taskId: source.taskId,
+        completedTableId: source.completedTableId,
+        incompletedTableId: source.incompletedTableId
+      };
+      return { items: [], pendingTasks: [pending] };
     }
     // Table reference -- look up and recurse
     const table = this.tableLoader.getDefinition(source.tableId);

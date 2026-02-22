@@ -38,12 +38,21 @@ const nothingSourceSchema = z.object({
   type: z.literal("nothing")
 });
 
+/** Task-gated source: loot resolved after player completes (or fails) the task. */
+const taskSourceSchema = z.object({
+  type: z.literal("task"),
+  taskId: z.string().min(1),
+  completedTableId: z.string().min(1),
+  incompletedTableId: z.string().min(1).optional()
+});
+
 /** Discriminated union of source types. */
 export const lootSourceSchema = z.discriminatedUnion("type", [
   itemSourceSchema,
   tableSourceSchema,
   tagSourceSchema,
-  nothingSourceSchema
+  nothingSourceSchema,
+  taskSourceSchema
 ]);
 
 /** Source with a weight. */

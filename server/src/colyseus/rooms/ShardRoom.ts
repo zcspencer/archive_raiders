@@ -4,6 +4,7 @@ import {
   ServerMessage,
   attackTargetPayloadSchema,
   claimContainerPayloadSchema,
+  claimTaskLootPayloadSchema,
   dropItemPayloadSchema,
   equipItemPayloadSchema,
   movePayloadSchema,
@@ -11,6 +12,7 @@ import {
   openContainerPayloadSchema,
   unequipItemPayloadSchema
 } from "@odyssey/shared";
+import type { PendingTaskDrop } from "@odyssey/shared";
 import { PlayerSchema, ShardState, spawnWorldObjectsForMap, worldObjectKey } from "../schema/ShardState.js";
 import { calculateDamage, canAttack, isInRange } from "../services/damageService.js";
 import { applyMove } from "../services/movementService.js";
@@ -33,6 +35,9 @@ interface JoinOptions {
  */
 export class ShardRoom extends Room<ShardState> {
   private static services: RoomServices | null = null;
+
+  /** Per-player pending task-gated drops (userId -> list of pending drops). */
+  private readonly pendingTaskDrops = new Map<string, PendingTaskDrop[]>();
 
   /**
    * Configures room-level service dependencies (called once at server boot).
@@ -225,17 +230,17 @@ export class ShardRoom extends Room<ShardState> {
       if (worldObj.health <= 0) {
         const drops = getDestroyableDrops(this.getServices().itemDefinitionLoader, worldObj.definitionId);
         if (drops && drops.length > 0) {
-          const resolved = this.getServices().lootResolver.resolve(drops, () => Math.random());
-          if (resolved.length > 0) {
+          const { items, pendingTasks } = this.getServices().lootResolver.resolve(drops, () => Math.random());
+          if (items.length > 0) {
             await this.getServices().inventoryService.addItems(
               authContext.user.id,
-              resolved.map((r) => ({ definitionId: r.definitionId, quantity: r.quantity }))
+              items.map((r) => ({ definitionId: r.definitionId, quantity: r.quantity }))
             );
             const updated = await this.getServices().inventoryService.getInventory(authContext.user.id);
             client.send(ServerMessage.InventoryUpdate, updated);
 
             const { itemDefinitionLoader } = this.getServices();
-            const previewItems = resolved.map((r) => {
+            const previewItems = items.map((r) => {
               const itemDef = itemDefinitionLoader.getDefinition(r.definitionId);
               return {
                 definitionId: r.definitionId,
@@ -245,8 +250,14 @@ export class ShardRoom extends Room<ShardState> {
               };
             });
             client.send(ServerMessage.LootDropPreview, { items: previewItems });
-          } else {
+          } else if (pendingTasks.length === 0) {
             client.send(ServerMessage.Notification, "You found nothing.");
+          }
+          for (const pending of pendingTasks) {
+            const list = this.pendingTaskDrops.get(authContext.user.id) ?? [];
+            list.push(pending);
+            this.pendingTaskDrops.set(authContext.user.id, list);
+            client.send(ServerMessage.TaskTrigger, { taskId: pending.taskId });
           }
         }
         this.state.worldObjects.delete(key);
@@ -361,5 +372,94 @@ export class ShardRoom extends Room<ShardState> {
         client.send(ServerMessage.Notification, err instanceof Error ? err.message : "Failed to claim container");
       }
     });
+
+    this.onMessage(ClientMessage.ClaimTaskLoot, async (client, rawPayload: unknown) => {
+      const payloadResult = claimTaskLootPayloadSchema.safeParse(rawPayload);
+      if (!payloadResult.success) {
+        client.send(ServerMessage.Notification, "Invalid claim-task-loot payload");
+        return;
+      }
+      const authContext = client.auth as JoinAuthContext | undefined;
+      if (!authContext) return;
+      const { taskId } = payloadResult.data;
+      const list = this.pendingTaskDrops.get(authContext.user.id);
+      const index = list?.findIndex((p) => p.taskId === taskId) ?? -1;
+      if (index === -1 || !list) {
+        client.send(ServerMessage.Notification, "No pending task loot for this task");
+        return;
+      }
+      const pending = list[index]!;
+      const { taskCompletionService, lootResolver, lootTableLoader, inventoryService, itemDefinitionLoader } =
+        this.getServices();
+      const attempt = await taskCompletionService.getLatestAttemptForTask(authContext.user.id, taskId);
+      if (!attempt) {
+        client.send(ServerMessage.Notification, "Complete the task first to claim loot");
+        return;
+      }
+      const tableId = attempt.isCorrect ? pending.completedTableId : pending.incompletedTableId;
+      if (!tableId) {
+        list.splice(index, 1);
+        if (list.length === 0) this.pendingTaskDrops.delete(authContext.user.id);
+        client.send(ServerMessage.Notification, "You found nothing.");
+        return;
+      }
+      const table = lootTableLoader.getDefinition(tableId);
+      if (!table) {
+        client.send(ServerMessage.Notification, `Loot table not found: ${tableId}`);
+        return;
+      }
+      const { items } = lootResolver.resolve(table.drops, () => Math.random());
+      const inventory = await inventoryService.getInventory(authContext.user.id);
+      const toGrant = filterImportantSingleInstance(items, inventory, itemDefinitionLoader);
+      if (toGrant.length > 0) {
+        await inventoryService.addItems(
+          authContext.user.id,
+          toGrant.map((e) => ({ definitionId: e.definitionId, quantity: e.quantity }))
+        );
+      }
+      list.splice(index, 1);
+      if (list.length === 0) this.pendingTaskDrops.delete(authContext.user.id);
+      const updated = await inventoryService.getInventory(authContext.user.id);
+      client.send(ServerMessage.InventoryUpdate, updated);
+      const previewItems = toGrant.map((r) => {
+        const def = itemDefinitionLoader.getDefinition(r.definitionId);
+        return {
+          definitionId: r.definitionId,
+          name: def?.name ?? r.definitionId,
+          quantity: r.quantity,
+          rarity: def?.rarity ?? "Common"
+        };
+      });
+      client.send(ServerMessage.LootDropPreview, { items: previewItems });
+    });
   }
+}
+
+function filterImportantSingleInstance(
+  items: Array<{ definitionId: string; quantity: number }>,
+  inventory: Array<{ definitionId: string; quantity: number; containedItems?: unknown[] }>,
+  itemLoader: { getDefinition: (id: string) => { rarity?: string } | undefined }
+): Array<{ definitionId: string; quantity: number }> {
+  const countInTree = (
+    inv: Array<{ definitionId: string; quantity: number; containedItems?: unknown[] }>,
+    defId: string
+  ): number => {
+    let n = 0;
+    for (const item of inv) {
+      if (item.definitionId === defId) n += item.quantity;
+      if (item.containedItems) n += countInTree(item.containedItems as typeof inv, defId);
+    }
+    return n;
+  };
+  const out: Array<{ definitionId: string; quantity: number }> = [];
+  for (const { definitionId, quantity } of items) {
+    const def = itemLoader.getDefinition(definitionId);
+    if (def?.rarity === "Important") {
+      if (countInTree(inventory, definitionId) >= 1) continue;
+      out.push({ definitionId, quantity: Math.min(quantity, 1) });
+    } else {
+      out.push({ definitionId, quantity });
+    }
+  }
+  return out;
 }

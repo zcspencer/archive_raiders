@@ -12,7 +12,8 @@
     { "registryKey": "parsedMap_village_tower", "file": "village_tower.json" },
     { "registryKey": "parsedMap_timber_nook", "file": "timber_nook.json" },
     { "registryKey": "parsedMap_mosslight_cottage", "file": "mosslight_cottage.json" },
-    { "registryKey": "parsedMap_elders_house", "file": "elders_house.json" }
+    { "registryKey": "parsedMap_elders_house", "file": "elders_house.json" },
+    { "registryKey": "parsedMap_village_house_1", "file": "village_house_1.json" }
   ],
   "initialScene": {
     "sceneKey": "TiledMapScene",

@@ -18,7 +18,7 @@
             "method": "weighted",
             "pool": [
               { "weight": 90, "source": { "type": "nothing" } },
-              { "weight": 10, "source": { "type": "table", "tableId": "gem_loot" } }
+              { "weight": 10, "source": { "type": "task", "taskId": "timber-nook-key", "completedTableId": "gem_loot" } }
             ]
           }
         ]

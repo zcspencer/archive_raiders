@@ -4,6 +4,8 @@ import type { CurrencyReward, ItemRarity } from "@odyssey/shared";
 import { ServerMessage } from "@odyssey/shared";
 import type { ItemInstance } from "@odyssey/shared";
 import { fetchCompletions } from "../api/task";
+import { getTaskDefinition } from "../data/taskDefinitions";
+import { useChallengeStore } from "../store/challenge";
 import { useCompletionStore } from "../store/completion";
 import { useContainerStore } from "../store/container";
 import { useCurrencyStore } from "../store/currency";
@@ -83,17 +85,6 @@ export function useColyseusRoom(
         setStatus("connected");
         setRoom(activeRoom);
 
-        try {
-          const { taskIds } = await fetchCompletions(options.accessToken);
-          if (!cancelled) {
-            useCompletionStore.getState().setCompletedTaskIds(taskIds);
-          }
-        } catch {
-          if (!cancelled) {
-            useCompletionStore.getState().setCompletedTaskIds([]);
-          }
-        }
-
         activeRoom.onMessage(ServerMessage.Notification, (payload: unknown) => {
           const msg = typeof payload === "string" ? payload : String(payload);
           useNotificationStore.getState().setMessage(msg);
@@ -149,6 +140,30 @@ export function useColyseusRoom(
             usePlayerControlStore.getState().setInputMode("ui");
           }
         });
+
+        activeRoom.onMessage(ServerMessage.TaskTrigger, (payload: unknown) => {
+          if (payload && typeof payload === "object" && "taskId" in payload) {
+            const { taskId } = payload as { taskId: string };
+            const task = getTaskDefinition(taskId);
+            if (task) {
+              useChallengeStore.getState().startChallenge(task, () => {
+                useGameRoomBridgeStore.getState().sendClaimTaskLoot(taskId);
+              });
+              usePlayerControlStore.getState().setInputMode("ui");
+            }
+          }
+        });
+
+        try {
+          const { taskIds } = await fetchCompletions(options.accessToken!);
+          if (!cancelled) {
+            useCompletionStore.getState().setCompletedTaskIds(taskIds);
+          }
+        } catch {
+          if (!cancelled) {
+            useCompletionStore.getState().setCompletedTaskIds([]);
+          }
+        }
 
         activeRoom.onLeave((code) => {
           if (cancelled) {

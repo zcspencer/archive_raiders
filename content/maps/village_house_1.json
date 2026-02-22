@@ -1,0 +1,151 @@
+{ "compressionlevel":-1,
+ "height":6,
+ "infinite":false,
+ "layers":[
+        {
+         "data":[31, 31, 31, 31, 31, 31,
+            31, 31, 31, 31, 31, 31,
+            31, 31, 31, 31, 31, 31,
+            31, 31, 31, 31, 31, 31,
+            31, 31, 31, 31, 31, 31,
+            31, 31, 31, 31, 31, 31],
+         "height":6,
+         "id":1,
+         "name":"ground",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":6,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"collision",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[0, 0, 0, 0, 0, 0,
+            0, 0, 0, 187, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 668,
+            0, 0, 0, 0, 0, 671],
+         "height":6,
+         "id":3,
+         "name":"detail_down",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":false,
+         "width":6,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "name":"objects",
+         "objects":[
+                {
+                 "height":0,
+                 "id":47,
+                 "name":"village_house_1_spawn",
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"spawn"
+                        }],
+                 "rotation":0,
+                 "type":"spawn",
+                 "visible":true,
+                 "width":0,
+                 "x":79.8003520506909,
+                 "y":141.262357984719
+                }, 
+                {
+                 "height":33,
+                 "id":48,
+                 "name":"village_house_1_exit",
+                 "properties":[
+                        {
+                         "name":"destination_map",
+                         "type":"string",
+                         "value":"village"
+                        }, 
+                        {
+                         "name":"destination_spawn",
+                         "type":"string",
+                         "value":"village_house_1_exit_spawn"
+                        }, 
+                        {
+                         "name":"is_visible",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"transition"
+                        }, 
+                        {
+                         "name":"label",
+                         "type":"string",
+                         "value":"Exit"
+                        }],
+                 "rotation":0,
+                 "type":"interactable",
+                 "visible":true,
+                 "width":32,
+                 "x":64.0916301796417,
+                 "y":158.550964390113
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0],
+         "height":6,
+         "id":4,
+         "name":"detail_up",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":false,
+         "width":6,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":7,
+ "nextobjectid":51,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.11.2",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"..\/..\/asset_workspace\/tiled_maps\/main.tsx"
+        }, 
+        {
+         "firstgid":668,
+         "source":"..\/..\/asset_workspace\/tiled_maps\/tilesets\/house.tsx"
+        }],
+ "tilewidth":32,
+ "type":"map",
+ "version":"1.10",
+ "width":6
+}

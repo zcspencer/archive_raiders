@@ -74,6 +74,7 @@ Each source has a `type` that determines what it produces.
 | `table` | Delegates to a loot table | `tableId` |
 | `tag` | Random item matching tag (+ optional rarity filter) | `tag`, `quantity`, `rarity?` |
 | `nothing` | No loot (empty result) | (none) |
+| `task` | Task-gated: player must complete task; success rolls `completedTableId`, failure rolls `incompletedTableId` (if present) | `taskId`, `completedTableId`, `incompletedTableId?` |
 
 ### Common Patterns
 
@@ -107,6 +108,23 @@ Each source has a `type` that determines what it produces.
 ```json
 { "method": "fixed", "source": { "type": "tag", "tag": "gem", "rarity": "Rare", "quantity": 1 } }
 ```
+
+**Task-gated drop (e.g. rock: complete task for better loot, fail for consolation):**
+```json
+{
+  "method": "weighted",
+  "pool": [
+    { "weight": 90, "source": { "type": "nothing" } },
+    { "weight": 10, "source": {
+        "type": "task",
+        "taskId": "rock-mining-quiz",
+        "completedTableId": "gem_loot",
+        "incompletedTableId": "basic_rock_loot"
+    }}
+  ]
+}
+```
+`completedTableId` is rolled when the player completes the task successfully; `incompletedTableId` (optional) is rolled when they attempt but fail. Omit `incompletedTableId` if failed attempts grant nothing.
 
 **Tiered rarity system:**
 ```json

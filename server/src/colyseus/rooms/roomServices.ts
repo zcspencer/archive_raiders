@@ -8,6 +8,8 @@ import type { InventoryService } from "../../inventory/InventoryService.js";
 import type { ItemActionResolver } from "../../inventory/ItemActionResolver.js";
 import type { ItemDefinitionLoader } from "../../inventory/ItemDefinitionLoader.js";
 import type { LootResolver } from "../../inventory/LootResolver.js";
+import type { LootTableLoader } from "../../inventory/LootTableLoader.js";
+import type { TaskCompletionService } from "../../task/TaskCompletionService.js";
 import type { ShardState } from "../schema/ShardState.js";
 import { findDefinitionIdInTree, getEquippableParams } from "./inventoryTreeUtils.js";
 
@@ -24,6 +26,8 @@ export interface RoomServices {
   itemActionResolver: ItemActionResolver;
   itemDefinitionLoader: ItemDefinitionLoader;
   lootResolver: LootResolver;
+  lootTableLoader: LootTableLoader;
+  taskCompletionService: TaskCompletionService;
   /** Per-map world object placements loaded from Tiled maps at boot. */
   mapPlacements: Map<string, MapWorldObjectPlacement[]>;
 }

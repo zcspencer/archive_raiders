@@ -31,7 +31,8 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     const result = resolver.resolve(drops, rng);
-    expect(result).toEqual([{ definitionId: "herb", quantity: 3 }]);
+    expect(result.items).toEqual([{ definitionId: "herb", quantity: 3 }]);
+    expect(result.pendingTasks).toHaveLength(0);
   });
 
   it("fixed drop with quantity range resolves to value in range", () => {
@@ -49,10 +50,10 @@ describe("LootResolver", () => {
     for (let seed = 0; seed < 100; seed++) {
       const rng = createSeededRng(seed);
       const result = resolver.resolve(drops, rng);
-      expect(result).toHaveLength(1);
-      expect(result[0]!.definitionId).toBe("herb");
-      expect(result[0]!.quantity).toBeGreaterThanOrEqual(1);
-      expect(result[0]!.quantity).toBeLessThanOrEqual(5);
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]!.definitionId).toBe("herb");
+      expect(result.items[0]!.quantity).toBeGreaterThanOrEqual(1);
+      expect(result.items[0]!.quantity).toBeLessThanOrEqual(5);
     }
   });
 
@@ -73,9 +74,9 @@ describe("LootResolver", () => {
     const rng = createSeededRng(42);
     for (let i = 0; i < 100; i++) {
       const result = resolver.resolve(drops, rng);
-      expect(result).toHaveLength(1);
-      expect(poolIds).toContain(result[0]!.definitionId);
-      seen.add(result[0]!.definitionId);
+      expect(result.items).toHaveLength(1);
+      expect(poolIds).toContain(result.items[0]!.definitionId);
+      seen.add(result.items[0]!.definitionId);
     }
     expect(seen.size).toBeGreaterThanOrEqual(2);
   });
@@ -101,8 +102,8 @@ describe("LootResolver", () => {
     for (let seed = 0; seed < 1000; seed++) {
       const rng = createSeededRng(seed);
       const result = resolver.resolve(drops, rng);
-      expect(result).toHaveLength(1);
-      if (result[0]!.definitionId === "common") commonCount++;
+      expect(result.items).toHaveLength(1);
+      if (result.items[0]!.definitionId === "common") commonCount++;
     }
     expect(commonCount).toBeGreaterThan(900);
   });
@@ -140,8 +141,8 @@ describe("LootResolver", () => {
     for (let seed = 0; seed < 1000; seed++) {
       const rng = createSeededRng(seed);
       const result = resolver.resolve(drops, rng);
-      expect(result).toHaveLength(1);
-      if (result[0]!.definitionId === "common") commonCount++;
+      expect(result.items).toHaveLength(1);
+      if (result.items[0]!.definitionId === "common") commonCount++;
     }
     expect(commonCount).toBeGreaterThan(900);
   });
@@ -166,7 +167,8 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     const result = resolver.resolve(drops, rng);
-    expect(result).toEqual([{ definitionId: "from_table", quantity: 2 }]);
+    expect(result.items).toEqual([{ definitionId: "from_table", quantity: 2 }]);
+    expect(result.pendingTasks).toHaveLength(0);
   });
 
   it("recursion depth limit throws", () => {
@@ -207,8 +209,8 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     const result = resolver.resolve(drops, rng);
-    expect(result).toHaveLength(3);
-    expect(result.every((r) => r.definitionId === "herb" && r.quantity === 1)).toBe(true);
+    expect(result.items).toHaveLength(3);
+    expect(result.items.every((r) => r.definitionId === "herb" && r.quantity === 1)).toBe(true);
   });
 
   it("tag source picks from matching items", () => {
@@ -228,9 +230,9 @@ describe("LootResolver", () => {
     const rng = createSeededRng(42);
     for (let i = 0; i < 100; i++) {
       const result = resolver.resolve(drops, rng);
-      expect(result).toHaveLength(1);
-      expect(["amethyst", "sapphire"]).toContain(result[0]!.definitionId);
-      seen.add(result[0]!.definitionId);
+      expect(result.items).toHaveLength(1);
+      expect(["amethyst", "sapphire"]).toContain(result.items[0]!.definitionId);
+      seen.add(result.items[0]!.definitionId);
     }
     expect(seen.size).toBe(2);
   });
@@ -249,7 +251,7 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     const result = resolver.resolve(drops, rng);
-    expect(result).toEqual([{ definitionId: "sapphire", quantity: 1 }]);
+    expect(result.items).toEqual([{ definitionId: "sapphire", quantity: 1 }]);
   });
 
   it("nothing source returns empty results", () => {
@@ -262,7 +264,8 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     const result = resolver.resolve(drops, rng);
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.pendingTasks).toHaveLength(0);
   });
 
   it("weighted pool with nothing source can produce empty or item results", () => {
@@ -287,8 +290,8 @@ describe("LootResolver", () => {
     const rng = createSeededRng(12345);
     for (let i = 0; i < 200; i++) {
       const result = resolver.resolve(drops, rng);
-      if (result.length === 0) emptyCount++;
-      if (result.length === 1 && result[0]!.definitionId === "gem") gemCount++;
+      if (result.items.length === 0) emptyCount++;
+      if (result.items.length === 1 && result.items[0]!.definitionId === "gem") gemCount++;
     }
     expect(gemCount + emptyCount).toBe(200);
     expect(gemCount).toBeGreaterThan(0);
@@ -305,5 +308,29 @@ describe("LootResolver", () => {
     ];
     const rng = createSeededRng(42);
     expect(() => resolver.resolve(drops, rng)).toThrow('No items found with tag "nonexistent"');
+  });
+
+  it("task source returns pending task and no immediate items", () => {
+    const resolver = buildResolver();
+    const drops = [
+      {
+        method: "fixed" as const,
+        source: {
+          type: "task" as const,
+          taskId: "rock-quiz",
+          completedTableId: "gem_loot",
+          incompletedTableId: "basic_loot"
+        }
+      }
+    ];
+    const rng = createSeededRng(42);
+    const result = resolver.resolve(drops, rng);
+    expect(result.items).toHaveLength(0);
+    expect(result.pendingTasks).toHaveLength(1);
+    expect(result.pendingTasks[0]).toEqual({
+      taskId: "rock-quiz",
+      completedTableId: "gem_loot",
+      incompletedTableId: "basic_loot"
+    });
   });
 });
