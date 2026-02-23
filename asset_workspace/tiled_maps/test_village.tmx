@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="10">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="29">
  <editorsettings>
   <export target="../../content/maps/village.json" format="json"/>
  </editorsettings>
@@ -58,9 +58,7 @@
     <property name="definition_id" value="rock_pile"/>
    </properties>
   </object>
- </objectgroup>
- <objectgroup id="3" name="collision">
-  <object id="3" name="village_tower_door" type="interactable" x="223.018" y="96.1244" width="32" height="33">
+  <object id="24" name="village_tower_door" type="interactable" x="223.369" y="96.7704" width="32" height="33">
    <properties>
     <property name="destination_map" value="village_tower"/>
     <property name="destination_spawn" value="village_tower_inner_spawn"/>
@@ -70,12 +68,12 @@
     <property name="task_id" value="ancient-computer-password"/>
    </properties>
   </object>
-  <object id="4" name="village_tower_exit_spawn" type="spawn" x="239.032" y="143.111">
+  <object id="25" name="village_tower_exit_spawn" type="spawn" x="239.383" y="143.757">
    <properties>
     <property name="kind" value="spawn"/>
    </properties>
   </object>
-  <object id="5" name="village_stump_hidden_chest" type="interactable" x="159.846" y="95.8234" width="31.9011" height="31.615">
+  <object id="26" name="village_stump_hidden_chest" type="interactable" x="160.197" y="96.4694" width="31.9011" height="31.615">
    <properties>
     <property name="is_visible" type="bool" value="false"/>
     <property name="kind" value="container"/>
@@ -83,17 +81,12 @@
     <property name="object_id" value="dungeon_chest"/>
    </properties>
   </object>
-  <object id="6" name="village_west_spawn" type="spawn" x="108.67" y="270.856">
+  <object id="27" name="village_west_spawn" type="spawn" x="109.021" y="271.502">
    <properties>
     <property name="kind" value="spawn"/>
    </properties>
   </object>
-  <object id="7" name="village_south_spawn" type="spawn" x="417.444" y="351.135">
-   <properties>
-    <property name="kind" value="spawn"/>
-   </properties>
-  </object>
-  <object id="8" name="bob_blacksmith" type="interactable" x="349.862" y="195.469" width="28.8413" height="29.3697">
+  <object id="28" name="bob_blacksmith" type="interactable" x="350.213" y="196.115" width="28.8413" height="29.3697">
    <properties>
     <property name="enabled" value="true"/>
     <property name="is_collidable" type="bool" value="true"/>
@@ -102,6 +95,40 @@
     <property name="npc_id" value="blacksmith"/>
     <property name="one_shot" value="false"/>
    </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="collision" visible="0">
+  <object id="7" name="village_south_spawn" type="spawn" x="417.444" y="351.135">
+   <properties>
+    <property name="kind" value="spawn"/>
+   </properties>
+  </object>
+  <object id="10" x="391.2" y="305.988" width="16.2677" height="16.655">
+   <ellipse/>
+  </object>
+  <object id="11" x="360.601" y="304.051" width="13.9438" height="14.7184">
+   <ellipse/>
+  </object>
+  <object id="12" x="324.192" y="299.791" width="20.141" height="18.2044">
+   <ellipse/>
+  </object>
+  <object id="13" x="311.411" y="209.156" width="17.4297" height="15.1057">
+   <ellipse/>
+  </object>
+  <object id="14" x="438.454" y="210.318" width="19.7537" height="15.8804">
+   <ellipse/>
+  </object>
+  <object id="15" x="391.975" y="165.001" width="19.7537" height="24.0143">
+   <ellipse/>
+  </object>
+  <object id="16" x="309.474" y="116.198" width="21.303" height="16.2677">
+   <ellipse/>
+  </object>
+  <object id="18" x="166.163" y="179.332" width="20.9156" height="12.7818">
+   <ellipse/>
+  </object>
+  <object id="19" x="70.4935" y="111.937" width="23.6269" height="13.1691">
+   <ellipse/>
   </object>
  </objectgroup>
 </map>

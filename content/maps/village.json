@@ -85,21 +85,10 @@
                  "width":341.48490857017,
                  "x":517.735183961225,
                  "y":35.2500550782111
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":3,
-         "name":"collision",
-         "objects":[
+                }, 
                 {
                  "height":33,
-                 "id":3,
+                 "id":24,
                  "name":"village_tower_door",
                  "properties":[
                         {
@@ -136,12 +125,12 @@
                  "type":"interactable",
                  "visible":true,
                  "width":32,
-                 "x":223.018,
-                 "y":96.1244
+                 "x":223.368671706473,
+                 "y":96.7703944182956
                 }, 
                 {
                  "height":0,
-                 "id":4,
+                 "id":25,
                  "name":"village_tower_exit_spawn",
                  "properties":[
                         {
@@ -153,12 +142,12 @@
                  "type":"spawn",
                  "visible":true,
                  "width":0,
-                 "x":239.032,
-                 "y":143.111
+                 "x":239.382671706473,
+                 "y":143.756994418296
                 }, 
                 {
                  "height":31.615,
-                 "id":5,
+                 "id":26,
                  "name":"village_stump_hidden_chest",
                  "properties":[
                         {
@@ -185,12 +174,12 @@
                  "type":"interactable",
                  "visible":true,
                  "width":31.9011,
-                 "x":159.846,
-                 "y":95.8234
+                 "x":160.196671706473,
+                 "y":96.4693944182956
                 }, 
                 {
                  "height":0,
-                 "id":6,
+                 "id":27,
                  "name":"village_west_spawn",
                  "properties":[
                         {
@@ -202,29 +191,12 @@
                  "type":"spawn",
                  "visible":true,
                  "width":0,
-                 "x":108.67,
-                 "y":270.856
-                }, 
-                {
-                 "height":0,
-                 "id":7,
-                 "name":"village_south_spawn",
-                 "properties":[
-                        {
-                         "name":"kind",
-                         "type":"string",
-                         "value":"spawn"
-                        }],
-                 "rotation":0,
-                 "type":"spawn",
-                 "visible":true,
-                 "width":0,
-                 "x":417.444,
-                 "y":351.135
+                 "x":109.020671706473,
+                 "y":271.501994418296
                 }, 
                 {
                  "height":29.3697,
-                 "id":8,
+                 "id":28,
                  "name":"bob_blacksmith",
                  "properties":[
                         {
@@ -261,17 +233,153 @@
                  "type":"interactable",
                  "visible":true,
                  "width":28.8413,
-                 "x":349.862,
-                 "y":195.469
+                 "x":350.212671706473,
+                 "y":196.114994418296
                 }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"collision",
+         "objects":[
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"village_south_spawn",
+                 "properties":[
+                        {
+                         "name":"kind",
+                         "type":"string",
+                         "value":"spawn"
+                        }],
+                 "rotation":0,
+                 "type":"spawn",
+                 "visible":true,
+                 "width":0,
+                 "x":417.444,
+                 "y":351.135
+                }, 
+                {
+                 "ellipse":true,
+                 "height":16.6550468665272,
+                 "id":10,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16.2677201952126,
+                 "x":391.199938027733,
+                 "y":305.988070338524
+                }, 
+                {
+                 "ellipse":true,
+                 "height":14.7184135099543,
+                 "id":11,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":13.9437601673251,
+                 "x":360.60113099388,
+                 "y":304.051436981951
+                }, 
+                {
+                 "ellipse":true,
+                 "height":18.2043535517856,
+                 "id":12,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20.1409869083585,
+                 "x":324.192423890309,
+                 "y":299.79084359749
+                }, 
+                {
+                 "ellipse":true,
+                 "height":15.1057401812689,
+                 "id":13,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":17.4297002091564,
+                 "x":311.410643736928,
+                 "y":209.156402509877
+                }, 
+                {
+                 "ellipse":true,
+                 "height":15.8803935238981,
+                 "id":14,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":19.753660237044,
+                 "x":438.453791928112,
+                 "y":210.318382523821
+                }, 
+                {
+                 "ellipse":true,
+                 "height":24.0142536215044,
+                 "id":15,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":19.7536602370439,
+                 "x":391.974591370362,
+                 "y":165.001161980014
+                }, 
+                {
+                 "ellipse":true,
+                 "height":16.2677201952126,
+                 "id":16,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":21.3029669223023,
+                 "x":309.474010380355,
+                 "y":116.198001394376
+                }, 
+                {
+                 "ellipse":true,
+                 "height":12.7817801533814,
+                 "id":18,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20.9156402509877,
+                 "x":166.163141993958,
+                 "y":179.332248818654
+                }, 
+                {
+                 "ellipse":true,
+                 "height":13.1691068246959,
+                 "id":19,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":23.6269269501898,
+                 "x":70.4934541792548,
+                 "y":111.937408009916
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":false,
+         "x":0,
+         "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":10,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
