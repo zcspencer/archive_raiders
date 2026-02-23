@@ -18,6 +18,7 @@ export * from "./types/invite.js";
 export * from "./types/boot.js";
 export * from "./constants/game.js";
 export * from "./constants/equipmentAnchors.js";
+export * from "./constants/areaFillObjects.js";
 export * from "./validators/task.schema.js";
 export * from "./validators/auth.schema.js";
 export * from "./validators/classroom.schema.js";

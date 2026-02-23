@@ -3,6 +3,11 @@ import { TILE_SIZE } from "@odyssey/shared";
 import type { CollisionGrid } from "../map/collisionGrid";
 import { getItemDefinition } from "../../data/itemDefinitions";
 import { useGameRoomBridgeStore } from "../../store/gameRoomBridge";
+import {
+  hasAutotile,
+  computeAutotileBitmask,
+  getAutotileFrame,
+} from "../map/rockAutotile";
 
 const DEFINITION_COLORS: Record<string, number> = {
   tree: 0x22c55e,
@@ -30,6 +35,7 @@ interface WorldObjectSprites {
   healthBarFill: Phaser.GameObjects.Rectangle;
   gridX: number;
   gridY: number;
+  definitionId: string;
 }
 
 /**
@@ -68,8 +74,28 @@ function readWorldObjectSnapshots(room: unknown): WorldObjectSnapshot[] {
 }
 
 /**
+ * Builds per-definitionId sets of occupied `"gridX,gridY"` keys for autotiled objects.
+ */
+function buildAutotilePositions(
+  snapshots: WorldObjectSnapshot[]
+): Map<string, Set<string>> {
+  const result = new Map<string, Set<string>>();
+  for (const snap of snapshots) {
+    if (!hasAutotile(snap.definitionId)) continue;
+    let posSet = result.get(snap.definitionId);
+    if (!posSet) {
+      posSet = new Set<string>();
+      result.set(snap.definitionId, posSet);
+    }
+    posSet.add(`${snap.gridX},${snap.gridY}`);
+  }
+  return result;
+}
+
+/**
  * Reconciles Colyseus world object state with Phaser sprites and health bars.
- * Placeholder rectangles per definitionId; health bar shown when health < maxHealth.
+ * Supports autotiled objects (e.g. rocks) that choose their frame based on
+ * 4-directional neighbor occupancy.
  */
 export class WorldObjectsController {
   private readonly scene: Phaser.Scene;
@@ -84,14 +110,15 @@ export class WorldObjectsController {
   }
 
   /**
-   * Call each frame (or when room state may have changed) to sync sprites with room.state.worldObjects.
-   * Only renders objects belonging to the current map.
+   * Call each frame (or when room state may have changed) to sync sprites
+   * with room.state.worldObjects. Only renders objects belonging to the current map.
    */
   reconcile(): void {
     const room = useGameRoomBridgeStore.getState().room;
     const allSnapshots = readWorldObjectSnapshots(room);
     const snapshots = allSnapshots.filter((s) => s.mapKey === this.currentMapKey);
     const currentIds = new Set(snapshots.map((s) => s.objectId));
+    const autotilePositions = buildAutotilePositions(snapshots);
 
     for (const id of this.sprites.keys()) {
       if (!currentIds.has(id)) {
@@ -100,7 +127,7 @@ export class WorldObjectsController {
     }
 
     for (const snap of snapshots) {
-      this.upsertObject(snap);
+      this.upsertObject(snap, autotilePositions);
     }
   }
 
@@ -121,24 +148,37 @@ export class WorldObjectsController {
     }
   }
 
-  private upsertObject(snap: WorldObjectSnapshot): void {
+  private upsertObject(
+    snap: WorldObjectSnapshot,
+    autotilePositions: Map<string, Set<string>>
+  ): void {
     const worldX = snap.gridX * TILE_SIZE + TILE_SIZE / 2;
     const worldY = snap.gridY * TILE_SIZE + TILE_SIZE / 2;
+    const isAutotiled = hasAutotile(snap.definitionId);
 
     let sprites = this.sprites.get(snap.objectId);
     if (!sprites) {
-      const def = getItemDefinition(snap.definitionId);
-      const mapSprite = def?.mapSprite;
-      const body =
-        mapSprite != null
-          ? this.scene.add.image(worldX, worldY, mapSprite.sheetKey, mapSprite.frame)
-          : this.scene.add.rectangle(
-              worldX,
-              worldY,
-              20,
-              20,
-              DEFINITION_COLORS[snap.definitionId] ?? DEFAULT_COLOR
-            );
+      let body: Phaser.GameObjects.Image | Phaser.GameObjects.Rectangle;
+
+      if (isAutotiled) {
+        const posSet = autotilePositions.get(snap.definitionId) ?? new Set<string>();
+        const mask = computeAutotileBitmask(snap.gridX, snap.gridY, posSet);
+        const frame = getAutotileFrame(snap.definitionId, mask);
+        body = this.scene.add.image(worldX, worldY, "tileset_main", frame);
+      } else {
+        const def = getItemDefinition(snap.definitionId);
+        const mapSprite = def?.mapSprite;
+        body =
+          mapSprite != null
+            ? this.scene.add.image(worldX, worldY, mapSprite.sheetKey, mapSprite.frame)
+            : this.scene.add.rectangle(
+                worldX,
+                worldY,
+                20,
+                20,
+                DEFINITION_COLORS[snap.definitionId] ?? DEFAULT_COLOR
+              );
+      }
       body.setDepth(1);
 
       const barY = worldY + HEALTH_BAR_OFFSET_Y;
@@ -162,8 +202,20 @@ export class WorldObjectsController {
       healthBarFill.setDepth(2);
 
       this.collisionGrid?.blockTile(snap.gridX, snap.gridY);
-      sprites = { body, healthBarBg, healthBarFill, gridX: snap.gridX, gridY: snap.gridY };
+      sprites = {
+        body,
+        healthBarBg,
+        healthBarFill,
+        gridX: snap.gridX,
+        gridY: snap.gridY,
+        definitionId: snap.definitionId,
+      };
       this.sprites.set(snap.objectId, sprites);
+    } else if (isAutotiled && sprites.body instanceof Phaser.GameObjects.Image) {
+      const posSet = autotilePositions.get(snap.definitionId) ?? new Set<string>();
+      const mask = computeAutotileBitmask(snap.gridX, snap.gridY, posSet);
+      const frame = getAutotileFrame(snap.definitionId, mask);
+      sprites.body.setFrame(frame);
     }
 
     sprites.body.setPosition(worldX, worldY);

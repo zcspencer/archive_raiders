@@ -8,6 +8,7 @@ import type {
   MapTransition,
   MapWorldObjectPlacement
 } from "@odyssey/shared";
+import { AREA_FILL_OBJECTS } from "@odyssey/shared";
 import { CollisionGrid } from "./collisionGrid";
 import { rasterizeCollision } from "./collisionRasterizer";
 
@@ -66,7 +67,18 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
       spawns.set(obj.name || `spawn_${obj.id}`, { gridX: gx, gridY: gy });
     } else if (obj.type === "world_object" || getProp(obj, "kind", "") === "world_object") {
       const defId = getProp(obj, "definition_id", obj.name);
-      worldObjectPlacements.push({ definition_id: defId, gridX: gx, gridY: gy });
+      const areaFill = AREA_FILL_OBJECTS[defId];
+      if (areaFill && obj.width > data.tilewidth && obj.height > data.tileheight) {
+        const widthTiles = Math.floor(obj.width / data.tilewidth);
+        const heightTiles = Math.floor(obj.height / data.tileheight);
+        for (let dy = 0; dy < heightTiles; dy++) {
+          for (let dx = 0; dx < widthTiles; dx++) {
+            worldObjectPlacements.push({ definition_id: areaFill.fillDefinitionId, gridX: gx + dx, gridY: gy + dy });
+          }
+        }
+      } else {
+        worldObjectPlacements.push({ definition_id: defId, gridX: gx, gridY: gy });
+      }
     } else if (obj.type === "npc" || getProp(obj, "kind", "") === "npc") {
       const collidable = getBoolProp(obj, "is_collidable");
       npcs.push({

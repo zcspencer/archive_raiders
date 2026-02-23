@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { MapWorldObjectPlacement, TiledMapData, TiledObject, TiledProperty, TiledLayer } from "@odyssey/shared";
-import { createSeededRng } from "@odyssey/shared";
+import { AREA_FILL_OBJECTS, createSeededRng } from "@odyssey/shared";
 import { resolveContentDirectory } from "../../contentPath.js";
 
 /**
@@ -28,7 +28,19 @@ export function extractWorldObjectPlacements(data: TiledMapData): MapWorldObject
     const defId = getProp(obj, "definition_id", obj.name);
     const gx = Math.floor(obj.x / data.tilewidth);
     const gy = Math.floor(obj.y / data.tileheight);
-    placements.push({ definition_id: defId, gridX: gx, gridY: gy });
+
+    const areaFill = AREA_FILL_OBJECTS[defId];
+    if (areaFill && obj.width > data.tilewidth && obj.height > data.tileheight) {
+      const widthTiles = Math.floor(obj.width / data.tilewidth);
+      const heightTiles = Math.floor(obj.height / data.tileheight);
+      for (let dy = 0; dy < heightTiles; dy++) {
+        for (let dx = 0; dx < widthTiles; dx++) {
+          placements.push({ definition_id: areaFill.fillDefinitionId, gridX: gx + dx, gridY: gy + dy });
+        }
+      }
+    } else {
+      placements.push({ definition_id: defId, gridX: gx, gridY: gy });
+    }
   }
   return placements;
 }
